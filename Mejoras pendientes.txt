@@ -1,3 +1,7 @@
 Evitar la sobre generacion de codigo cuando el reviwer no aprueba la primera version(se esta generando todo nuevamente)
 Multimodal -> Video con indicaciones narradas sobre como quiere el usuario el frontend
 Generar hipervinculo en caso de que se haya realizado un sitio web en outputs y mostralo al usuario.
+Actualizar nombres
+RAG A ALMENOS DOS AGENTES (AgenticRAG)
+Estado del arte
+curso langgraph 

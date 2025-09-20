@@ -3,76 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NU Hotel - Charming Mountain Lodge</title>
+    <title>myOrthos - Sonrisas que Inspiran</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for placeholder icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="main-header">
-        <div class="top-bar">
-            <div class="logo-placeholder"></div>
+        <div class="logo">
+            <!-- As per spec: "myOrthos" (texto con un elemento gráfico de subrayado/onda azul) -->
+            <a href="#" class="logo-link">myOrthos</a>
         </div>
-        <nav class="navbar">
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#rooms">Rooms</a></li>
-                <li><a href="#restaurants">Restaurants</a></li>
-                <li><a href="#spa">Spa</a></li>
-                <li><a href="#contact">Contact</a></li>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Services <span class="dropdown-arrow"></span></a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
             </ul>
+            <!-- CTA button for mobile navigation -->
+            <button class="cta-button header-button mobile-only">Let's Talk</button>
         </nav>
+        <!-- CTA button for desktop header -->
+        <button class="cta-button header-button desktop-only">Let's Talk</button>
+        <button class="hamburger-menu">
+            <img src="assets/Hamburger_Menu_Icon.svg" alt="Menu">
+        </button>
     </header>
 
     <main>
         <section class="hero-section">
-            <h1 class="hero-title">NU HOTEL</h1>
-            <h2 class="hero-subtitle">Charming mountain lodge</h2>
+            <div class="hero-content">
+                <h1>Smiles that <span class="accent-text">Inspire</span></h1>
+                <p class="description">myOrthos is the premier partner for orthodontic practices, offering innovative solutions to enhance patient care and streamline operations.</p>
+                <button class="cta-button primary-button">Show Me How</button>
+            </div>
+            <div class="hero-images">
+                <img src="assets/Hero_Circular_Profile_Image_1.jpg" alt="Smiling person" class="hero-circular-image">
+                <img src="assets/Hero_Image_Card_1.jpg" alt="Orthodontic tools" class="hero-image-card card-1">
+                <img src="assets/Hero_Image_Card_2.jpg" alt="Happy patient" class="hero-image-card card-2">
+                <img src="assets/Hero_Image_Card_3.jpg" alt="Dental care" class="hero-image-card card-3">
+                <img src="assets/Hero_Image_Card_4.jpg" alt="Orthodontist consulting" class="hero-image-card card-4">
+            </div>
+            <img src="assets/Hero_Background_Waves.svg" alt="Background waves" class="hero-background-waves">
+            <img src="assets/Wave_Separator_Shape.svg" alt="Section separator wave" class="wave-separator">
         </section>
 
-        <section class="welcome-section content-wrapper">
-            <h2 class="section-title">Welcome to NU Hotel</h2>
-            <div class="welcome-content">
-                <p>
-                    Nestled in the heart of the majestic mountains, NU Hotel offers a serene escape from the everyday hustle. Our commitment to exceptional service and unparalleled comfort ensures a memorable stay for every guest. Experience the perfect blend of rustic charm and modern luxury.
-                </p>
-                <p>
-                    From breathtaking panoramic views to exquisite dining experiences, every detail at NU Hotel is crafted to inspire relaxation and rejuvenation. Whether you seek adventure on the slopes or tranquility by the fireplace, your perfect mountain getaway awaits.
-                </p>
+        <section class="content-section-1">
+            <div class="section-header">
+                <img src="assets/Smile_Teeth_Icon.svg" alt="Smile icon" class="smile-icon">
+                <h2>First Impressions</h2>
             </div>
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="card-image-placeholder">
-                        <i class="fas fa-mountain"></i>
-                    </div>
-                    <h3>Rooms</h3>
-                    <p>Mountain views</p>
-                </div>
-                <div class="card">
-                    <div class="card-image-placeholder">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <h3>Restaurants</h3>
-                    <p>Farm-to-table</p>
-                </div>
-                <div class="card">
-                    <div class="card-image-placeholder">
-                        <i class="fas fa-spa"></i>
-                    </div>
-                    <h3>Spa</h3>
-                    <p>Thermal baths</p>
+            <div class="tab-control">
+                <button class="tab-item active" data-tab="care">Focusing on patient care</button>
+                <button class="tab-item" data-tab="efficiency">Maximizing practice efficiency</button>
+            </div>
+            <div class="testimonial-card">
+                <img src="assets/Quote_Icon.svg" alt="Quote icon" class="quote-icon">
+                <p class="quote-text">"myOrthos has transformed our practice. The support and innovative tools have allowed us to provide exceptional patient care while significantly improving our operational flow. Highly recommended!"</p>
+                <div class="author-info">
+                    <img src="assets/Testimonial_Profile_Image_1.jpg" alt="Testimonial author" class="profile-image">
+                    <p class="author-attribution">Dr. Jane Doe, Orthodontist</p>
                 </div>
             </div>
-        </section>
-
-        <section class="cta-section content-wrapper">
-            <h2 class="section-title">Stay with us</h2>
-            <p class="cta-text">
-                Book your unforgettable mountain retreat today and discover the magic of NU Hotel.
-            </p>
         </section>
     </main>
 

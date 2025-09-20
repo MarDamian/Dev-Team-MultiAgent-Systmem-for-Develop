@@ -1,14 +1,10 @@
-# Contenido para: src/agents/planner.py
-
 import json
 from src.model import analytical_llm
+from src.rag_retriever import retrieve_context
 
 def planner_node(state: dict) -> dict:
     print("---AGENTE: PLANIFICADOR DE PROYECTO---")
 
-    # --- Lógica de Selección de Contexto ---
-    # El planificador ahora es más inteligente. Prioriza la especificación de UI/UX si existe,
-    # de lo contrario, utiliza la solicitud original del usuario.
     if state.get("ui_ux_spec"):
         context_source = "Especificación Técnica de UI/UX"
         context_content = state["ui_ux_spec"]
@@ -16,15 +12,24 @@ def planner_node(state: dict) -> dict:
         context_source = "Solicitud Original del Usuario"
         context_content = state["user_input"]
 
+    # --- Recuperación de Contexto con RAG ---
+    # Llama a la función del otro archivo. No sabe ni le importa cómo funciona por dentro.
+    retrieved_info = retrieve_context(context_content)
+
     prompt = f"""
     Eres un jefe de proyecto técnico. Tu tarea es crear un plan de desarrollo detallado basado en la siguiente información.
+
+    **Contexto Relevante de la Base de Conocimientos:**
+    ---
+    {retrieved_info}
+    ---
 
     **{context_source}:**
     ---
     {context_content}
     ---
 
-    Tu plan debe indicar qué se necesita y las tecnologías a usar.
+    Basado en el contexto y la solicitud, tu plan debe indicar qué se necesita y las tecnologías a usar.
 
     **IMPORTANTE:** Tu salida debe ser un objeto JSON con la siguiente estructura y NADA MÁS:
     - `plan_type`: "frontend", "backend", "both" o "none".
@@ -39,12 +44,11 @@ def planner_node(state: dict) -> dict:
     response = analytical_llm.invoke(prompt)
     
     try:
-        # Limpiar la respuesta para asegurar que sea un JSON válido
         json_response = response.content.strip().replace("```json", "").replace("```", "").strip()
         plan = json.loads(json_response)
         print(f"Plan de desarrollo generado: {plan}")
         return {"dev_plan": plan}
     except json.JSONDecodeError:
         print("Error: El planificador no devolvió un JSON válido.")
-        # Devolvemos un plan vacío para evitar que el grafo se rompa
         return {"dev_plan": {"plan_type": "none"}}
+
