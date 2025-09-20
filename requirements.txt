@@ -59,7 +59,7 @@ marshmallow==3.26.1
 matplotlib-inline==0.1.7
 mdurl==0.1.2
 multidict==6.6.2
-mypy_extensions==1.1.0
+mypy_extensions==1.1.1
 numpy==2.3.1
 opencv-python==4.11.0.86
 orjson==3.10.18
@@ -73,7 +73,7 @@ proto-plus==1.26.1
 protobuf==6.31.1
 pure_eval==0.2.3
 pyasn1==0.6.1
-pyasn1_modules==0.4.2
+pyasn1_modules==0.4.1
 pydantic==2.11.7
 pydantic-settings==2.10.1
 pydantic_core==2.33.2
@@ -109,3 +109,5 @@ websockets==15.0.1
 xxhash==3.5.0
 yarl==1.20.1
 zstandard==0.23.0
+langchain-chroma
+pypdf
