@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTeam-Bot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="chat-container">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle">
+            <div class="slider round">
+                <span class="icon sun-icon"></span>
+                <span class="icon moon-icon"></span>
+            </div>
+        </label>
+        <div id="chat-box">
+            <div class="message bot-message">
+                <p>¡Hola! Soy DevTeam-Bot. ¿En qué puedo ayudarte hoy?</p>
+            </div>
+        </div>
+         <div id="file-list"></div>
+        <form id="message-form">
+            <input type="file" id="file-input" multiple hidden>
+            <button type="button" id="upload-button"><img src="/static/img/attachment.png" alt="Adjuntar"></button>
+            <input type="text" id="message-input" placeholder="Escribe tu mensaje..." autocomplete="off" required>
+            <button type="submit"><img src="/static/img/send.png" alt="Enviar"></button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
