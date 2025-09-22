@@ -1,141 +1,242 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canva-like UI</title>
+    <title>Google Drive Clone</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts for Inter (sans-serif) and Dancing Script (script) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts - Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 </head>
 <body>
-    <div class="app-shell">
-        <header class="header">
-            <div class="logo-section">
-                <span class="canva-logo">Canva</span>
+    <div class="app-container">
+        <header class="header-bar">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fab fa-google-drive"></i>
+                    <span>Drive</span>
+                </div>
             </div>
-            <div class="global-actions">
-                <i class="fas fa-user profile-icon"></i>
-                <i class="fas fa-users collaboration-icon"></i>
-                <button class="play-button">
-                    <i class="fas fa-play"></i>
-                    <span>9.5s</span>
-                </button>
-                <button class="share-button">
-                    <i class="fas fa-share-alt"></i>
-                    <span>Share</span>
-                </button>
+            <div class="search-bar">
+                <i class="fas fa-search icon"></i>
+                <input type="text" placeholder="Buscar en Drive" id="search-input">
+            </div>
+            <div class="header-right">
+                <div class="icon-button" title="Filtrar"><i class="fas fa-filter icon"></i></div>
+                <div class="icon-button" title="Cambiar vista"><i class="fas fa-th-large icon"></i></div>
+                <div class="icon-button" title="Configuración"><i class="fas fa-cog icon"></i></div>
+                <div class="icon-button" title="Ayuda"><i class="fas fa-question-circle icon"></i></div>
+                <div class="avatar" title="Cuenta de Google"></div>
             </div>
         </header>
 
-        <div class="main-content">
+        <div class="main-layout">
             <aside class="sidebar">
-                <div class="nav-icons">
-                    <i class="fas fa-th-large nav-icon active"></i> <!-- Grid -->
-                    <i class="fas fa-shapes nav-icon"></i> <!-- Shapes -->
-                    <i class="fas fa-cloud nav-icon"></i> <!-- Cloud -->
-                    <i class="fas fa-font nav-icon"></i> <!-- Text -->
-                    <i class="fas fa-music nav-icon"></i> <!-- Music -->
-                    <i class="fas fa-video nav-icon"></i> <!-- Video -->
-                    <i class="fas fa-ellipsis-h nav-icon"></i> <!-- More options -->
+                <div class="new-button-container">
+                    <button class="new-button" id="new-button">
+                        <i class="fas fa-plus icon"></i>
+                        <span>Nuevo</span>
+                    </button>
+                    <div class="dropdown-menu" id="new-dropdown">
+                        <a href="#" class="dropdown-item"><i class="fas fa-folder icon"></i> Nueva carpeta</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-upload icon"></i> Subir archivo</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-folder-open icon"></i> Subir carpeta</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item"><i class="fas fa-file-alt icon"></i> Documentos de Google</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-file-excel icon"></i> Hojas de cálculo de Google</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-file-powerpoint icon"></i> Presentaciones de Google</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-file-video icon"></i> Vids de Google</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-file-alt icon"></i> Formularios de Google</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-ellipsis-h icon"></i> Más</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item"><i class="fas fa-trash-alt icon"></i> Papelera</a>
+                    </div>
+                </div>
+
+                <nav class="navigation">
+                    <a href="#" class="nav-link active" data-content="home">
+                        <i class="fas fa-home icon"></i>
+                        <span>Página principal</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="my-drive">
+                        <i class="fas fa-folder icon"></i>
+                        <span>Mi unidad</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="computers">
+                        <i class="fas fa-laptop icon"></i>
+                        <span>Ordenadores</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="shared-with-me">
+                        <i class="fas fa-user-friends icon"></i>
+                        <span>Compartido conmigo</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="recent">
+                        <i class="fas fa-clock icon"></i>
+                        <span>Reciente</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="starred">
+                        <i class="fas fa-star icon"></i>
+                        <span>Destacados</span>
+                    </a>
+                    <a href="#" class="nav-link" data-content="trash">
+                        <i class="fas fa-trash-alt icon"></i>
+                        <span>Papelera</span>
+                    </a>
+                </nav>
+
+                <div class="storage-info">
+                    <i class="fas fa-cloud icon"></i>
+                    <span>Almacenamiento</span>
+                    <p>15 GB de 100 GB usado</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 15%;"></div>
+                    </div>
+                    <button class="get-more-storage-button">Obtener más almacenamiento</button>
                 </div>
             </aside>
 
-            <div class="canvas-area">
-                <div class="sub-header">
-                    <span class="position-text">Position</span>
-                    <!-- Icon or menu on the right, not fully visible in spec -->
+            <div class="content-area">
+                <!-- Home Content -->
+                <div id="home-content" class="content-section active">
+                    <div class="welcome-banner">
+                        <div class="welcome-image-placeholder"></div>
+                        <h2>Te damos la bienvenida a Drive</h2>
+                        <p>Almacena tus archivos de forma segura y accede a ellos desde cualquier dispositivo.</p>
+                        <button class="welcome-button">Más información</button>
+                    </div>
+
+                    <h3 class="section-title">Carpetas sugeridas</h3>
+                    <div class="folder-cards-grid">
+                        <div class="folder-card">
+                            <div class="folder-header">
+                                <i class="fas fa-folder icon"></i>
+                                <span>Proyectos</span>
+                            </div>
+                            <p class="folder-metadata">En Mi unidad</p>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                        <div class="folder-card">
+                            <div class="folder-header">
+                                <i class="fas fa-folder icon"></i>
+                                <span>Documentos importantes</span>
+                            </div>
+                            <p class="folder-metadata">En Mi unidad</p>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                        <div class="folder-card">
+                            <div class="folder-header">
+                                <i class="fas fa-folder icon"></i>
+                                <span>Fotos de vacaciones</span>
+                            </div>
+                            <p class="folder-metadata">En Mi unidad</p>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">Archivos sugeridos</h3>
+                    <div class="file-cards-grid">
+                        <div class="file-card">
+                            <div class="file-thumbnail">
+                                <div class="thumbnail-placeholder">DOC</div>
+                            </div>
+                            <div class="file-info">
+                                <p class="file-name">Informe anual 2023.docx</p>
+                                <p class="file-metadata">Lo has editado • 15:09</p>
+                            </div>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-thumbnail">
+                                <div class="thumbnail-placeholder">PPT</div>
+                            </div>
+                            <div class="file-info">
+                                <p class="file-name">Presentacion marketing.pptx</p>
+                                <p class="file-metadata">Tú lo has editado • Ayer</p>
+                            </div>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                        <div class="file-card">
+                            <div class="file-thumbnail">
+                                <div class="thumbnail-placeholder">XLS</div>
+                            </div>
+                            <div class="file-info">
+                                <p class="file-name">Presupuesto Q1 2024.xlsx</p>
+                                <p class="file-metadata">Lo has subido • 20/01/2024</p>
+                            </div>
+                            <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="canvas">
-                    <h1 class="wygin-logo">WYGINS+</h1>
 
-                    <div class="card-grid">
-                        <!-- Card 1: Team Updates -->
-                        <div class="card" data-card-type="team-updates">
-                            <div class="card-icon team-updates-icon">
-                                <!-- Placeholder for hands with book, points -->
-                                <i class="fas fa-hands-helping"></i>
-                                <div class="orange-dot dot-1"></div>
-                                <div class="orange-dot dot-2"></div>
-                            </div>
-                            <h3 class="card-title">Team Updates</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 2: Employee Handbook -->
-                        <div class="card" data-card-type="employee-handbook">
-                            <div class="card-icon employee-handbook-icon">
-                                <!-- Placeholder for hand icon -->
-                                <i class="fas fa-hand-paper"></i>
-                            </div>
-                            <h3 class="card-title">Employee Handbook</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 3: Project Reports (Selected) -->
-                        <div class="card selected" data-card-type="project-reports">
-                            <div class="card-icon project-reports-icon">
-                                <!-- Placeholder for leaves -->
-                                <i class="fas fa-leaf"></i>
-                            </div>
-                            <h3 class="card-title">Project Reports</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 4: Hiring Hub (Selected) -->
-                        <div class="card selected" data-card-type="hiring-hub">
-                            <div class="card-icon hiring-hub-icon">
-                                <!-- Placeholder for circle -->
-                                <i class="fas fa-circle"></i>
-                            </div>
-                            <h3 class="card-title">Hiring Hub</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 5: Annual Report -->
-                        <div class="card" data-card-type="annual-report">
-                            <div class="card-icon annual-report-icon">
-                                <!-- Placeholder for branch -->
-                                <i class="fas fa-tree"></i>
-                            </div>
-                            <h3 class="card-title">Annual Report</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 6: New Services -->
-                        <div class="card" data-card-type="new-services">
-                            <div class="card-icon new-services-icon">
-                                <!-- Placeholder for star -->
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <h3 class="card-title">New Services</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
-
-                        <!-- Card 7: Company Culture -->
-                        <div class="card" data-card-type="company-culture">
-                            <div class="card-icon company-culture-icon">
-                                <!-- Placeholder for arc -->
-                                <i class="fas fa-archway"></i>
-                            </div>
-                            <h3 class="card-title">Company Culture</h3>
-                            <div class="action-button"><i class="fas fa-plus"></i></div>
-                        </div>
+                <!-- My Drive Content -->
+                <div id="my-drive-content" class="content-section">
+                    <h2 class="main-title">Mi unidad</h2>
+                    <div class="file-list-header">
+                        <span>Nombre</span>
+                        <span>Propietario</span>
+                        <span>Última modificación</span>
+                        <span>Tamaño</span>
                     </div>
+                    <div class="file-list-item">
+                        <i class="fas fa-folder icon"></i>
+                        <span>Carpeta de trabajo</span>
+                        <span>Yo</span>
+                        <span>Hace 2 horas</span>
+                        <span>-</span>
+                        <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                    </div>
+                    <div class="file-list-item">
+                        <i class="fas fa-file-pdf icon"></i>
+                        <span>Contrato_final.pdf</span>
+                        <span>Juan Pérez</span>
+                        <span>Ayer</span>
+                        <span>1.2 MB</span>
+                        <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                    </div>
+                    <div class="file-list-item">
+                        <i class="fas fa-file-image icon"></i>
+                        <span>Foto_vacaciones.jpg</span>
+                        <span>Yo</span>
+                        <span>Hace 1 semana</span>
+                        <span>3.5 MB</span>
+                        <div class="kebab-menu-icon"><i class="fas fa-ellipsis-v icon"></i></div>
+                    </div>
+                </div>
 
-                    <!-- Annotations -->
-                    <div class="annotation maria-annotation">
-                        <span class="comment-bubble">Maria</span>
-                        <div class="pointer"></div>
+                <!-- Computers Content -->
+                <div id="computers-content" class="content-section">
+                    <h2 class="main-title">Ordenadores</h2>
+                    <div class="alert-banner" id="computers-alert-banner">
+                        <i class="fas fa-info-circle icon"></i>
+                        <span>Sincroniza tus archivos en la nube con Google Drive para ordenadores.</span>
+                        <button class="close-alert-button"><i class="fas fa-times icon"></i></button>
                     </div>
-                    <div class="annotation julia-annotation">
-                        <span class="comment-bubble">Julia</span>
-                        <div class="pointer"></div>
+                    <div class="computer-card">
+                        <i class="fas fa-laptop icon"></i>
+                        <h3>Mi portátil</h3>
+                        <p>Última sincronización: Hace 5 minutos</p>
+                        <button class="view-files-button">Ver archivos</button>
                     </div>
+                </div>
+
+                <!-- Placeholder content for other navigation links -->
+                <div id="shared-with-me-content" class="content-section">
+                    <h2 class="main-title">Compartido conmigo</h2>
+                    <p>Aquí verás los archivos y carpetas que otros han compartido contigo.</p>
+                </div>
+                <div id="recent-content" class="content-section">
+                    <h2 class="main-title">Reciente</h2>
+                    <p>Accede rápidamente a los archivos que has abierto o editado recientemente.</p>
+                </div>
+                <div id="starred-content" class="content-section">
+                    <h2 class="main-title">Destacados</h2>
+                    <p>Marca archivos o carpetas como destacados para encontrarlos fácilmente aquí.</p>
+                </div>
+                <div id="trash-content" class="content-section">
+                    <h2 class="main-title">Papelera</h2>
+                    <p>Los elementos de la papelera se eliminarán definitivamente después de 30 días.</p>
                 </div>
             </div>
         </div>

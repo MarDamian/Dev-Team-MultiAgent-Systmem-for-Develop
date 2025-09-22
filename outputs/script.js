@@ -1,88 +1,100 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cards = document.querySelectorAll('.card');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const searchInput = document.getElementById('search-input');
+    const newButton = document.getElementById('new-button');
+    const newDropdown = document.getElementById('new-dropdown');
+    const computersAlertBanner = document.getElementById('computers-alert-banner');
+    const closeAlertButton = computersAlertBanner ? computersAlertBanner.querySelector('.close-alert-button') : null;
 
-    const resizeHandleClasses = [
-        'top-left', 'top-center', 'top-right',
-        'middle-left', 'middle-right',
-        'bottom-left', 'bottom-center', 'bottom-right'
-    ];
-
-    function createResizeHandles(cardElement) {
-        resizeHandleClasses.forEach(className => {
-            const handle = document.createElement('div');
-            handle.classList.add('resize-handle', className);
-            cardElement.appendChild(handle);
+    // Function to update content based on navigation
+    function updateContent(contentId) {
+        // Deactivate all content sections
+        contentSections.forEach(section => {
+            section.classList.remove('active');
         });
-    }
 
-    function removeResizeHandles(cardElement) {
-        const handles = cardElement.querySelectorAll('.resize-handle');
-        handles.forEach(handle => handle.remove());
-    }
-
-    cards.forEach(card => {
-        // Initialize selected cards with handles if they have the 'selected' class
-        if (card.classList.contains('selected')) {
-            createResizeHandles(card);
+        // Activate the selected content section
+        const targetContent = document.getElementById(`${contentId}-content`);
+        if (targetContent) {
+            targetContent.classList.add('active');
         }
 
-        card.addEventListener('click', (event) => {
-            // Prevent toggling if click originated from action button or resize handle
-            if (event.target.closest('.action-button') || event.target.closest('.resize-handle')) {
-                return;
-            }
+        // Update search input placeholder
+        let placeholderText = "Buscar en Drive";
+        switch (contentId) {
+            case 'home':
+                placeholderText = "Buscar en Drive";
+                break;
+            case 'my-drive':
+                placeholderText = "Buscar en Mi unidad";
+                break;
+            case 'computers':
+                placeholderText = "Buscar en Ordenadores";
+                break;
+            case 'shared-with-me':
+                placeholderText = "Buscar en Compartido conmigo";
+                break;
+            case 'recent':
+                placeholderText = "Buscar en Reciente";
+                break;
+            case 'starred':
+                placeholderText = "Buscar en Destacados";
+                break;
+            case 'trash':
+                placeholderText = "Buscar en Papelera";
+                break;
+        }
+        searchInput.placeholder = placeholderText;
+    }
 
-            card.classList.toggle('selected');
-
-            if (card.classList.contains('selected')) {
-                createResizeHandles(card);
-            } else {
-                removeResizeHandles(card);
-            }
+    // Navigation links click handler
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            
+            // Remove 'active' class from all nav links
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            
+            // Add 'active' class to the clicked link
+            link.classList.add('active');
+            
+            // Update the main content area
+            updateContent(link.dataset.content);
         });
     });
 
-    // Optional: Add basic drag functionality for annotations
-    const annotations = document.querySelectorAll('.annotation');
-    annotations.forEach(annotation => {
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        annotation.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - annotation.getBoundingClientRect().left;
-            offsetY = e.clientY - annotation.getBoundingClientRect().top;
-            annotation.style.cursor = 'grabbing';
-            annotation.style.zIndex = '100'; // Bring to front
+    // "Nuevo" button dropdown toggle
+    if (newButton && newDropdown) {
+        newButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing immediately
+            newDropdown.classList.toggle('show');
+            newButton.classList.toggle('active'); // Add active state to button
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            // Ensure annotation stays within canvas boundaries (optional, for more robust drag)
-            const canvas = annotation.closest('.canvas');
-            const canvasRect = canvas.getBoundingClientRect();
-            const annotationRect = annotation.getBoundingClientRect();
-
-            let newLeft = e.clientX - offsetX;
-            let newTop = e.clientY - offsetY;
-
-            // Clamp left
-            newLeft = Math.max(canvasRect.left, newLeft);
-            newLeft = Math.min(canvasRect.right - annotationRect.width, newLeft);
-            // Clamp top
-            newTop = Math.max(canvasRect.top, newTop);
-            newTop = Math.min(canvasRect.bottom - annotationRect.height, newTop);
-
-            annotation.style.left = `${newLeft - canvasRect.left}px`;
-            annotation.style.top = `${newTop - canvasRect.top}px`;
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!newButton.contains(e.target) && !newDropdown.contains(e.target)) {
+                newDropdown.classList.remove('show');
+                newButton.classList.remove('active'); // Remove active state from button
+            }
         });
+    }
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            annotation.style.cursor = 'grab';
-            annotation.style.zIndex = '5'; // Reset z-index
+    // Alert Banner close functionality
+    if (closeAlertButton && computersAlertBanner) {
+        closeAlertButton.addEventListener('click', () => {
+            computersAlertBanner.style.display = 'none';
         });
+    }
 
-        annotation.style.cursor = 'grab'; // Set initial cursor
-    });
+    // Initial content load (Página principal)
+    // This ensures 'home' content is displayed and its nav link is active on page load.
+    const initialActiveLink = document.querySelector('.nav-link.active');
+    if (initialActiveLink) {
+        updateContent(initialActiveLink.dataset.content);
+    } else {
+        // Fallback if no link has 'active' class initially
+        updateContent('home');
+    }
 });

@@ -17,29 +17,38 @@ def planner_node(state: dict) -> dict:
     retrieved_info = retrieve_context(context_content)
 
     prompt = f"""
-    Eres un jefe de proyecto técnico. Tu tarea es crear un plan de desarrollo detallado basado en la siguiente información.
+        Eres un jefe de proyecto técnico. Tu tarea es analizar la siguiente información y generar un plan de desarrollo en formato JSON.
 
-    **Contexto Relevante de la Base de Conocimientos:**
-    ---
-    {retrieved_info}
-    ---
+        **Contexto Relevante de la Base de Conocimientos (Para guiar decisiones técnicas):**
+        ---
+        {retrieved_info}
+        ---
 
-    **{context_source}:**
-    ---
-    {context_content}
-    ---
+        **Solicitud del Usuario ({context_source}):**
+        ---
+        {context_content}
+        ---
 
-    Basado en el contexto y la solicitud, tu plan debe indicar qué se necesita y las tecnologías a usar,
-    tambien aclara de forma resumida que vas a aplicar segun tu Base de Conocimiento.
+        **INSTRUCCIONES:**
+        1.  **Analiza** la solicitud del usuario y la base de conocimientos.
+        2.  **Formula un plan** para los desarrolladores frontend y/o backend.
+        3.  **Justifica tus decisiones técnicas** incorporando citas de la "Base de Conocimientos" directamente en la descripción de la tarea. La justificación debe ser breve y empezar con "(Justificación: ...)" para ser fácilmente identificable.
+        4.  **Genera un único objeto JSON** con la respuesta, sin texto introductorio ni de cierre.
 
-    **IMPORTANTE:** Tu salida debe ser un objeto JSON con la siguiente estructura y NADA MÁS:
-    - `plan_type`: "frontend", "backend", "both" o "none".
-    - `frontend_task`: (string | null) Una descripción clara y concisa de la tarea para el desarrollador frontend.
-    - `frontend_tech`: (string | null) La tecnología específica para el frontend (ej. "HTML, CSS y JavaScript").
-    - `backend_task`: (string | null) Una descripción clara de la tarea para el desarrollador backend.
-    - `backend_tech`: (string | null) La tecnología específica para el backend (ej. "Python con Flask").
+        **Ejemplo de justificación en una tarea:** "Crear los endpoints API para la gestión de usuarios. (Justificación: La base de conocimientos indica que 'la autenticación debe manejarse en el backend')."
 
-    **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. Si el usuario pide "HTML, CSS y JS", el campo `frontend_tech` debe ser exactamente ese. No sugieras frameworks, librerías o herramientas de construcción a menos que se pidan explícitamente.
+        **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
+        {{
+            "plan_type": "frontend", "backend", "both" o "none",
+            "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend, incluyendo justificación si aplica.",
+            "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
+            "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend, incluyendo justificación si aplica.",
+            "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask')."
+        }}
+
+        **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. 
+        Si el usuario pide "HTML, CSS y JS", el campo `frontend_tech` debe ser exactamente ese. 
+        No sugieras frameworks, librerías o herramientas de construcción a menos que se pidan explícitamente.  
     """
     
     response = analytical_llm.invoke(prompt)
