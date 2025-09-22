@@ -1,62 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const hamburgerMenu = document.querySelector('.hamburger-menu');
-    const mainNav = document.querySelector('.main-nav');
+    const cards = document.querySelectorAll('.card');
 
-    // Toggle mobile navigation
-    hamburgerMenu.addEventListener('click', () => {
-        document.body.classList.toggle('nav-open');
-    });
+    const resizeHandleClasses = [
+        'top-left', 'top-center', 'top-right',
+        'middle-left', 'middle-right',
+        'bottom-left', 'bottom-center', 'bottom-right'
+    ];
 
-    // Dropdown menu functionality
-    const dropdowns = document.querySelectorAll('.has-dropdown');
-
-    dropdowns.forEach(dropdown => {
-        const dropdownToggle = dropdown.querySelector('a');
-        const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-
-        // Toggle dropdown on click
-        dropdownToggle.addEventListener('click', (e) => {
-            // Check if we are in a mobile view where the main nav is stacked
-            // This check ensures default link behavior is prevented only when the nav is in mobile mode
-            const isMobileNavOpen = document.body.classList.contains('nav-open');
-            const isSmallScreen = window.innerWidth <= 992; // Use breakpoint defined in CSS
-
-            if (isMobileNavOpen || isSmallScreen) {
-                e.preventDefault(); // Prevent default link behavior for dropdowns in mobile/small screen
-                
-                // Close other open dropdowns
-                dropdowns.forEach(otherDropdown => {
-                    if (otherDropdown !== dropdown && otherDropdown.classList.contains('active')) {
-                        otherDropdown.classList.remove('active');
-                    }
-                });
-                dropdown.classList.toggle('active');
-            }
-            // For desktop, hover CSS handles dropdowns, and direct links should navigate.
-            // If a dropdown parent link has no href, preventDefault is always fine.
+    function createResizeHandles(cardElement) {
+        resizeHandleClasses.forEach(className => {
+            const handle = document.createElement('div');
+            handle.classList.add('resize-handle', className);
+            cardElement.appendChild(handle);
         });
+    }
 
-        // Close dropdown if clicked outside
-        document.addEventListener('click', (e) => {
-            // Only close if not clicking on the dropdown itself or its toggle
-            if (!dropdown.contains(e.target) && dropdown.classList.contains('active')) {
-                dropdown.classList.remove('active');
+    function removeResizeHandles(cardElement) {
+        const handles = cardElement.querySelectorAll('.resize-handle');
+        handles.forEach(handle => handle.remove());
+    }
+
+    cards.forEach(card => {
+        // Initialize selected cards with handles if they have the 'selected' class
+        if (card.classList.contains('selected')) {
+            createResizeHandles(card);
+        }
+
+        card.addEventListener('click', (event) => {
+            // Prevent toggling if click originated from action button or resize handle
+            if (event.target.closest('.action-button') || event.target.closest('.resize-handle')) {
+                return;
+            }
+
+            card.classList.toggle('selected');
+
+            if (card.classList.contains('selected')) {
+                createResizeHandles(card);
+            } else {
+                removeResizeHandles(card);
             }
         });
     });
 
-    // Segmented control functionality
-    const segmentedControlOptions = document.querySelectorAll('.segmented-control__option');
+    // Optional: Add basic drag functionality for annotations
+    const annotations = document.querySelectorAll('.annotation');
+    annotations.forEach(annotation => {
+        let isDragging = false;
+        let offsetX, offsetY;
 
-    segmentedControlOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            // Remove 'active' class from all options
-            segmentedControlOptions.forEach(opt => opt.classList.remove('active'));
-            // Add 'active' class to the clicked option
-            option.classList.add('active');
-            // In a real application, you would update content here based on data-tab attribute
-            // const tabId = option.dataset.tab;
-            // updateContent(tabId);
+        annotation.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - annotation.getBoundingClientRect().left;
+            offsetY = e.clientY - annotation.getBoundingClientRect().top;
+            annotation.style.cursor = 'grabbing';
+            annotation.style.zIndex = '100'; // Bring to front
         });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            // Ensure annotation stays within canvas boundaries (optional, for more robust drag)
+            const canvas = annotation.closest('.canvas');
+            const canvasRect = canvas.getBoundingClientRect();
+            const annotationRect = annotation.getBoundingClientRect();
+
+            let newLeft = e.clientX - offsetX;
+            let newTop = e.clientY - offsetY;
+
+            // Clamp left
+            newLeft = Math.max(canvasRect.left, newLeft);
+            newLeft = Math.min(canvasRect.right - annotationRect.width, newLeft);
+            // Clamp top
+            newTop = Math.max(canvasRect.top, newTop);
+            newTop = Math.min(canvasRect.bottom - annotationRect.height, newTop);
+
+            annotation.style.left = `${newLeft - canvasRect.left}px`;
+            annotation.style.top = `${newTop - canvasRect.top}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            annotation.style.cursor = 'grab';
+            annotation.style.zIndex = '5'; // Reset z-index
+        });
+
+        annotation.style.cursor = 'grab'; // Set initial cursor
     });
 });

@@ -20,7 +20,8 @@ class GraphState(TypedDict):
     backend_code: Optional[str]
     last_code_generated: Optional[Union[str, Dict[str, str]]]
 
-    # --- Campos de Auditoría y Feedback ---
+    # --- Campos de Auditoría y Feedback --
+    feedback: Optional[str]
     review_feedback: Optional[str]
     review_count: int
     code_approved: Optional[bool] # Bandera para finalizar el ciclo de desarrollo
@@ -33,5 +34,5 @@ class GraphState(TypedDict):
     # Una lista de las preguntas que el planner ya ha hecho para evitar repeticiones
     rag_queries_made: Optional[List[str]]
 
-    # --- CAMPO ELIMINADO ---
-    # tool_output: str # Eliminado porque ya no se usa el nodo 'execute_code'
+    # --- CAMPO CLAVE PARA VISUALIZAR EL PROCESO RAG ITERATIVO ---
+    rag_steps: Annotated[List[str], lambda x, y: x + y]

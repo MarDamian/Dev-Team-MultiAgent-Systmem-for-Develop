@@ -95,24 +95,35 @@ def quality_auditor_node(state: dict) -> dict:
         feedback = audit_result.get("feedback", "No se proporcionó feedback.")
         is_approved = audit_result.get("approved", False)
 
+        review_count += 1
+
         if is_approved:
-            print(f"Auditoría de Calidad: APROBADO. {feedback}")
+            print(f"Auditoría de Calidad: APROBADO. Feedback: {feedback}")
+            # --- ¡ESTE ES EL BLOQUE QUE NECESITA CORRECCIÓN! ---
+            # Debemos devolver el feedback Y la bandera de aprobación para que el frontend los vea.
             return {
-                "review_feedback": None,      # Limpiar feedback para salir del bucle
+                "feedback": feedback,         # <-- CLAVE: Devolver el feedback de aprobación.
+                "review_feedback": None,      # Limpiar el feedback de rechazo.
                 "review_count": review_count,
-                "code_approved": True         # Señal para que el supervisor finalice
+                "code_approved": True         # Señal para que el supervisor finalice.
             }
         else:
             print(f"Auditoría de Calidad: REQUIERE CAMBIOS. Feedback: {feedback}")
+            # Este bloque ya estaba bien, pero lo revisamos para consistencia.
             return {
-                "review_feedback": feedback,  # Devolver feedback para el desarrollador
-                "review_count": review_count
+                "feedback": feedback,         # Devolver el feedback.
+                "review_feedback": feedback,  # Llenar el campo de feedback de rechazo.
+                "review_count": review_count,
+                "code_approved": False        # Indicar que no está aprobado.
             }
 
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Error: El auditor no devolvió un JSON válido. Error: {e}")
-        # Devolver un feedback de error para que el desarrollador sepa que algo falló
+        # Asegurarnos de que el feedback de error también se devuelva.
+        feedback_error = "Error interno del auditor: La respuesta no fue un JSON válido. Por favor, intenta generar el código de nuevo."
         return {
-            "review_feedback": "Error interno del auditor: La respuesta no fue un JSON válido. Por favor, intenta generar el código de nuevo.",
-            "review_count": review_count
+            "feedback": feedback_error,
+            "review_feedback": feedback_error,
+            "review_count": review_count,
+            "code_approved": False
         }

@@ -139,7 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
-        console.log("Evento del servidor:", eventData); // Mantén esto para depurar
+        // ¡Paso de depuración CRÍTICO! Revisa la consola de tu navegador (F12) para ver los datos exactos que llegan.
+        console.log("Mensaje recibido del servidor:", eventData);
 
         // --- 1. Manejar eventos de control del flujo (errores, finalización) ---
         if (eventData.error) {
@@ -155,14 +156,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         if (eventData.type === "final_response") {
-            // El supervisor envía la respuesta final con el hipervínculo aquí.
+            // El supervisor envía aquí el mensaje "Tarea completada" con el hipervínculo.
             addMessage(marked.parse(eventData.content), 'bot'); 
             return;
         }
 
         // --- 2. Manejar eventos de stream de los agentes ---
         const nodeName = Object.keys(eventData)[0];
-        if (!nodeName) return; // Salir si el evento es inválido
+        if (!nodeName) return;
 
         const nodeOutput = eventData[nodeName];
         const friendlyNodeName = nodeName.replace(/_/g, ' ').replace('agent', '').trim().toUpperCase();
@@ -172,8 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
             addMessage(`<i>Paso: ${friendlyNodeName}</i>`, 'agent-status');
         }
 
-        // Salir si el nodo no tiene una salida para mostrar
-        if (!nodeOutput) return;
+        if (!nodeOutput) return; // Salir si el nodo no tiene una salida que mostrar
 
         // --- 3. Lógica de visualización específica para cada agente ---
 
@@ -196,25 +196,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // c) Salida del Desarrollador Frontend
-        if (nodeOutput.frontend_code && typeof nodeOutput.frontend_code === 'object') {
+        if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
             // Itera sobre el diccionario de código {html: "...", css: "...", javascript: "..."}
             for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
-                if (code) { // Asegurarse de que el bloque de código no esté vacío
+                if (code) {
                     addMessage(code, 'bot', { isCode: true, lang: lang });
                 }
             }
         }
 
         // d) Salida del Desarrollador Backend
-        if (nodeOutput.backend_code && typeof nodeOutput.backend_code === 'string') {
+        if (nodeName === 'develop_backend' && nodeOutput.backend_code) {
             addMessage(nodeOutput.backend_code, 'bot', { isCode: true, lang: 'python' });
         }
         
-        // e) Salida del AUDITOR DE CALIDAD (LA LÓGICA CLAVE CORREGIDA)
+        // e) SALIDA DEL AUDITOR DE CALIDAD (LA LÓGICA FINAL Y CORRECTA)
         if (nodeName === 'quality_auditor') {
-            // El auditor siempre devuelve la clave 'feedback', tanto para aprobación como para rechazo.
-            if (nodeOutput.feedback) {
-                const prefix = nodeOutput.code_approved ? "Auditoría" : "Feedback del Auditor";
+        // La consola (tu captura) nos mostró que el objeto que llega tiene `feedback` y `code_approved`.
+        // Esta lógica está diseñada para leer exactamente esas claves.
+            if (nodeOutput && typeof nodeOutput.feedback === 'string' && nodeOutput.feedback.trim() !== '') {
+                
+                // Determinamos si es una aprobación o un rechazo basándonos en la bandera que envía el backend.
+                const isApproved = nodeOutput.code_approved === true;
+                const prefix = isApproved ? "Auditoría" : "Feedback del Auditor";
+
+                // Creamos y mostramos el mensaje formateado en Markdown.
                 addMessage(`**${prefix}:** ${nodeOutput.feedback}`, 'bot');
             }
         }

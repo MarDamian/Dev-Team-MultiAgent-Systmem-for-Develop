@@ -3,93 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myOrthos</title>
+    <title>Canva-like UI</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts for Inter (sans-serif) and Dancing Script (script) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <header class="header">
-        <div class="container header__container">
-            <a href="#" class="logo">
-                <img src="assets/myOrthos_logo.svg" alt="myOrthos Logo">
-            </a>
-            <nav class="main-nav">
-                <ul class="main-nav__list">
-                    <li class="main-nav__item has-dropdown">
-                        <a href="#">Why myOrthos <img src="assets/chevron-down.svg" alt="Dropdown arrow"></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Benefit 1</a></li>
-                            <li><a href="#">Benefit 2</a></li>
-                            <li><a href="#">Benefit 3</a></li>
-                        </ul>
-                    </li>
-                    <li class="main-nav__item"><a href="#">Our Practices</a></li>
-                    <li class="main-nav__item has-dropdown">
-                        <a href="#">About Us <img src="assets/chevron-down.svg" alt="Dropdown arrow"></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Our Story</a></li>
-                            <li><a href="#">Our Team</a></li>
-                            <li><a href="#">Our Values</a></li>
-                        </ul>
-                    </li>
-                    <li class="main-nav__item"><a href="#">Careers</a></li>
-                    <li class="main-nav__item"><a href="#">Insights</a></li>
-                </ul>
-                <button class="btn btn--primary main-nav__cta">Let's Talk</button>
-            </nav>
-            <button class="hamburger-menu" aria-label="Toggle navigation">
-                <img src="assets/menu.svg" alt="Menu icon">
-            </button>
+    <div class="app-shell">
+        <header class="header">
+            <div class="logo-section">
+                <span class="canva-logo">Canva</span>
+            </div>
+            <div class="global-actions">
+                <i class="fas fa-user profile-icon"></i>
+                <i class="fas fa-users collaboration-icon"></i>
+                <button class="play-button">
+                    <i class="fas fa-play"></i>
+                    <span>9.5s</span>
+                </button>
+                <button class="share-button">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="nav-icons">
+                    <i class="fas fa-th-large nav-icon active"></i> <!-- Grid -->
+                    <i class="fas fa-shapes nav-icon"></i> <!-- Shapes -->
+                    <i class="fas fa-cloud nav-icon"></i> <!-- Cloud -->
+                    <i class="fas fa-font nav-icon"></i> <!-- Text -->
+                    <i class="fas fa-music nav-icon"></i> <!-- Music -->
+                    <i class="fas fa-video nav-icon"></i> <!-- Video -->
+                    <i class="fas fa-ellipsis-h nav-icon"></i> <!-- More options -->
+                </div>
+            </aside>
+
+            <div class="canvas-area">
+                <div class="sub-header">
+                    <span class="position-text">Position</span>
+                    <!-- Icon or menu on the right, not fully visible in spec -->
+                </div>
+                <div class="canvas">
+                    <h1 class="wygin-logo">WYGINS+</h1>
+
+                    <div class="card-grid">
+                        <!-- Card 1: Team Updates -->
+                        <div class="card" data-card-type="team-updates">
+                            <div class="card-icon team-updates-icon">
+                                <!-- Placeholder for hands with book, points -->
+                                <i class="fas fa-hands-helping"></i>
+                                <div class="orange-dot dot-1"></div>
+                                <div class="orange-dot dot-2"></div>
+                            </div>
+                            <h3 class="card-title">Team Updates</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 2: Employee Handbook -->
+                        <div class="card" data-card-type="employee-handbook">
+                            <div class="card-icon employee-handbook-icon">
+                                <!-- Placeholder for hand icon -->
+                                <i class="fas fa-hand-paper"></i>
+                            </div>
+                            <h3 class="card-title">Employee Handbook</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 3: Project Reports (Selected) -->
+                        <div class="card selected" data-card-type="project-reports">
+                            <div class="card-icon project-reports-icon">
+                                <!-- Placeholder for leaves -->
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h3 class="card-title">Project Reports</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 4: Hiring Hub (Selected) -->
+                        <div class="card selected" data-card-type="hiring-hub">
+                            <div class="card-icon hiring-hub-icon">
+                                <!-- Placeholder for circle -->
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <h3 class="card-title">Hiring Hub</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 5: Annual Report -->
+                        <div class="card" data-card-type="annual-report">
+                            <div class="card-icon annual-report-icon">
+                                <!-- Placeholder for branch -->
+                                <i class="fas fa-tree"></i>
+                            </div>
+                            <h3 class="card-title">Annual Report</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 6: New Services -->
+                        <div class="card" data-card-type="new-services">
+                            <div class="card-icon new-services-icon">
+                                <!-- Placeholder for star -->
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="card-title">New Services</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+
+                        <!-- Card 7: Company Culture -->
+                        <div class="card" data-card-type="company-culture">
+                            <div class="card-icon company-culture-icon">
+                                <!-- Placeholder for arc -->
+                                <i class="fas fa-archway"></i>
+                            </div>
+                            <h3 class="card-title">Company Culture</h3>
+                            <div class="action-button"><i class="fas fa-plus"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Annotations -->
+                    <div class="annotation maria-annotation">
+                        <span class="comment-bubble">Maria</span>
+                        <div class="pointer"></div>
+                    </div>
+                    <div class="annotation julia-annotation">
+                        <span class="comment-bubble">Julia</span>
+                        <div class="pointer"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </header>
-
-    <main>
-        <section class="hero-section">
-            <div class="hero-section__bg-elements">
-                <img src="assets/hero_background_lines.svg" alt="Decorative lines" class="hero-bg-lines">
-                <!-- The organic curve is handled by CSS pseudo-element -->
-            </div>
-            <div class="container hero-section__content">
-                <h1 class="hero-title">Smiles that <span class="text--accent">Inspire</span></h1>
-                <p class="hero-subtitle">myOrthos is the premier partner for orthodontists and supporting teams</p>
-                <button class="btn btn--primary hero__cta">Show Me How</button>
-                <div class="hero-images">
-                    <div class="hero-image-card hero-image-card--1">
-                        <img src="assets/hero_dentist_patient_1.jpg" alt="Dentist with patient">
-                    </div>
-                    <div class="hero-image-card hero-image-card--2">
-                        <img src="assets/hero_dentist_patient_2.jpg" alt="Another dentist with patient">
-                    </div>
-                    <div class="hero-image-card hero-image-card--3 hero-image-card--circle">
-                        <img src="assets/hero_person_smiling.jpg" alt="Person smiling">
-                    </div>
-                    <div class="hero-image-card hero-image-card--4">
-                        <img src="assets/hero_dentist_working.jpg" alt="Dentist working">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="first-impressions-section">
-            <div class="container first-impressions__container">
-                <div class="first-impressions__header">
-                    <img src="assets/smile-icon.svg" alt="Smile icon" class="first-impressions__icon">
-                    <h2 class="section-title">First Impressions</h2>
-                </div>
-                <div class="segmented-control">
-                    <button class="segmented-control__option active" data-tab="patient-care">Focusing on patient care</button>
-                    <button class="segmented-control__option" data-tab="clinical-autonomy">Respecting clinical autonomy</button>
-                </div>
-                <div class="testimonial-card">
-                    <img src="assets/testimonial_person_dr_smith.jpg" alt="Dr. Smith" class="testimonial-card__avatar">
-                    <img src="assets/quote-icon.svg" alt="Quote icon" class="testimonial-card__quote-icon">
-                    <p class="testimonial-card__quote">"myOrthos has transformed our practice, allowing us to focus on what truly matters: delivering exceptional patient care and achieving outstanding results. Their support has been invaluable."</p>
-                    <p class="testimonial-card__attribution">Dr. Emily Smith, Orthodontist</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
