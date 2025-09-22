@@ -135,11 +135,13 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.onerror = (error) => addMessage("Error de conexión. Por favor, refresca la página.", "bot");
     
 
+    // Reemplaza toda tu función socket.onmessage existente con esta.
+
     socket.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
-        console.log("Evento del servidor:", eventData);
+        console.log("Evento del servidor:", eventData); // Mantén esto para depurar
 
-        // --- Manejo de eventos de control del flujo ---
+        // --- 1. Manejar eventos de control del flujo (errores, finalización) ---
         if (eventData.error) {
             addMessage(`Error del servidor: ${eventData.error}`, 'agent-status');
             isThinking = false; messageInput.disabled = false;
@@ -153,32 +155,34 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         if (eventData.type === "final_response") {
-            // Usa `eventData.content` que es la clave correcta para la respuesta final del supervisor
+            // El supervisor envía la respuesta final con el hipervínculo aquí.
             addMessage(marked.parse(eventData.content), 'bot'); 
             return;
         }
 
-        // --- Manejo de eventos de stream de los agentes ---
+        // --- 2. Manejar eventos de stream de los agentes ---
         const nodeName = Object.keys(eventData)[0];
-        if (!nodeName) return; // Salir si el evento está vacío
+        if (!nodeName) return; // Salir si el evento es inválido
 
         const nodeOutput = eventData[nodeName];
         const friendlyNodeName = nodeName.replace(/_/g, ' ').replace('agent', '').trim().toUpperCase();
 
-        // Mostrar el nombre del paso (manteniendo tu lógica actual)
+        // Mostrar el nombre del paso (ej. "Paso: DEVELOP FRONTEND")
         if (friendlyNodeName && !["SUPERVISOR", "CONVERSATIONAL", "MULTIMODAL ANALYZER"].includes(friendlyNodeName)) {
             addMessage(`<i>Paso: ${friendlyNodeName}</i>`, 'agent-status');
         }
 
-        // --- Lógica de visualización por tipo de salida (más robusta) ---
-        if (!nodeOutput) return; // Salir si el nodo no tiene salida
+        // Salir si el nodo no tiene una salida para mostrar
+        if (!nodeOutput) return;
 
-        // Salida del Diseñador UI/UX
+        // --- 3. Lógica de visualización específica para cada agente ---
+
+        // a) Salida del Diseñador UI/UX
         if (nodeOutput.ui_ux_spec) {
-            // Renderizamos como Markdown para una mejor visualización
             addMessage(marked.parse(nodeOutput.ui_ux_spec), 'bot');
         }
-        // Salida del Planificador
+
+        // b) Salida del Planificador
         if (nodeOutput.dev_plan) {
             const plan = nodeOutput.dev_plan;
             let planHtml = "<h4>Plan de Desarrollo</h4><ul>";
@@ -190,36 +194,30 @@ document.addEventListener("DOMContentLoaded", () => {
             planHtml += "</ul>";
             addMessage(planHtml, 'bot');
         }
-        // Salida del Desarrollador Frontend
+
+        // c) Salida del Desarrollador Frontend
         if (nodeOutput.frontend_code && typeof nodeOutput.frontend_code === 'object') {
-            // Tu lógica actual para el código es buena y no necesita cambios.
-            // Pero el contenido real ya no viaja por WebSocket. Esto se puede simplificar o eliminar.
-            // Por ahora lo dejamos por si quieres volver a añadirlo.
-            console.log("Señal de código frontend recibida, pero el código está en archivos.");
-        }
-        // Salida del Desarrollador Backend
-        if (nodeOutput.backend_code) {
-            // Misma lógica que el frontend.
-            console.log("Señal de código backend recibida, pero el código está en archivos.");
-        }
-        
-        // --- LÓGICA CORREGIDA Y MEJORADA PARA EL AUDITOR ---
-        // El auditor ahora es la única fuente de feedback.
-        if (nodeName === 'quality_auditor') {
-            if (nodeOutput.review_feedback) {
-                // Caso: RECHAZADO
-                addMessage(`**Feedback del Auditor:** ${nodeOutput.review_feedback}`, 'bot');
-            } else if (nodeOutput.code_approved === true) {
-                // Caso: APROBADO
-                // El auditor devuelve un 'feedback' de aprobación en el JSON. Vamos a buscarlo.
-                // Aunque LangGraph no siempre envía el stream completo, es buena práctica prepararse.
-                const approvalMessage = nodeOutput.feedback || "**Auditoría:** Código APROBADO.";
-                addMessage(approvalMessage, 'bot');
+            // Itera sobre el diccionario de código {html: "...", css: "...", javascript: "..."}
+            for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
+                if (code) { // Asegurarse de que el bloque de código no esté vacío
+                    addMessage(code, 'bot', { isCode: true, lang: lang });
+                }
             }
         }
+
+        // d) Salida del Desarrollador Backend
+        if (nodeOutput.backend_code && typeof nodeOutput.backend_code === 'string') {
+            addMessage(nodeOutput.backend_code, 'bot', { isCode: true, lang: 'python' });
+        }
         
-        // El supervisor ahora genera la respuesta final con el hipervínculo.
-        // Esta sección ya está cubierta por el `eventData.type === "final_response"`.
+        // e) Salida del AUDITOR DE CALIDAD (LA LÓGICA CLAVE CORREGIDA)
+        if (nodeName === 'quality_auditor') {
+            // El auditor siempre devuelve la clave 'feedback', tanto para aprobación como para rechazo.
+            if (nodeOutput.feedback) {
+                const prefix = nodeOutput.code_approved ? "Auditoría" : "Feedback del Auditor";
+                addMessage(`**${prefix}:** ${nodeOutput.feedback}`, 'bot');
+            }
+        }
     };
     // --- Lógica de Envío de Mensajes ---
     messageForm.addEventListener("submit", async (event) => {

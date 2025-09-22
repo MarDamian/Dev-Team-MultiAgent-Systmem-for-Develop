@@ -75,10 +75,10 @@ def frontend_developer_node(state: dict) -> dict:
 
     # Usar la nueva herramienta para extraer y guardar el código
     output_code = extract_and_save_code(full_code)
-    
+    extracted_code_dict = extract_and_save_code(full_code)
     # Devolvemos todos los bloques de código y limpiamos el feedback
     return {
-        "frontend_code": output_code,
+        "frontend_code": extracted_code_dict,
         "last_code_generated": "frontend",
         "review_feedback": None # ¡CLAVE! Limpiar el bucle.
     }
