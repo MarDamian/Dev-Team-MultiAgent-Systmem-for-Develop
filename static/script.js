@@ -134,84 +134,93 @@ document.addEventListener("DOMContentLoaded", () => {
     //socket.onopen = () => addMessage("Conectado a DevTeam-Bot.", "agent-status");
     socket.onerror = (error) => addMessage("Error de conexión. Por favor, refresca la página.", "bot");
     
+
     socket.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
         console.log("Evento del servidor:", eventData);
 
+        // --- Manejo de eventos de control del flujo ---
         if (eventData.error) {
             addMessage(`Error del servidor: ${eventData.error}`, 'agent-status');
             isThinking = false; messageInput.disabled = false;
             return;
         }
-
         if (eventData.type === "done") {
             isThinking = false; messageInput.disabled = false; messageInput.focus();
-            selectedFiles = []; // Limpiar archivos después de enviar
-            fileInput.value = ''; // Limpiar el input de tipo file
-            updateFileList(); // Actualizar la lista de archivos (vacía)
+            selectedFiles = [];
+            fileInput.value = '';
+            updateFileList();
             return;
+        }
+        if (eventData.type === "final_response") {
+            // Usa `eventData.content` que es la clave correcta para la respuesta final del supervisor
+            addMessage(marked.parse(eventData.content), 'bot'); 
+            return;
+        }
+
+        // --- Manejo de eventos de stream de los agentes ---
+        const nodeName = Object.keys(eventData)[0];
+        if (!nodeName) return; // Salir si el evento está vacío
+
+        const nodeOutput = eventData[nodeName];
+        const friendlyNodeName = nodeName.replace(/_/g, ' ').replace('agent', '').trim().toUpperCase();
+
+        // Mostrar el nombre del paso (manteniendo tu lógica actual)
+        if (friendlyNodeName && !["SUPERVISOR", "CONVERSATIONAL", "MULTIMODAL ANALYZER"].includes(friendlyNodeName)) {
+            addMessage(`<i>Paso: ${friendlyNodeName}</i>`, 'agent-status');
+        }
+
+        // --- Lógica de visualización por tipo de salida (más robusta) ---
+        if (!nodeOutput) return; // Salir si el nodo no tiene salida
+
+        // Salida del Diseñador UI/UX
+        if (nodeOutput.ui_ux_spec) {
+            // Renderizamos como Markdown para una mejor visualización
+            addMessage(marked.parse(nodeOutput.ui_ux_spec), 'bot');
+        }
+        // Salida del Planificador
+        if (nodeOutput.dev_plan) {
+            const plan = nodeOutput.dev_plan;
+            let planHtml = "<h4>Plan de Desarrollo</h4><ul>";
+            if(plan.plan_type) planHtml += `<li><strong>Tipo:</strong> ${plan.plan_type}</li>`;
+            if(plan.frontend_task) planHtml += `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>`;
+            if(plan.frontend_tech) planHtml += `<li><strong>Tecnología Frontend:</strong> ${plan.frontend_tech}</li>`;
+            if(plan.backend_task) planHtml += `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>`;
+            if(plan.backend_tech) planHtml += `<li><strong>Tecnología Backend:</strong> ${plan.backend_tech}</li>`;
+            planHtml += "</ul>";
+            addMessage(planHtml, 'bot');
+        }
+        // Salida del Desarrollador Frontend
+        if (nodeOutput.frontend_code && typeof nodeOutput.frontend_code === 'object') {
+            // Tu lógica actual para el código es buena y no necesita cambios.
+            // Pero el contenido real ya no viaja por WebSocket. Esto se puede simplificar o eliminar.
+            // Por ahora lo dejamos por si quieres volver a añadirlo.
+            console.log("Señal de código frontend recibida, pero el código está en archivos.");
+        }
+        // Salida del Desarrollador Backend
+        if (nodeOutput.backend_code) {
+            // Misma lógica que el frontend.
+            console.log("Señal de código backend recibida, pero el código está en archivos.");
         }
         
-        // Manejar el evento de respuesta final del servidor
-        if (eventData.type === "final_response") {
-            addMessage(marked.parse(eventData.content), 'bot'); // Renderizar Markdown
-            return;
-        }
-
-        const nodeName = Object.keys(eventData)[0];
-        if (nodeName) {
-            const nodeOutput = eventData[nodeName];
-            const friendlyNodeName = nodeName.replace(/_/g, ' ').replace('agent', '').trim().toUpperCase();
-
-            // Mostrar el nombre del paso para nodos de desarrollo
-            if (friendlyNodeName && !["SUPERVISOR", "CONVERSATIONAL", "MULTIMODAL ANALYZER"].includes(friendlyNodeName)) {
-                 addMessage(`<i>Paso: ${friendlyNodeName}</i>`, 'agent-status');
-            }
-
-            // Lógica detallada para mostrar la salida de cada nodo
-            if (nodeOutput) {
-                // Salida del Diseñador UI/UX
-                if (nodeOutput.ui_ux_spec) {
-                    addMessage(nodeOutput.ui_ux_spec, 'bot');
-                }
-                // Salida del Planificador
-                if (nodeOutput.dev_plan) {
-                    const plan = nodeOutput.dev_plan;
-                    let planHtml = "<h4>Plan de Desarrollo</h4><ul>";
-                    if(plan.plan_type) planHtml += `<li><strong>Tipo:</strong> ${plan.plan_type}</li>`;
-                    if(plan.frontend_task) planHtml += `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>`;
-                    if(plan.frontend_tech) planHtml += `<li><strong>Tecnología Frontend:</strong> ${plan.frontend_tech}</li>`;
-                    if(plan.backend_task) planHtml += `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>`;
-                    if(plan.backend_tech) planHtml += `<li><strong>Tecnología Backend:</strong> ${plan.backend_tech}</li>`;
-                    planHtml += "</ul>";
-                    addMessage(planHtml, 'bot');
-                }
-                // Salida del Desarrollador Frontend
-                if (nodeOutput.frontend_code && typeof nodeOutput.frontend_code === 'object') {
-                    for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
-                        addMessage(code, 'bot', { isCode: true, lang: lang });
-                    }
-                }
-                // Salida del Desarrollador Backend
-                if (nodeOutput.backend_code) {
-                    addMessage(nodeOutput.backend_code, 'bot', { isCode: true, lang: 'python' });
-                }
-                // Salida del Revisor de Código
-                if (nodeOutput.review_feedback) {
-                    addMessage(`**Feedback de Revisión:** ${nodeOutput.review_feedback}`, 'bot');
-                } else if (nodeName === 'review_code') {
-                     addMessage("**Revisión:** Código APROBADO.", 'bot');
-                }
-                // Salida de respuesta final genérica
-                if (nodeOutput.final_response) {
-                    // Esta parte ya no debería ser necesaria si el tipo "final_response" se maneja arriba
-                    // Pero la mantengo por si acaso, aunque la lógica principal se mueve.
-                    addMessage(nodeOutput.final_response, 'bot');
-                }
+        // --- LÓGICA CORREGIDA Y MEJORADA PARA EL AUDITOR ---
+        // El auditor ahora es la única fuente de feedback.
+        if (nodeName === 'quality_auditor') {
+            if (nodeOutput.review_feedback) {
+                // Caso: RECHAZADO
+                addMessage(`**Feedback del Auditor:** ${nodeOutput.review_feedback}`, 'bot');
+            } else if (nodeOutput.code_approved === true) {
+                // Caso: APROBADO
+                // El auditor devuelve un 'feedback' de aprobación en el JSON. Vamos a buscarlo.
+                // Aunque LangGraph no siempre envía el stream completo, es buena práctica prepararse.
+                const approvalMessage = nodeOutput.feedback || "**Auditoría:** Código APROBADO.";
+                addMessage(approvalMessage, 'bot');
             }
         }
+        
+        // El supervisor ahora genera la respuesta final con el hipervínculo.
+        // Esta sección ya está cubierta por el `eventData.type === "final_response"`.
     };
-
     // --- Lógica de Envío de Mensajes ---
     messageForm.addEventListener("submit", async (event) => {
         event.preventDefault();

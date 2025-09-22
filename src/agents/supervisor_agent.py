@@ -1,16 +1,10 @@
-# Contenido para: src/agents/supervisor_agent.py
-
 from src.model import analytical_llm
-from src.tools.file_analyzer import prepare_multimodal_input
 from src.tools.generate_hyperlink import generate_local_html_hyperlink, create_hyperlink_message
 from langchain_core.messages import HumanMessage
-import json
 import os
 import re
 
-# --- Lista de Nodos Disponibles para el Supervisor ---
-# Define los nodos a los que el supervisor puede enrutar las tareas.
-# '__end__' es una palabra clave especial en LangGraph para terminar el flujo.
+# La lista de nodos disponibles se mantiene igual.
 AVAILABLE_NODES = [
     "conversational_agent",
     "multimodal_analyzer",
@@ -18,107 +12,109 @@ AVAILABLE_NODES = [
     "planner",
     "develop_backend",
     "develop_frontend",
-    "review_code",
-    "execute_code",
+    "quality_auditor",
     "__end__"
 ]
 
 def supervisor_node(state: dict) -> dict:
     """
-    Este es el supervisor orquestador. Analiza el estado completo de la tarea
-    y decide qué especialista debe actuar a continuación. Su lógica ahora está
-    implementada principalmente en código para mayor robustez y mantenibilidad.
+    Supervisor orquestador robustecido para manejar respuestas inesperadas del LLM
+    y con lógica de enrutamiento mejorada.
     """
     print("---AGENTE: SUPERVISOR ORQUESTADOR---")
 
+    # (La sección de recopilación de estado se mantiene igual)
+    plan = state.get("dev_plan", {})
+    has_plan = bool(plan)
+    # ... etc ...
+
+    # --- Todas las demás variables de estado se mantienen igual que en tu código ---
     user_input = state.get("user_input", "")
-    file_paths = state.get("file_paths", [])
-    has_files = bool(file_paths)
-    has_spec = "ui_ux_spec" in state and state["ui_ux_spec"] is not None
-    has_plan = "dev_plan" in state and state["dev_plan"] is not None
-    has_code = ("frontend_code" in state and state["frontend_code"]) or ("backend_code" in state and state["backend_code"])
-    has_feedback = "review_feedback" in state and state["review_feedback"] is not None
+    has_files = bool(state.get("file_paths"))
+    has_spec = bool(state.get("ui_ux_spec"))
+    has_code = bool(state.get("frontend_code") or state.get("backend_code"))
+    has_feedback = bool(state.get("review_feedback"))
     code_approved = state.get("code_approved", False)
     task_complete = state.get("task_complete", False)
+    rag_status = state.get("rag_status")
 
-    # --- Lógica de Enrutamiento Basada en Código (Más Robusta) ---
     decision = ""
 
-    # 1. Lógica de finalización (prioridad máxima)
+    # --- 1. Lógica de Finalización (Prioridad Máxima) ---
     if code_approved:
+        # ... (código de finalización)
         print("Tarea finalizada (código aprobado).")
-        final_response_message = state.get("final_response", "Tarea completada.")
+        final_response_message = "Tarea completada."
         if os.path.exists("outputs/index.html"):
             hyperlink = generate_local_html_hyperlink("outputs/index.html")
             final_response_message += create_hyperlink_message(hyperlink)
-            print(f"Hipervínculo generado: {hyperlink}")
-        
-        return {
-            "routing_decision": "__end__",
-            "final_response": final_response_message,
-            "task_complete": None,
-            "code_approved": None
-        }
+        return {"routing_decision": "__end__", "final_response": final_response_message}
 
     if task_complete:
         print("Tarea de un solo paso completa. Finalizando flujo.")
-        # La respuesta real fue generada y enviada por el nodo anterior.
-        # El único trabajo de este nodo es terminar el grafo.
-        # Devolver un diccionario sin `final_response` previene la duplicación en el frontend.
-        return {
-            "routing_decision": "__end__",
-            "task_complete": None,
-            "code_approved": None
-        }
+        return {"routing_decision": "__end__"}
 
-    # 2. Lógica de enrutamiento basada en el estado (reglas explícitas)
-    # TODO: Mejorar la lógica para diferenciar entre frontend y backend.
+    # --- 2. Lógica de Enrutamiento Basada en Estado (Reglas Explícitas) ---
+    if rag_status == "continue":
+        return {"routing_decision": "planner"}
     if has_feedback:
-        decision = "develop_frontend" # Asume frontend por ahora
+        if plan.get("plan_type") in ["frontend", "both"]: decision = "develop_frontend"
+        else: decision = "develop_backend"
     elif has_code:
-        decision = "review_code"
+        decision = "quality_auditor"
     elif has_plan:
-        decision = "develop_frontend" # Asume frontend por ahora
+        plan_type = plan.get("plan_type")
+        if plan_type in ["frontend", "both"]: decision = "develop_frontend"
+        elif plan_type == "backend": decision = "develop_backend"
+        else: decision = "conversational_agent"
     elif has_spec:
         decision = "planner"
-    
-    # 3. Si ninguna regla explícita coincide, usar el LLM para casos ambiguos.
+
+    # --- 3. Enrutamiento Inicial Basado en LLM (MODIFICADO Y ROBUSTECIDO) ---
     if not decision:
-        print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
+        print("No se encontró una regla de enrutamiento explícita. Consultando al LLM para la tarea inicial.")
+        
         prompt = f"""
-        Eres un enrutador lógico. Tu única tarea es decidir el siguiente paso en un flujo de trabajo.
-        Responde ÚNICAMENTE con el nombre del nodo de la lista. No des explicaciones.
+        Eres un enrutador lógico experto. Tu única tarea es decidir el primer paso en un flujo de trabajo de desarrollo de software.
+        Responde ÚNICAMENTE con el nombre de uno de los siguientes nodos: {AVAILABLE_NODES}. No des explicaciones.
 
         Petición del usuario: "{user_input}"
         ¿Hay archivos adjuntos?: {has_files}
 
-        REGLAS DE ENRUTAMIENTO:
-        - Si el usuario pide "implementar", "crear", "desarrollar" o similar, enruta a `ui_ux_designer`.
-        - Si el usuario pide "analizar", "resumir", "describir" o similar, enruta a `multimodal_analyzer`.
-        - Para cualquier otra situación que implique una conversación, enruta a `conversational_agent`.
-        - Si no estás seguro, enruta a `conversational_agent`.
+        **REGLAS DE ENRUTAMIENTO CRÍTICAS:**
+        - Para `ui_ux_designer`: Si la petición es **crear, implementar, desarrollar, codificar, o construir una interfaz** a partir de un archivo visual (imagen o video). La intención es PRODUCTIVA.
+        - Para `multimodal_analyzer`: Si la petición es **analizar, describir, resumir, explicar, o decir qué hay** en un archivo. La intención es INFORMATIVA.
+        - Para `conversational_agent`: Para cualquier otra cosa (preguntas, saludos, tareas no claras).
 
-        Basado en las reglas y la petición, ¿cuál es el siguiente nodo?
+        Ejemplos:
+        - "Implementa este diseño" (con imagen) -> ui_ux_designer
+        - "¿Qué ves en este video?" (con video) -> multimodal_analyzer
+        - "Crea una web a partir de este video" (con video) -> ui_ux_designer
+
+        Nodo de destino:
         """
         
         message = HumanMessage(content=prompt)
         response = analytical_llm.invoke([message])
+        llm_response_content = response.content.strip()
+
+        print(f"Respuesta del LLM para enrutamiento: '{llm_response_content}'") # <-- DEBUGGING MUY ÚTIL
+
+        # --- Lógica de parseo más robusta ---
+        if llm_response_content:
+            node_pattern = re.compile(r'\b(' + '|'.join(re.escape(node) for node in AVAILABLE_NODES) + r')\b')
+            match = node_pattern.search(llm_response_content)
+            if match:
+                decision = match.group(1)
         
-        # --- Análisis Robusto de la Respuesta del LLM ---
-        # Busca cualquiera de los nodos disponibles en la respuesta del LLM.
-        # Esto es más resistente a respuestas con texto adicional.
-        node_pattern = re.compile(r'\b(' + '|'.join(re.escape(node) for node in AVAILABLE_NODES) + r')\b')
-        match = node_pattern.search(response.content)
-        
-        if match:
-            decision = match.group(1)
-        else:
-            print(f"ADVERTENCIA: El LLM dio una respuesta no concluyente ('{response.content}'). Usando 'conversational_agent' como fallback.")
+        # Si después de todo, la decisión sigue vacía, usamos el fallback
+        if not decision:
+            print(f"ADVERTENCIA: El LLM dio una respuesta no concluyente o vacía. Usando 'conversational_agent' como fallback.")
             decision = "conversational_agent"
 
-    # --- Validación Final ---
+    # --- 4. Validación Final (sin cambios, pero ahora debería funcionar) ---
     if decision not in AVAILABLE_NODES:
-        print(f"ADVERTENCIA: Decisión inválida ('{decision}'). Forzando a '__end__'.")
+        print(f"ADVERTENCIA: Decisión inválida ('{decision}'). Forzando a '__end__' para evitar un error.")
         decision = "__end__"
     
     print(f"Decisión del Supervisor: Enviar a '{decision}'")

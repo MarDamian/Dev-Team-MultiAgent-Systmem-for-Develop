@@ -1,27 +1,37 @@
-# Contenido para: src/graph/state.py
-
-from typing import TypedDict, List, Dict, Annotated
+from typing import TypedDict, List, Dict, Annotated, Optional, Union
 
 class GraphState(TypedDict):
     # --- Campos de Conversación y Decisión ---
     user_input: str
     chat_history: Annotated[List[str], lambda x, y: x + y]
-    # La respuesta final generada por un agente de respuesta directa (conversacional, multimodal, etc.)
-    final_response: str | None
-    # Una bandera para indicar que una tarea de un solo paso ha terminado.
-    task_complete: bool | None
-    # La decisión de enrutamiento del supervisor.
+    final_response: Optional[str]
+    task_complete: Optional[bool]
     routing_decision: str
 
-    # --- Campos de Desarrollo ---
-    # La especificación técnica generada por el diseñador de UI/UX a partir de una maqueta.
-    ui_ux_spec: str | None
+    # --- Campos de Desarrollo y Archivos ---
     file_paths: List[str]
-    file_description: str
-    dev_plan: Dict[str, str] | None
-    backend_code: str | None
-    frontend_code: str | None
-    review_feedback: str | None
-    tool_output: str
+    file_description: Optional[str] # Campo opcional para descripciones de archivos
+    ui_ux_spec: Optional[str]
+    dev_plan: Optional[Dict[str, str]]
+
+    # --- Campos de Código (con tipado mejorado) ---
+    # El código de frontend puede ser un diccionario (html, css, js), mientras que el backend suele ser un solo string.
+    frontend_code: Optional[Dict[str, str]]
+    backend_code: Optional[str]
+    last_code_generated: Optional[Union[str, Dict[str, str]]]
+
+    # --- Campos de Auditoría y Feedback ---
+    review_feedback: Optional[str]
     review_count: int
-    last_code_generated: str | None
+    code_approved: Optional[bool] # Bandera para finalizar el ciclo de desarrollo
+
+    # --- NUEVOS CAMPOS PARA EL RAG ITERATIVO DEL PLANNER ---
+    # El estado actual de la investigación del planner ('continue' o 'complete')
+    rag_status: Optional[str]
+    # El contexto de la base de conocimientos acumulado a través de las iteraciones
+    rag_context: Optional[str]
+    # Una lista de las preguntas que el planner ya ha hecho para evitar repeticiones
+    rag_queries_made: Optional[List[str]]
+
+    # --- CAMPO ELIMINADO ---
+    # tool_output: str # Eliminado porque ya no se usa el nodo 'execute_code'

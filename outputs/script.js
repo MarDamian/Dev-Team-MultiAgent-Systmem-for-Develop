@@ -1,49 +1,62 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Hamburger Menu Toggle
     const hamburgerMenu = document.querySelector('.hamburger-menu');
     const mainNav = document.querySelector('.main-nav');
 
-    // Create an overlay div for when the mobile menu is open
-    const navOverlay = document.createElement('div');
-    navOverlay.classList.add('main-nav-overlay');
-    document.body.appendChild(navOverlay);
-
+    // Toggle mobile navigation
     hamburgerMenu.addEventListener('click', () => {
-        mainNav.classList.toggle('active');
-        navOverlay.classList.toggle('active');
-        // Toggle body scroll to prevent scrolling when menu is open
-        document.body.classList.toggle('no-scroll');
+        document.body.classList.toggle('nav-open');
     });
 
-    // Close menu when clicking outside (on overlay)
-    navOverlay.addEventListener('click', () => {
-        mainNav.classList.remove('active');
-        navOverlay.classList.remove('active');
-        document.body.classList.remove('no-scroll');
-    });
+    // Dropdown menu functionality
+    const dropdowns = document.querySelectorAll('.has-dropdown');
 
-    // Close menu when a navigation link or the mobile CTA button is clicked
-    mainNav.querySelectorAll('a, .cta-button.mobile-only').forEach(item => {
-        item.addEventListener('click', () => {
-            if (mainNav.classList.contains('active')) {
-                mainNav.classList.remove('active');
-                navOverlay.classList.remove('active');
-                document.body.classList.remove('no-scroll');
+    dropdowns.forEach(dropdown => {
+        const dropdownToggle = dropdown.querySelector('a');
+        const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+
+        // Toggle dropdown on click
+        dropdownToggle.addEventListener('click', (e) => {
+            // Check if we are in a mobile view where the main nav is stacked
+            // This check ensures default link behavior is prevented only when the nav is in mobile mode
+            const isMobileNavOpen = document.body.classList.contains('nav-open');
+            const isSmallScreen = window.innerWidth <= 992; // Use breakpoint defined in CSS
+
+            if (isMobileNavOpen || isSmallScreen) {
+                e.preventDefault(); // Prevent default link behavior for dropdowns in mobile/small screen
+                
+                // Close other open dropdowns
+                dropdowns.forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown && otherDropdown.classList.contains('active')) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+                dropdown.classList.toggle('active');
+            }
+            // For desktop, hover CSS handles dropdowns, and direct links should navigate.
+            // If a dropdown parent link has no href, preventDefault is always fine.
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', (e) => {
+            // Only close if not clicking on the dropdown itself or its toggle
+            if (!dropdown.contains(e.target) && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
             }
         });
     });
 
-    // Tab Control
-    const tabItems = document.querySelectorAll('.tab-item');
-    tabItems.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Remove 'active' class from all tabs
-            tabItems.forEach(item => item.classList.remove('active'));
-            // Add 'active' class to the clicked tab
-            tab.classList.add('active');
-            // In a real application, you would also update the content based on the clicked tab's data-tab attribute
-            // const tabContentId = tab.dataset.tab;
-            // console.log(`Switching to tab: ${tabContentId}`);
+    // Segmented control functionality
+    const segmentedControlOptions = document.querySelectorAll('.segmented-control__option');
+
+    segmentedControlOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Remove 'active' class from all options
+            segmentedControlOptions.forEach(opt => opt.classList.remove('active'));
+            // Add 'active' class to the clicked option
+            option.classList.add('active');
+            // In a real application, you would update content here based on data-tab attribute
+            // const tabId = option.dataset.tab;
+            // updateContent(tabId);
         });
     });
 });

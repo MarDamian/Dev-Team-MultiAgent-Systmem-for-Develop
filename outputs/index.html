@@ -1,68 +1,90 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myOrthos - Sonrisas que Inspiran</title>
+    <title>myOrthos</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="main-header">
-        <div class="logo">
-            <!-- As per spec: "myOrthos" (texto con un elemento gráfico de subrayado/onda azul) -->
-            <a href="#" class="logo-link">myOrthos</a>
+    <header class="header">
+        <div class="container header__container">
+            <a href="#" class="logo">
+                <img src="assets/myOrthos_logo.svg" alt="myOrthos Logo">
+            </a>
+            <nav class="main-nav">
+                <ul class="main-nav__list">
+                    <li class="main-nav__item has-dropdown">
+                        <a href="#">Why myOrthos <img src="assets/chevron-down.svg" alt="Dropdown arrow"></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Benefit 1</a></li>
+                            <li><a href="#">Benefit 2</a></li>
+                            <li><a href="#">Benefit 3</a></li>
+                        </ul>
+                    </li>
+                    <li class="main-nav__item"><a href="#">Our Practices</a></li>
+                    <li class="main-nav__item has-dropdown">
+                        <a href="#">About Us <img src="assets/chevron-down.svg" alt="Dropdown arrow"></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Our Story</a></li>
+                            <li><a href="#">Our Team</a></li>
+                            <li><a href="#">Our Values</a></li>
+                        </ul>
+                    </li>
+                    <li class="main-nav__item"><a href="#">Careers</a></li>
+                    <li class="main-nav__item"><a href="#">Insights</a></li>
+                </ul>
+                <button class="btn btn--primary main-nav__cta">Let's Talk</button>
+            </nav>
+            <button class="hamburger-menu" aria-label="Toggle navigation">
+                <img src="assets/menu.svg" alt="Menu icon">
+            </button>
         </div>
-        <nav class="main-nav">
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Services <span class="dropdown-arrow"></span></a></li>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-            <!-- CTA button for mobile navigation -->
-            <button class="cta-button header-button mobile-only">Let's Talk</button>
-        </nav>
-        <!-- CTA button for desktop header -->
-        <button class="cta-button header-button desktop-only">Let's Talk</button>
-        <button class="hamburger-menu">
-            <img src="assets/Hamburger_Menu_Icon.svg" alt="Menu">
-        </button>
     </header>
 
     <main>
         <section class="hero-section">
-            <div class="hero-content">
-                <h1>Smiles that <span class="accent-text">Inspire</span></h1>
-                <p class="description">myOrthos is the premier partner for orthodontic practices, offering innovative solutions to enhance patient care and streamline operations.</p>
-                <button class="cta-button primary-button">Show Me How</button>
+            <div class="hero-section__bg-elements">
+                <img src="assets/hero_background_lines.svg" alt="Decorative lines" class="hero-bg-lines">
+                <!-- The organic curve is handled by CSS pseudo-element -->
             </div>
-            <div class="hero-images">
-                <img src="assets/Hero_Circular_Profile_Image_1.jpg" alt="Smiling person" class="hero-circular-image">
-                <img src="assets/Hero_Image_Card_1.jpg" alt="Orthodontic tools" class="hero-image-card card-1">
-                <img src="assets/Hero_Image_Card_2.jpg" alt="Happy patient" class="hero-image-card card-2">
-                <img src="assets/Hero_Image_Card_3.jpg" alt="Dental care" class="hero-image-card card-3">
-                <img src="assets/Hero_Image_Card_4.jpg" alt="Orthodontist consulting" class="hero-image-card card-4">
+            <div class="container hero-section__content">
+                <h1 class="hero-title">Smiles that <span class="text--accent">Inspire</span></h1>
+                <p class="hero-subtitle">myOrthos is the premier partner for orthodontists and supporting teams</p>
+                <button class="btn btn--primary hero__cta">Show Me How</button>
+                <div class="hero-images">
+                    <div class="hero-image-card hero-image-card--1">
+                        <img src="assets/hero_dentist_patient_1.jpg" alt="Dentist with patient">
+                    </div>
+                    <div class="hero-image-card hero-image-card--2">
+                        <img src="assets/hero_dentist_patient_2.jpg" alt="Another dentist with patient">
+                    </div>
+                    <div class="hero-image-card hero-image-card--3 hero-image-card--circle">
+                        <img src="assets/hero_person_smiling.jpg" alt="Person smiling">
+                    </div>
+                    <div class="hero-image-card hero-image-card--4">
+                        <img src="assets/hero_dentist_working.jpg" alt="Dentist working">
+                    </div>
+                </div>
             </div>
-            <img src="assets/Hero_Background_Waves.svg" alt="Background waves" class="hero-background-waves">
-            <img src="assets/Wave_Separator_Shape.svg" alt="Section separator wave" class="wave-separator">
         </section>
 
-        <section class="content-section-1">
-            <div class="section-header">
-                <img src="assets/Smile_Teeth_Icon.svg" alt="Smile icon" class="smile-icon">
-                <h2>First Impressions</h2>
-            </div>
-            <div class="tab-control">
-                <button class="tab-item active" data-tab="care">Focusing on patient care</button>
-                <button class="tab-item" data-tab="efficiency">Maximizing practice efficiency</button>
-            </div>
-            <div class="testimonial-card">
-                <img src="assets/Quote_Icon.svg" alt="Quote icon" class="quote-icon">
-                <p class="quote-text">"myOrthos has transformed our practice. The support and innovative tools have allowed us to provide exceptional patient care while significantly improving our operational flow. Highly recommended!"</p>
-                <div class="author-info">
-                    <img src="assets/Testimonial_Profile_Image_1.jpg" alt="Testimonial author" class="profile-image">
-                    <p class="author-attribution">Dr. Jane Doe, Orthodontist</p>
+        <section class="first-impressions-section">
+            <div class="container first-impressions__container">
+                <div class="first-impressions__header">
+                    <img src="assets/smile-icon.svg" alt="Smile icon" class="first-impressions__icon">
+                    <h2 class="section-title">First Impressions</h2>
+                </div>
+                <div class="segmented-control">
+                    <button class="segmented-control__option active" data-tab="patient-care">Focusing on patient care</button>
+                    <button class="segmented-control__option" data-tab="clinical-autonomy">Respecting clinical autonomy</button>
+                </div>
+                <div class="testimonial-card">
+                    <img src="assets/testimonial_person_dr_smith.jpg" alt="Dr. Smith" class="testimonial-card__avatar">
+                    <img src="assets/quote-icon.svg" alt="Quote icon" class="testimonial-card__quote-icon">
+                    <p class="testimonial-card__quote">"myOrthos has transformed our practice, allowing us to focus on what truly matters: delivering exceptional patient care and achieving outstanding results. Their support has been invaluable."</p>
+                    <p class="testimonial-card__attribution">Dr. Emily Smith, Orthodontist</p>
                 </div>
             </div>
         </section>

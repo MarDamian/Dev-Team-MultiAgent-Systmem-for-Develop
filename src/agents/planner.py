@@ -29,7 +29,8 @@ def planner_node(state: dict) -> dict:
     {context_content}
     ---
 
-    Basado en el contexto y la solicitud, tu plan debe indicar qué se necesita y las tecnologías a usar.
+    Basado en el contexto y la solicitud, tu plan debe indicar qué se necesita y las tecnologías a usar,
+    tambien aclara de forma resumida que vas a aplicar segun tu Base de Conocimiento.
 
     **IMPORTANTE:** Tu salida debe ser un objeto JSON con la siguiente estructura y NADA MÁS:
     - `plan_type`: "frontend", "backend", "both" o "none".
