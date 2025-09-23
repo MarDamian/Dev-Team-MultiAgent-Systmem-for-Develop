@@ -61,5 +61,5 @@ def build_graph(checkpointer):
         checkpointer=checkpointer
     )
     
-    print("Grafo final y simplificado compilado exitosamente.")
+    print("Grafo final compilado exitosamente.")
     return app

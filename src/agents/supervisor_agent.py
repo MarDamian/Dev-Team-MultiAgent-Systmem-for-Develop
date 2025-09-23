@@ -1,122 +1,106 @@
+# Contenido para: src/agents/supervisor_node.py
+
 from src.model import analytical_llm
 from src.tools.generate_hyperlink import generate_local_html_hyperlink, create_hyperlink_message
 from langchain_core.messages import HumanMessage
 import os
 import re
 
-# La lista de nodos disponibles se mantiene igual.
 AVAILABLE_NODES = [
-    "conversational_agent",
-    "multimodal_analyzer",
-    "ui_ux_designer",
-    "planner",
-    "develop_backend",
-    "develop_frontend",
-    "quality_auditor",
-    "__end__"
+    "conversational_agent", "multimodal_analyzer", "ui_ux_designer", "planner",
+    "develop_backend", "develop_frontend", "quality_auditor", "__end__"
 ]
 
 def supervisor_node(state: dict) -> dict:
     """
-    Supervisor orquestador robustecido para manejar respuestas inesperadas del LLM
-    y con lógica de enrutamiento mejorada.
+    Supervisor orquestador puro. Enruta la tarea basándose en el estado actual
+    de la sesión. La gestión del estado entre tareas se maneja con thread_id en el backend.
     """
     print("---AGENTE: SUPERVISOR ORQUESTADOR---")
 
-    # (La sección de recopilación de estado se mantiene igual)
-    plan = state.get("dev_plan", {})
-    has_plan = bool(plan)
-    # ... etc ...
-
-    # --- Todas las demás variables de estado se mantienen igual que en tu código ---
-    user_input = state.get("user_input", "")
-    has_files = bool(state.get("file_paths"))
-    has_spec = bool(state.get("ui_ux_spec"))
-    has_code = bool(state.get("frontend_code") or state.get("backend_code"))
-    has_feedback = bool(state.get("review_feedback"))
-    code_approved = state.get("code_approved", False)
-    task_complete = state.get("task_complete", False)
-    rag_status = state.get("rag_status")
-
-    decision = ""
-
-    # --- 1. Lógica de Finalización (Prioridad Máxima) ---
-    if code_approved:
-        # ... (código de finalización)
+    # --- 1. LÓGICA DE FINALIZACIÓN (PRIORIDAD MÁXIMA) ---
+    # Esta regla es ahora infalible: si un nodo pone estas banderas, el flujo para.
+    if state.get("code_approved"):
         print("Tarea finalizada (código aprobado).")
         final_response_message = "Tarea completada."
         if os.path.exists("outputs/index.html"):
             hyperlink = generate_local_html_hyperlink("outputs/index.html")
             final_response_message += create_hyperlink_message(hyperlink)
+        # Devuelve el estado final, no se necesita propagar todo el estado
         return {"routing_decision": "__end__", "final_response": final_response_message}
 
-    if task_complete:
+    if state.get("task_complete"):
         print("Tarea de un solo paso completa. Finalizando flujo.")
         return {"routing_decision": "__end__"}
 
-    # --- 2. Lógica de Enrutamiento Basada en Estado (Reglas Explícitas) ---
+    # --- 2. RECOPILACIÓN DE ESTADO Y ENRUTAMIENTO ---
+    plan = state.get("dev_plan", {})
+    has_plan = bool(plan)
+    has_files = bool(state.get("file_paths"))
+    has_spec = bool(state.get("ui_ux_spec"))
+    has_code = bool(state.get("frontend_code") or state.get("backend_code"))
+    has_feedback = bool(state.get("review_feedback"))
+    rag_status = state.get("rag_status")
+    decision_route = ""
+
+    # --- 3. ENRUTAMIENTO BASADO EN ESTADO (TAREAS EN CURSO) ---
     if rag_status == "continue":
-        return {"routing_decision": "planner"}
-    if has_feedback:
-        if plan.get("plan_type") in ["frontend", "both"]: decision = "develop_frontend"
-        else: decision = "develop_backend"
+        decision_route = "planner"
+    elif has_feedback:
+        if plan.get("plan_type") in ["frontend", "both"]: decision_route = "develop_frontend"
+        else: decision_route = "develop_backend"
     elif has_code:
-        decision = "quality_auditor"
+        decision_route = "quality_auditor"
     elif has_plan:
         plan_type = plan.get("plan_type")
-        if plan_type in ["frontend", "both"]: decision = "develop_frontend"
-        elif plan_type == "backend": decision = "develop_backend"
-        else: decision = "conversational_agent"
+        if plan_type in ["frontend", "both"]: decision_route = "develop_frontend"
+        elif plan_type == "backend": decision_route = "develop_backend"
+        else: decision_route = "conversational_agent"
     elif has_spec:
-        decision = "planner"
+        decision_route = "planner"
 
-    # --- 3. Enrutamiento Inicial Basado en LLM (MODIFICADO Y ROBUSTECIDO) ---
-    if not decision:
-        print("No se encontró una regla de enrutamiento explícita. Consultando al LLM para la tarea inicial.")
+    # --- 4. ENRUTAMIENTO INICIAL BASADO EN INTENCIÓN (NUEVAS TAREAS) ---
+    if not decision_route:
+        print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
+        user_input = state.get("user_input", "")
         
-        prompt = f"""
-        Eres un enrutador lógico experto. Tu única tarea es decidir el primer paso en un flujo de trabajo de desarrollo de software.
-        Responde ÚNICAMENTE con el nombre de uno de los siguientes nodos: {AVAILABLE_NODES}. No des explicaciones.
+        prompt_route = f"""
+        Eres un enrutador de tareas experto. Clasifica la intención del usuario y elige el nodo correcto.
+        Responde ÚNICAMENTE con el nombre de uno de estos nodos: {AVAILABLE_NODES}.
 
-        Petición del usuario: "{user_input}"
-        ¿Hay archivos adjuntos?: {has_files}
+        Petición: "{user_input}"
+        Archivos adjuntos: {has_files}
 
-        **REGLAS DE ENRUTAMIENTO CRÍTICAS:**
-        - Para `ui_ux_designer`: Si la petición es **crear, implementar, desarrollar, codificar, o construir una interfaz** a partir de un archivo visual (imagen o video). La intención es PRODUCTIVA.
-        - Para `multimodal_analyzer`: Si la petición es **analizar, describir, resumir, explicar, o decir qué hay** en un archivo. La intención es INFORMATIVA.
-        - Para `conversational_agent`: Para cualquier otra cosa (preguntas, saludos, tareas no claras).
-
-        Ejemplos:
-        - "Implementa este diseño" (con imagen) -> ui_ux_designer
-        - "¿Qué ves en este video?" (con video) -> multimodal_analyzer
-        - "Crea una web a partir de este video" (con video) -> ui_ux_designer
+        **Reglas de Intención:**
+        1. **Intención de DESARROLLO:** Si el usuario quiere crear, hacer, construir, etc., una app/web/juego.
+           - SIN archivos visuales -> `planner`
+           - CON archivo visual -> `ui_ux_designer`
+        2. **Intención CONVERSACIONAL:** Si es un saludo, despedida, o pregunta general.
+           - -> `conversational_agent`
+        3. **Intención de ANÁLISIS:** Si solo quiere saber qué hay en un archivo.
+           - -> `multimodal_analyzer`
 
         Nodo de destino:
         """
-        
-        message = HumanMessage(content=prompt)
+        message = HumanMessage(content=prompt_route)
         response = analytical_llm.invoke([message])
         llm_response_content = response.content.strip()
+        print(f"Respuesta del LLM para enrutamiento: '{llm_response_content}'")
 
-        print(f"Respuesta del LLM para enrutamiento: '{llm_response_content}'") # <-- DEBUGGING MUY ÚTIL
+        node_pattern = re.compile(r'\b(' + '|'.join(re.escape(node) for node in AVAILABLE_NODES) + r')\b')
+        match = node_pattern.search(llm_response_content)
+        if match:
+            decision_route = match.group(1)
+        else:
+            print("ADVERTENCIA: Fallback a 'conversational_agent'.")
+            decision_route = "conversational_agent"
 
-        # --- Lógica de parseo más robusta ---
-        if llm_response_content:
-            node_pattern = re.compile(r'\b(' + '|'.join(re.escape(node) for node in AVAILABLE_NODES) + r')\b')
-            match = node_pattern.search(llm_response_content)
-            if match:
-                decision = match.group(1)
-        
-        # Si después de todo, la decisión sigue vacía, usamos el fallback
-        if not decision:
-            print(f"ADVERTENCIA: El LLM dio una respuesta no concluyente o vacía. Usando 'conversational_agent' como fallback.")
-            decision = "conversational_agent"
-
-    # --- 4. Validación Final (sin cambios, pero ahora debería funcionar) ---
-    if decision not in AVAILABLE_NODES:
-        print(f"ADVERTENCIA: Decisión inválida ('{decision}'). Forzando a '__end__' para evitar un error.")
-        decision = "__end__"
+    # --- 5. VALIDACIÓN FINAL ---
+    if decision_route not in AVAILABLE_NODES:
+        print(f"ADVERTENCIA: Decisión inválida ('{decision_route}'). Forzando a '__end__'.")
+        decision_route = "__end__"
     
-    print(f"Decisión del Supervisor: Enviar a '{decision}'")
+    print(f"Decisión del Supervisor: Enviar a '{decision_route}'")
     
-    return {"routing_decision": decision}
+    # Solo devolvemos la decisión, LangGraph se encarga de propagar el estado.
+    return {"routing_decision": decision_route}

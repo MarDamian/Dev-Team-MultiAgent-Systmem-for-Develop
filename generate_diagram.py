@@ -1,32 +1,43 @@
-# Contenido para: generate_diagram.py
-
 import os
-from langgraph.checkpoint.sqlite import SqliteSaver # <-- IMPORTAMOS LA LIBRERÍA
+from langgraph.checkpoint.sqlite import SqliteSaver 
+from langgraph.graph import MermaidDrawMethod
 from src.graph.workflow import build_graph
 
 def main():
     """
     Función principal para generar y guardar la imagen del grafo,
-    gestionando correctamente el checkpointer.
+    gestionando correctamente el checkpointer y exportando también el .mmd
+    para inspección manual en caso de error.
     """
     print("Gestionando el checkpointer en memoria para construir el grafo...")
 
-    # CORRECCIÓN CLAVE: Usamos 'with' para crear y gestionar correctamente el checkpointer,
-    # tal como lo hacemos en main.py.
     with SqliteSaver.from_conn_string(":memory:") as memory:
         
         print("Construyendo el grafo...")
-        # Ahora llamamos a build_graph pasándole el checkpointer que requiere.
         compiled_graph = build_graph(checkpointer=memory)
 
-        print("Generando la imagen del grafo usando Mermaid... (esto puede tardar un momento)")
+        # 🔹 Exportar Mermaid code (texto)
+        try:
+            mermaid_code = compiled_graph.get_graph().draw_mermaid()
+            mmd_filename = "workflow_diagram.mmd"
+            with open(mmd_filename, "w", encoding="utf-8") as f:
+                f.write(mermaid_code)
+            print(f"\n✔ Código Mermaid exportado en: {os.path.abspath(mmd_filename)}")
+            print("Puedes abrirlo en https://mermaid.live para validar la estructura.")
+        except Exception as e:
+            print("\n--- ERROR AL GENERAR EL CÓDIGO MERMAID ---")
+            print(f"Detalle del error: {e}")
+            return
+
+        # 🔹 Intentar renderizar con Pyppeteer
+        print("\nGenerando la imagen del grafo usando Mermaid con Pyppeteer... (esto puede tardar un momento)")
 
         try:
-            # El resto de la lógica para generar la imagen es la misma.
-            png_bytes = compiled_graph.get_graph().draw_mermaid_png()
+            png_bytes = compiled_graph.get_graph().draw_mermaid_png(
+                draw_method=MermaidDrawMethod.PYPPETEER
+            )
 
             output_filename = "workflow_diagram.png"
-
             with open(output_filename, "wb") as f:
                 f.write(png_bytes)
             
@@ -36,9 +47,7 @@ def main():
             print("\n--- ERROR AL GENERAR LA IMAGEN ---")
             print("No se pudo generar la imagen del grafo.")
             print(f"Detalle del error: {e}")
-            print("\nRecordatorio: ¿Has instalado las dependencias para renderizar?")
-            print("1. pip install playwright")
-            print("2. playwright install")
+            print("⚠ Pero el archivo .mmd ya fue generado para revisar en Mermaid Live.")
 
 if __name__ == "__main__":
     main()
