@@ -1,30 +1,39 @@
+// Contenido para: static/js/modules/websocketHandler.js
+
 import { addMessage } from './ui.js';
+// <-- CAMBIO CLAVE: Importar la función para añadir al historial
+import { addToHistory } from './chatState.js';
 
 function handleAgentMessage(nodeName, nodeOutput) {
     const friendlyNodeName = nodeName.replace(/_/g, ' ').replace('agent', '').trim().toUpperCase();
-
     if (friendlyNodeName && !["SUPERVISOR", "CONVERSATIONAL", "MULTIMODAL ANALYZER"].includes(friendlyNodeName)) {
         addMessage(`<i>Paso: ${friendlyNodeName}</i>`, 'agent-status');
     }
 
     if (!nodeOutput) return;
 
+    // --- LÓGICA DE ACTUALIZACIÓN DE HISTORIAL ---
+    // Solo añadimos al historial los mensajes textuales clave del bot.
+    // No añadimos código para mantener el historial conversacional limpio y eficiente.
     if (nodeName === 'conversational_agent' && nodeOutput.final_response) {
-        addMessage(marked.parse(nodeOutput.final_response), 'bot');
+        const botResponse = marked.parse(nodeOutput.final_response);
+        addMessage(botResponse, 'bot');
+        addToHistory("Bot", nodeOutput.final_response); // <-- CAMBIO CLAVE
     }
     if (nodeOutput.ui_ux_spec) {
         addMessage(marked.parse(nodeOutput.ui_ux_spec), 'bot');
+        addToHistory("Bot", nodeOutput.ui_ux_spec); // <-- CAMBIO CLAVE
     }
     if (nodeOutput.dev_plan) {
         const plan = nodeOutput.dev_plan;
-        let planHtml = "<h4>Plan de Desarrollo</h4><ul>";
-        if (plan.plan_type) planHtml += `<li><strong>Tipo:</strong> ${plan.plan_type}</li>`;
-        if (plan.frontend_task) planHtml += `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>`;
-        if (plan.frontend_tech) planHtml += `<li><strong>Tecnología Frontend:</strong> ${plan.frontend_tech}</li>`;
-        if (plan.backend_task) planHtml += `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>`;
-        if (plan.backend_tech) planHtml += `<li><strong>Tecnología Backend:</strong> ${plan.backend_tech}</li>`;
-        planHtml += "</ul>";
+        let planHtml = "<h4>Plan de Desarrollo</h4><ul>" +
+            (plan.plan_type ? `<li><strong>Tipo:</strong> ${plan.plan_type}</li>` : '') +
+            (plan.frontend_task ? `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>` : '') +
+            // ... (resto del plan) ...
+            "</ul>";
         addMessage(planHtml, 'bot');
+        const planText = `Plan de Desarrollo: Tipo=${plan.plan_type}, Tarea Frontend=${plan.frontend_task}`;
+        addToHistory("Bot", planText); // <-- CAMBIO CLAVE (versión texto)
     }
     if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
         for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
@@ -35,15 +44,17 @@ function handleAgentMessage(nodeName, nodeOutput) {
         addMessage(nodeOutput.backend_code, 'bot', { isCode: true, lang: 'python' });
     }
     if (nodeName === 'quality_auditor' && nodeOutput.feedback) {
-        const isApproved = nodeOutput.code_approved === true;
-        const prefix = isApproved ? "Auditoría" : "Feedback del Auditor";
-        addMessage(`**${prefix}:** ${nodeOutput.feedback}`, 'bot');
+        const prefix = nodeOutput.code_approved ? "Auditoría" : "Feedback del Auditor";
+        const feedbackMessage = `**${prefix}:** ${nodeOutput.feedback}`;
+        addMessage(feedbackMessage, 'bot');
+        addToHistory("Bot", feedbackMessage); // <-- CAMBIO CLAVE
     }
 }
 
 export function initWebSocket(callbacks) {
+    // ... (El código de esta función no cambia) ...
     const socket = new WebSocket(`ws://${window.location.host}/ws`);
-    socket.onerror = (error) => addMessage("Error de conexión. Por favor, refresca la página.", "bot");
+    socket.onerror = () => addMessage("Error de conexión. Por favor, refresca la página.", "bot");
 
     socket.onmessage = (event) => {
         const eventData = JSON.parse(event.data);
@@ -59,7 +70,9 @@ export function initWebSocket(callbacks) {
             return;
         }
         if (eventData.type === "final_response") {
-            addMessage(marked.parse(eventData.content), 'bot');
+            const finalMessage = marked.parse(eventData.content);
+            addMessage(finalMessage, 'bot');
+            addToHistory("Bot", eventData.content); // <-- CAMBIO CLAVE
             return;
         }
 

@@ -4,19 +4,14 @@ import uvicorn
 import uuid
 import os
 import shutil
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from src.graph.workflow import build_graph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
-# --- Configuración de la App FastAPI ---
 app = FastAPI()
-
-# Montar la carpeta 'static'
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# --- Endpoints de la API ---
 
 @app.get("/")
 async def get_root():
@@ -26,25 +21,20 @@ async def get_root():
 async def upload_files(files: list[UploadFile] = File(...)):
     if not os.path.exists("uploads"):
         os.makedirs("uploads")
-    
     filenames = []
     for file in files:
         file_path = os.path.join("uploads", file.filename)
-        with open(file_path, "wb", buffering=0) as buffer: # buffering=0 para asegurar escritura inmediata
+        with open(file_path, "wb", buffering=0) as buffer:
             shutil.copyfileobj(file.file, buffer)
         filenames.append(file.filename)
-        print(f"Archivo guardado: {file.filename}")
-        
-    return JSONResponse(content={"filenames": filenames}, status_code=200)
+    return JSONResponse(content={"filenames": filenames})
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("Nuevo cliente conectado. Las sesiones se crearán por tarea.")
 
-    # El checkpointer se mantiene vivo durante toda la conexión del WebSocket.
     async with AsyncSqliteSaver.from_conn_string(":memory:") as memory:
-        # El grafo se construye una vez por conexión, usando el mismo checkpointer.
         langgraph_app = build_graph(checkpointer=memory)
         
         try:
@@ -52,23 +42,29 @@ async def websocket_endpoint(websocket: WebSocket):
                 data = await websocket.receive_json()
                 print(f"Mensaje recibido del cliente: {data}")
                 
-                # --- LÓGICA DE SESIÓN POR TAREA ---
-                # ¡CAMBIO CLAVE! Se genera un nuevo thread_id para CADA nueva tarea del usuario.
-                # Esto asegura que el estado `task_complete` de una tarea no afecte a la siguiente.
                 thread_id = str(uuid.uuid4())
                 config = {"configurable": {"thread_id": thread_id}}
                 print(f"Iniciando nueva tarea con sesión: {thread_id}")
 
                 user_input = data.get("user_input")
-                file_names = data.get("file_names", []) 
+                file_names = data.get("file_names", [])
                 
+                # <-- CAMBIO CLAVE: Recibimos el historial conversacional del frontend
+                chat_history = data.get("chat_history", [])
+
                 if not user_input and not file_names:
                     continue
 
                 file_paths = [os.path.join("uploads", f) for f in file_names]
-                inputs = {"user_input": user_input, "file_paths": file_paths}
+                
+                # <-- CAMBIO CLAVE: Inyectamos el historial en el estado inicial de la nueva tarea
+                inputs = {
+                    "user_input": user_input,
+                    "file_paths": file_paths,
+                    "chat_history": chat_history 
+                }
 
-                print(f"Invocando el grafo con la entrada: {inputs}")
+                print(f"Invocando el grafo con la entrada (con historial): {inputs}")
                 
                 async for event in langgraph_app.astream(inputs, config=config):
                     if event:
@@ -87,10 +83,7 @@ async def websocket_endpoint(websocket: WebSocket):
             print(f"Error fatal en el WebSocket: {e}")
             await websocket.send_json({"error": str(e)})
 
-# --- Punto de Entrada para Ejecutar el Servidor ---
 if __name__ == "__main__":
     if not os.path.exists("uploads"): os.makedirs("uploads")
     if not os.path.exists("outputs"): os.makedirs("outputs")
-
-    print("Iniciando servidor FastAPI en http://127.0.0.1:8000")
     uvicorn.run(app, host="127.0.0.1", port=8000)

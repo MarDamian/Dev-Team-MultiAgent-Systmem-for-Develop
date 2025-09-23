@@ -1,6 +1,5 @@
-Evitar la sobre generacion de codigo cuando el reviwer no aprueba la primera version(se esta generando todo nuevamente)
 Generar hipervinculo en caso de que se haya realizado un sitio web en outputs y mostralo al usuario.
 RAG A ALMENOS DOS AGENTES (AgenticRAG)
-Ajustar Markdown
 Estado del arte
-curso langgraph 
+curso langgraph
+Agents encargados del Backend (nuevo agente para bases de datos) 

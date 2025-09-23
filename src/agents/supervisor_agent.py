@@ -13,20 +13,18 @@ AVAILABLE_NODES = [
 
 def supervisor_node(state: dict) -> dict:
     """
-    Supervisor orquestador puro. Enruta la tarea basándose en el estado actual
-    de la sesión. La gestión del estado entre tareas se maneja con thread_id en el backend.
+    Supervisor orquestador puro. Enruta la tarea basándose en el estado actual de la sesión.
+    La gestión del estado entre tareas (incluido el historial) se maneja en main.py.
     """
     print("---AGENTE: SUPERVISOR ORQUESTADOR---")
 
     # --- 1. LÓGICA DE FINALIZACIÓN (PRIORIDAD MÁXIMA) ---
-    # Esta regla es ahora infalible: si un nodo pone estas banderas, el flujo para.
     if state.get("code_approved"):
         print("Tarea finalizada (código aprobado).")
         final_response_message = "Tarea completada."
         if os.path.exists("outputs/index.html"):
             hyperlink = generate_local_html_hyperlink("outputs/index.html")
             final_response_message += create_hyperlink_message(hyperlink)
-        # Devuelve el estado final, no se necesita propagar todo el estado
         return {"routing_decision": "__end__", "final_response": final_response_message}
 
     if state.get("task_complete"):
@@ -63,12 +61,16 @@ def supervisor_node(state: dict) -> dict:
     if not decision_route:
         print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
         user_input = state.get("user_input", "")
+        chat_history = state.get("chat_history", []) # <-- El supervisor ahora tiene el contexto
         
         prompt_route = f"""
         Eres un enrutador de tareas experto. Clasifica la intención del usuario y elige el nodo correcto.
         Responde ÚNICAMENTE con el nombre de uno de estos nodos: {AVAILABLE_NODES}.
 
-        Petición: "{user_input}"
+        Historial de la Conversación Reciente:
+        {chat_history[-4:]} 
+
+        Petición Actual del Usuario: "{user_input}"
         Archivos adjuntos: {has_files}
 
         **Reglas de Intención:**
@@ -102,5 +104,4 @@ def supervisor_node(state: dict) -> dict:
     
     print(f"Decisión del Supervisor: Enviar a '{decision_route}'")
     
-    # Solo devolvemos la decisión, LangGraph se encarga de propagar el estado.
     return {"routing_decision": decision_route}
