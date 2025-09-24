@@ -12,9 +12,6 @@ function handleAgentMessage(nodeName, nodeOutput) {
 
     if (!nodeOutput) return;
 
-    // --- LÓGICA DE ACTUALIZACIÓN DE HISTORIAL ---
-    // Solo añadimos al historial los mensajes textuales clave del bot.
-    // No añadimos código para mantener el historial conversacional limpio y eficiente.
     if (nodeName === 'conversational_agent' && nodeOutput.final_response) {
         const botResponse = marked.parse(nodeOutput.final_response);
         addMessage(botResponse, 'bot');
@@ -29,11 +26,16 @@ function handleAgentMessage(nodeName, nodeOutput) {
         let planHtml = "<h4>Plan de Desarrollo</h4><ul>" +
             (plan.plan_type ? `<li><strong>Tipo:</strong> ${plan.plan_type}</li>` : '') +
             (plan.frontend_task ? `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>` : '') +
-            // ... (resto del plan) ...
+            (plan.backend_task ? `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>` : '') + 
             "</ul>";
+
         addMessage(planHtml, 'bot');
-        const planText = `Plan de Desarrollo: Tipo=${plan.plan_type}, Tarea Frontend=${plan.frontend_task}`;
-        addToHistory("Bot", planText); // <-- CAMBIO CLAVE (versión texto)
+
+        const planTextParts = ["Plan de Desarrollo:"];
+        if (plan.plan_type) planTextParts.push(`Tipo=${plan.plan_type}`);
+        if (plan.frontend_task) planTextParts.push(`Tarea Frontend=${plan.frontend_task}`);
+        if (plan.backend_task) planTextParts.push(`Tarea Backend=${plan.backend_task}`); 
+
     }
     if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
         for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
@@ -41,7 +43,9 @@ function handleAgentMessage(nodeName, nodeOutput) {
         }
     }
     if (nodeName === 'develop_backend' && nodeOutput.backend_code) {
-        addMessage(nodeOutput.backend_code, 'bot', { isCode: true, lang: 'python' });
+        for (const [lang, code] of Object.entries(nodeOutput.backend_code)) {
+            if (code) addMessage(code, 'bot', { isCode: true, lang });
+        }
     }
     if (nodeName === 'quality_auditor' && nodeOutput.feedback) {
         const prefix = nodeOutput.code_approved ? "Auditoría" : "Feedback del Auditor";

@@ -17,7 +17,7 @@ async function uploadFiles() {
         const response = await fetch("/upload", { method: "POST", body: formData });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Error al subir archivos.");
-        addMessage(`<i>Archivos subidos: ${result.filenames.join(", ")}</i>`, 'agent-status');
+        //addMessage(`<i>Archivos subidos: ${result.filenames.join(", ")}</i>`, 'agent-status');
         return result.filenames;
     } catch (error) {
         addMessage(`<i>Error de red al subir: ${error.message}</i>`, 'agent-status');
@@ -40,7 +40,7 @@ export function initFormHandler(socket) {
         selectors.messageInput.value = "";
         selectors.messageInput.disabled = true;
         isThinking = true;
-        addMessage("<i>DevTeam-Bot está pensando...</i>", 'agent-status');
+        //addMessage("<i>DevTeam-Bot está pensando...</i>", 'agent-status');
 
         const uploadedFileNames = await uploadFiles();
 

@@ -45,9 +45,9 @@ body {
 }
 #chat-container {
     position: relative; /* 1. AÑADIDO: Establece el contexto de posicionamiento */
-    width: 80%;
-    max-width: 800px;
-    height: 90vh;
+    width: 90%;
+    max-width: 1400px;
+    height: 95vh;
     background-color: var(--bg-secondary); /* Usar variable CSS */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);

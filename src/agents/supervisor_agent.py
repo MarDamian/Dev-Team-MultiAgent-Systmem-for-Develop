@@ -1,4 +1,4 @@
-# Contenido para: src/agents/supervisor_node.py
+# Contenido para: src/agents/supervisor_agent.py
 
 from src.model import analytical_llm
 from src.tools.generate_hyperlink import generate_local_html_hyperlink, create_hyperlink_message
@@ -61,10 +61,11 @@ def supervisor_node(state: dict) -> dict:
     if not decision_route:
         print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
         user_input = state.get("user_input", "")
-        chat_history = state.get("chat_history", []) # <-- El supervisor ahora tiene el contexto
+        chat_history = state.get("chat_history", [])
         
+        # <<< --- INICIO DE LA MODIFICACIÓN --- >>>
         prompt_route = f"""
-        Eres un enrutador de tareas experto. Clasifica la intención del usuario y elige el nodo correcto.
+        Eres un enrutador de tareas experto. Clasifica la intención del usuario y elige el siguiente nodo correcto en el flujo de trabajo.
         Responde ÚNICAMENTE con el nombre de uno de estos nodos: {AVAILABLE_NODES}.
 
         Historial de la Conversación Reciente:
@@ -73,17 +74,28 @@ def supervisor_node(state: dict) -> dict:
         Petición Actual del Usuario: "{user_input}"
         Archivos adjuntos: {has_files}
 
-        **Reglas de Intención:**
-        1. **Intención de DESARROLLO:** Si el usuario quiere crear, hacer, construir, etc., una app/web/juego.
-           - SIN archivos visuales -> `planner`
-           - CON archivo visual -> `ui_ux_designer`
-        2. **Intención CONVERSACIONAL:** Si es un saludo, despedida, o pregunta general.
-           - -> `conversational_agent`
-        3. **Intención de ANÁLISIS:** Si solo quiere saber qué hay en un archivo.
+        **Reglas de Intención y Enrutamiento:**
+
+        1. **Intención de Desarrollo / Creación:** Si el usuario quiere crear, construir, implementar o desarrollar una aplicación, web, API, base de datos, etc.
+           - Si la petición se enfoca explícitamente en lógica de backend, bases de datos, APIs, manejo de datos, servidor** (ej: "crea una base de datos para esto", "desarrolla una API con estos requisitos", "necesito el backend para esta imagen"), la tarea debe ser planificada.
+             -> `planner`
+           - Si el foco principal es el diseño visual o la interfaz de usuario a partir de un archivo de imagen/video/boceto adjunto (ej: "convierte este diseño en una web", "créame el HTML y CSS para esta maqueta").
+             -> `ui_ux_designer`
+           - Si es una petición de desarrollo general, abstracta o mixta (frontend + backend)** sin un archivo visual como punto de partida claro (ej: "créame una app de tareas", "hazme un juego de snake").
+             -> `planner`
+
+        2. **Intención de Análisis Puro:** Si el usuario solo quiere saber qué contiene un archivo (ej: "¿qué dice este audio?", "¿describe esta imagen?") SIN una solicitud explícita de construir o desarrollar algo con ello.
            - -> `multimodal_analyzer`
 
+        3. **Intención Conversacional:** Si es un saludo, despedida, una pregunta de conocimiento general o una conversación que no encaja en las anteriores.
+           - -> `conversational_agent`
+
+           
+           
         Nodo de destino:
         """
+        # <<< --- FIN DE LA MODIFICACIÓN --- >>>
+
         message = HumanMessage(content=prompt_route)
         response = analytical_llm.invoke([message])
         llm_response_content = response.content.strip()
