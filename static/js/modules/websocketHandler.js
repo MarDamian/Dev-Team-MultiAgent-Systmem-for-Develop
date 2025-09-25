@@ -15,11 +15,15 @@ function handleAgentMessage(nodeName, nodeOutput) {
     if (nodeName === 'conversational_agent' && nodeOutput.final_response) {
         const botResponse = marked.parse(nodeOutput.final_response);
         addMessage(botResponse, 'bot');
-        addToHistory("Bot", nodeOutput.final_response); // <-- CAMBIO CLAVE
+        addToHistory("Bot", nodeOutput.final_response); 
     }
     if (nodeOutput.ui_ux_spec) {
         addMessage(marked.parse(nodeOutput.ui_ux_spec), 'bot');
-        addToHistory("Bot", nodeOutput.ui_ux_spec); // <-- CAMBIO CLAVE
+        addToHistory("Bot", nodeOutput.ui_ux_spec);
+    }
+    if (nodeOutput.analysis_result) {
+        addMessage(marked.parse(nodeOutput.analysis_result), 'bot');
+        addToHistory("Bot", nodeOutput.analysis_result); 
     }
     if (nodeOutput.dev_plan) {
         const plan = nodeOutput.dev_plan;
@@ -40,6 +44,11 @@ function handleAgentMessage(nodeName, nodeOutput) {
     }
     if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
         for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
+            if (code) addMessage(code, 'bot', { isCode: true, lang });
+        }
+    }
+    if (nodeName === 'database_architech' && nodeOutput.db_schema) {
+        for (const [lang, code] of Object.entries(nodeOutput.db_schema)) {
             if (code) addMessage(code, 'bot', { isCode: true, lang });
         }
     }

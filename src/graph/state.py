@@ -16,6 +16,7 @@ class GraphState(TypedDict):
     frontend_code: Optional[Dict[str, str]]
     backend_code: Optional[str]
     last_code_generated: Optional[Union[str, Dict[str, str]]]
+    db_schema: Optional[str]
 
     # --- Campos de Auditoría y Feedback --
     feedback: Optional[str]
@@ -25,7 +26,6 @@ class GraphState(TypedDict):
     rag_status: Optional[str]
     rag_context: Optional[str]
     rag_queries_made: Optional[List[str]]
-    db_schema: Optional[str]
     analysis_result: Optional[str]
 
     # --- CAMPO CLAVE PARA VISUALIZAR EL PROCESO RAG ITERATIVO ---

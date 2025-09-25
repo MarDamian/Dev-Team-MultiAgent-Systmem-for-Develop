@@ -22,9 +22,6 @@ def supervisor_node(state: dict) -> dict:
     if state.get("code_approved"):
         print("Tarea finalizada (código aprobado).")
         final_response_message = "Tarea completada."
-        if os.path.exists("outputs/index.html"):
-            hyperlink = generate_local_html_hyperlink("outputs/index.html")
-            final_response_message += create_hyperlink_message(hyperlink)
         return {"routing_decision": "__end__", "final_response": final_response_message}
 
     if state.get("task_complete"):
@@ -49,21 +46,22 @@ def supervisor_node(state: dict) -> dict:
     if rag_status == "continue":
         decision_route = "planner"
     elif has_feedback:
-        if plan.get("plan_type") in ["frontend", "both"]: decision_route = "develop_frontend"
-        else: decision_route = "develop_backend"
-    elif has_code:
+        plan_type = plan.get("plan_type")
+        if plan_type in ["frontend", "both"]:
+            decision_route = "develop_frontend"
+        elif plan_type == "database":
+            decision_route = "database_architech"
+        else: 
+            decision_route = "develop_backend"   
+    elif has_code or has_db_schema:
         decision_route = "quality_auditor"
     elif has_plan:
         plan_type = plan.get("plan_type")
-        # --- NUEVA LÓGICA DE ENRUTAMIENTO ---
         if plan_type in ["database", "both"] and not has_db_schema:
-            # Si el plan es de backend y AÚN NO tenemos un esquema de BD, vamos al arquitecto.
             decision_route = "database_architech"
         elif plan_type in ["frontend", "both"]:
-            # Si es frontend (o backend con esquema ya listo), vamos al desarrollador.
             decision_route = "develop_frontend"
         elif plan_type == "backend":
-            # Si es solo backend y ya tenemos el esquema, vamos al desarrollador.
             decision_route = "develop_backend"
         else:
             decision_route = "conversational_agent"

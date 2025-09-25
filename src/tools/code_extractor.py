@@ -46,9 +46,7 @@ def extract_and_save_code(full_code_string: str, default_folder: str) -> dict:
     for filename, code in extracted_code.items():
         # La carpeta de destino es determinada por el agente que llama a la función.
         subdirectory = default_folder
-        
-        # El nombre del archivo se toma directamente de la clave extraída del delimitador.
-        # No es necesario inferir la extensión.
+    
         final_path = f"{subdirectory}/{filename}"
         save_code_to_file(final_path, code)
             

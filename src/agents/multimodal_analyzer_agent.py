@@ -17,6 +17,10 @@ def multimodal_analyzer_node(state: dict) -> dict:
     prompt_text = f"""
     Eres un experto analista. La petición del usuario es: "{user_input}".
     Tu única tarea es analizar los archivos adjuntos y proporcionar una descripción detallada y útil del contenido.
+    No resulvas la solicitud del usuario solo describe detalladamente el archivo adjunto
+
+        Si es un audio -> Transcribelo y da un pequeño analisis muy breve
+        Si es un audio acerca de como implementar un proyecto 
     """
     
     multimodal_content = prepare_multimodal_input(prompt_text, file_paths)

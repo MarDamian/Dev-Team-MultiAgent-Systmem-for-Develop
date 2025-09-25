@@ -68,7 +68,7 @@ def database_architech_node(state: dict) -> dict:
     extracted_code_dict = extract_and_save_code(full_code, default_folder="database")
 
     return {
-        "database_code": extracted_code_dict,
+        "db_schema": extracted_code_dict,
         "last_code_generated": "database",
         "review_feedback": None 
     }

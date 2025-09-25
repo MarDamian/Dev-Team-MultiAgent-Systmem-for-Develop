@@ -2,7 +2,11 @@ import os
 import json
 from src.model import analytical_llm
 from src.rag_retriever import retrieve_context
-from src.tools.code_reader import read_code_from_files 
+from src.tools.code_reader import (
+    list_code_files_in_directory, 
+    read_code_from_files, 
+    format_code_for_prompt
+)
 
 def quality_auditor_node(state: dict) -> dict:
     """
@@ -18,46 +22,31 @@ def quality_auditor_node(state: dict) -> dict:
     review_count = state.get("review_count", 0)
     
     # --- 2. Determinar qué archivos auditar ---
-    code_to_review = ""
-    tech_to_review = ""
-    files_to_read = []
+    output_dir = "outputs"
+    files_to_read = list_code_files_in_directory(output_dir)
 
-    last_generated = state.get("last_code_generated")
-    if last_generated == "frontend":
-        print("Auditoría de código Frontend detectada.")
-        files_to_read = ["outputs/index.html", "outputs/style.css", "outputs/script.js"]
-        tech_to_review = plan.get("frontend_tech", "HTML, CSS, JavaScript")
-    elif last_generated == "backend":
-        print("Auditoría de código Backend detectada.")
-        files_to_read = ["outputs/app.py"] # Asumiendo este nombre de archivo
-        tech_to_review = plan.get("backend_tech", "Python")
-
-    # --- 3. Leer el código usando la herramienta centralizada ---
     if not files_to_read:
-        print("Error: El auditor fue llamado pero no se especificó qué tipo de código revisar (frontend/backend).")
-        return {"review_feedback": "Error interno: No se pudo determinar qué código auditar."}
-        
+        print("Auditor: No se encontraron archivos para auditar.")
+        return {"review_feedback": "Error: No se encontró código en la carpeta de salida para auditar."}
+    
+    # --- 3. Leer el código usando la herramienta centralizada ---
+    
     code_files_content = read_code_from_files(files_to_read)
-    
-    # Formatear el código leído para incluirlo en el prompt
-    full_code_parts = []
-    for filename, content in code_files_content.items():
-        if content: # Solo añadir si el archivo tiene contenido
-            full_code_parts.append(f"--- CÓDIGO DEL ARCHIVO: {filename} ---\n{content}")
-    code_to_review = "\n\n".join(full_code_parts)
-    
-    # Salvaguarda: si después de leer, no hay código, romper el bucle con un error
-    if not code_to_review:
-        print("Advertencia: La herramienta de lectura no encontró código en los archivos para auditar.")
-        return {"review_feedback": "Error: No se encontró código en los archivos para auditar. Por favor, genera el código de nuevo."}
 
-    # --- 4. Enriquecer con RAG ---
-    task_description_for_rag = plan.get("frontend_task") or plan.get("backend_task") or user_input
+    # --- 4. Formatear el código para el prompt del LLM (¡NUEVA LÓGICA SIMPLIFICADA!) ---
+    code_to_review = format_code_for_prompt(code_files_content)
+    
+    if not code_to_review:
+        print("Advertencia: No se encontró contenido auditable en los archivos.")
+        return {"review_feedback": "Error: Los archivos encontrados estaban vacíos. Por favor, genera el código de nuevo."}
+    
+    # --- 5. Enriquecer con RAG ---
+    task_description_for_rag = plan.get("frontend_task") or plan.get("backend_task") or plan.get("db_task") or user_input
     print(f"Buscando principios de calidad relevantes para: '{task_description_for_rag[:80]}...'")
     quality_principles = retrieve_context(task_description_for_rag)
     print("Contexto de calidad recuperado.")
 
-    # --- 5. Construir el Prompt para el LLM ---
+    # --- 6. Construir el Prompt para el LLM ---
     prompt_text = f"""
     Eres un auditor de calidad de software meticuloso y experto. Tu misión es evaluar si el código generado cumple no solo con la solicitud del usuario, sino también con los principios de alta calidad definidos en nuestra base de conocimientos.
 

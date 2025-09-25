@@ -44,12 +44,14 @@ def planner_node(state: dict) -> dict:
             "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
             "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend, incluyendo justificación si aplica.",
             "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
-            "db_task:"(string | null) Descripción clara de la tarea para el arquitecto de base de datos, incluyendo justificación si aplica.(no des detalles muy especificos sobre la base de datos)",
+            "db_task:"(string | null) Descripción clara de la tarea para el arquitecto de base de datos, 
+                incluyendo justificación si aplica.(no des detalles  sobre la base de datos ya hay un agente especializado en su creacion)",
             "db_tech": "(string | null) Tecnología específica para de base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j').",
         }}
 
         **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. 
         Si el usuario pide "HTML, CSS y JS", el campo `frontend_tech` debe ser exactamente ese. 
+        Si el usuario te pide unicamente bases de datos, solo osupas `db_task` y `db_tech`.
         No sugieras frameworks, librerías o herramientas de construcción a menos que se pidan explícitamente.  
     """
     
