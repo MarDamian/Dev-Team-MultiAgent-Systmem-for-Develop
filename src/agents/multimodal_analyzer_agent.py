@@ -11,10 +11,12 @@ def multimodal_analyzer_node(state: dict) -> dict:
     user_input = state["user_input"]
     file_paths = state.get("file_paths", [])
     
+    if not file_paths:
+        return {"analysis_result": "No se proporcionaron archivos para analizar."}
     # El prompt puede permanecer igual, es muy bueno.
     prompt_text = f"""
     Eres un experto analista. La petición del usuario es: "{user_input}".
-    Tu única tarea es analizar los archivos adjuntos y proporcionar una descripción detallada y útil en respuesta a la petición del usuario.
+    Tu única tarea es analizar los archivos adjuntos y proporcionar una descripción detallada y útil del contenido.
     """
     
     multimodal_content = prepare_multimodal_input(prompt_text, file_paths)
@@ -23,7 +25,7 @@ def multimodal_analyzer_node(state: dict) -> dict:
     
     analysis_result = response.content.strip()
 
-    print(f"--- SALIDA DEL ANALISTA MULTIMODAL: {analysis_result[:80]}... ---")
+    print(f"--- SALIDA DEL ANALISTA MULTIMODAL: {analysis_result[:100]}... ---")
 
 
-    return {"final_response": analysis_result}
+    return {"analysis_result": analysis_result} 

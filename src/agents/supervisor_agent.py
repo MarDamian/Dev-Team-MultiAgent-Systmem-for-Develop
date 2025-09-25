@@ -8,7 +8,7 @@ import re
 
 AVAILABLE_NODES = [
     "conversational_agent", "multimodal_analyzer", "ui_ux_designer", "planner",
-    "develop_backend", "develop_frontend", "quality_auditor", "__end__"
+    "develop_backend", "develop_frontend", "quality_auditor", "database_architech","__end__"
 ]
 
 def supervisor_node(state: dict) -> dict:
@@ -35,13 +35,17 @@ def supervisor_node(state: dict) -> dict:
     plan = state.get("dev_plan", {})
     has_plan = bool(plan)
     has_files = bool(state.get("file_paths"))
+    has_analysis_result = bool(state.get("analysis_result")) 
     has_spec = bool(state.get("ui_ux_spec"))
+    has_db_schema = bool(state.get("db_schema"))
     has_code = bool(state.get("frontend_code") or state.get("backend_code"))
     has_feedback = bool(state.get("review_feedback"))
     rag_status = state.get("rag_status")
     decision_route = ""
 
     # --- 3. ENRUTAMIENTO BASADO EN ESTADO (TAREAS EN CURSO) ---
+    if has_analysis_result and not has_plan:
+        decision_route = "planner"
     if rag_status == "continue":
         decision_route = "planner"
     elif has_feedback:
@@ -51,63 +55,63 @@ def supervisor_node(state: dict) -> dict:
         decision_route = "quality_auditor"
     elif has_plan:
         plan_type = plan.get("plan_type")
-        if plan_type in ["frontend", "both"]: decision_route = "develop_frontend"
-        elif plan_type == "backend": decision_route = "develop_backend"
-        else: decision_route = "conversational_agent"
+        # --- NUEVA LÓGICA DE ENRUTAMIENTO ---
+        if plan_type in ["database", "both"] and not has_db_schema:
+            # Si el plan es de backend y AÚN NO tenemos un esquema de BD, vamos al arquitecto.
+            decision_route = "database_architech"
+        elif plan_type in ["frontend", "both"]:
+            # Si es frontend (o backend con esquema ya listo), vamos al desarrollador.
+            decision_route = "develop_frontend"
+        elif plan_type == "backend":
+            # Si es solo backend y ya tenemos el esquema, vamos al desarrollador.
+            decision_route = "develop_backend"
+        else:
+            decision_route = "conversational_agent"
     elif has_spec:
         decision_route = "planner"
 
     # --- 4. ENRUTAMIENTO INICIAL BASADO EN INTENCIÓN (NUEVAS TAREAS) ---
     if not decision_route:
-        print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
+        #print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
         user_input = state.get("user_input", "")
         chat_history = state.get("chat_history", [])
         
-        # <<< --- INICIO DE LA MODIFICACIÓN --- >>>
+        
         prompt_route = f"""
-        Eres un enrutador de tareas experto. Clasifica la intención del usuario y elige el siguiente nodo correcto en el flujo de trabajo.
+        Eres un enrutador de tareas experto. Tu objetivo es analizar la petición del usuario y decidir el PRIMER paso correcto en un flujo de trabajo.
         Responde ÚNICAMENTE con el nombre de uno de estos nodos: {AVAILABLE_NODES}.
 
-        Historial de la Conversación Reciente:
-        {chat_history[-4:]} 
+        **Contexto:**
+        - Petición del Usuario: "{user_input}"
+        - ¿Hay archivos adjuntos?: {has_files}
 
-        Petición Actual del Usuario: "{user_input}"
-        Archivos adjuntos: {has_files}
+        **Proceso de Decisión Lógico (Paso a Paso):**
+        1.  **Requisito de Análisis:** 
+            - ¿Pide crear una interfaz/sitio web o diesño web a partir de un diseño visual (imagen/boceto/video)? -> `ui_ux_designer`
+             ¿La petición del usuario es para una base de datos, una API , o tares del backend ? -> `multimodal_analyzer`            
+        2.  **Si no se requiere análisis previo**, evalúa la intención principal de desarrollo:
+            - ¿Pide explícitamente y SOLO un esquema de BD o código SQL? -> `database_architech`
+            - ¿Pide una aplicación completa, API, backend, o una tarea de desarrollo compleja? -> `planner`
+            - ¿Pide crear una interfaz a partir de un diseño visual (imagen/boceto)? -> `ui_ux_designer`
+        3.  **Otros Casos:**
+            - ¿Pide solo saber qué hay en un archivo (análisis puro, sin construcción)? -> `multimodal_analyzer`
+            - ¿Es una conversación normal (saludo, pregunta)? -> `conversational_agent`
 
-        **Reglas de Intención y Enrutamiento:**
-
-        1. **Intención de Desarrollo / Creación:** Si el usuario quiere crear, construir, implementar o desarrollar una aplicación, web, API, base de datos, etc.
-           - Si la petición se enfoca explícitamente en lógica de backend, bases de datos, APIs, manejo de datos, servidor** (ej: "crea una base de datos para esto", "desarrolla una API con estos requisitos", "necesito el backend para esta imagen"), la tarea debe ser planificada.
-             -> `planner`
-           - Si el foco principal es el diseño visual o la interfaz de usuario a partir de un archivo de imagen/video/boceto adjunto (ej: "convierte este diseño en una web", "créame el HTML y CSS para esta maqueta").
-             -> `ui_ux_designer`
-           - Si es una petición de desarrollo general, abstracta o mixta (frontend + backend)** sin un archivo visual como punto de partida claro (ej: "créame una app de tareas", "hazme un juego de snake").
-             -> `planner`
-
-        2. **Intención de Análisis Puro:** Si el usuario solo quiere saber qué contiene un archivo (ej: "¿qué dice este audio?", "¿describe esta imagen?") SIN una solicitud explícita de construir o desarrollar algo con ello.
-           - -> `multimodal_analyzer`
-
-        3. **Intención Conversacional:** Si es un saludo, despedida, una pregunta de conocimiento general o una conversación que no encaja en las anteriores.
-           - -> `conversational_agent`
-
-           
-           
+        Basado en este proceso, ¿cuál es el único nodo correcto para la petición actual?
         Nodo de destino:
         """
-        # <<< --- FIN DE LA MODIFICACIÓN --- >>>
 
         message = HumanMessage(content=prompt_route)
         response = analytical_llm.invoke([message])
         llm_response_content = response.content.strip()
         print(f"Respuesta del LLM para enrutamiento: '{llm_response_content}'")
-
-        node_pattern = re.compile(r'\b(' + '|'.join(re.escape(node) for node in AVAILABLE_NODES) + r')\b')
-        match = node_pattern.search(llm_response_content)
-        if match:
-            decision_route = match.group(1)
-        else:
-            print("ADVERTENCIA: Fallback a 'conversational_agent'.")
-            decision_route = "conversational_agent"
+        
+        # Lógica de parseo robusta para evitar errores
+        decision_route = "conversational_agent" # Fallback de seguridad
+        for node in AVAILABLE_NODES:
+            if node in llm_response_content:
+                decision_route = node
+                break
 
     # --- 5. VALIDACIÓN FINAL ---
     if decision_route not in AVAILABLE_NODES:
@@ -117,3 +121,4 @@ def supervisor_node(state: dict) -> dict:
     print(f"Decisión del Supervisor: Enviar a '{decision_route}'")
     
     return {"routing_decision": decision_route}
+    

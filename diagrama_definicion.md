@@ -14,9 +14,11 @@ graph TD;
 	develop_backend(develop_backend)
 	develop_frontend(develop_frontend)
 	quality_auditor(quality_auditor)
+	database_architect(database_architect)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> supervisor;
 	conversational_agent --> supervisor;
+	database_architect --> supervisor;
 	develop_backend --> supervisor;
 	develop_frontend --> supervisor;
 	multimodal_analyzer --> supervisor;
@@ -24,6 +26,7 @@ graph TD;
 	quality_auditor --> supervisor;
 	supervisor -.-> __end__;
 	supervisor -.-> conversational_agent;
+	supervisor -.-> database_architect;
 	supervisor -.-> develop_backend;
 	supervisor -.-> develop_frontend;
 	supervisor -.-> multimodal_analyzer;

@@ -41,7 +41,7 @@ def frontend_developer_node(state: dict) -> dict:
 
     prompt = f"""
     Eres un desarrollador de software senior experto en {tech}.
-    Tu tarea es generar el código completo y funcional para la siguiente tarea, basándote en el plan y el feedback proporcionado.
+    Tu tarea es generar el código completo y funcional para la siguiente tarea {task}, basándote en el plan y el feedback proporcionado.
     Si se proporciona código existente y feedback, DEBES modificar el código existente para aplicar las correcciones.
 
     **Instrucciones CRÍTICAS:**
@@ -74,11 +74,10 @@ def frontend_developer_node(state: dict) -> dict:
     print("\n--- FIN DE LA SALIDA DE DEPURACIÓN ---\n")
 
     # Usar la nueva herramienta para extraer y guardar el código
-    output_code = extract_and_save_code(full_code)
-    extracted_code_dict = extract_and_save_code(full_code)
+    extracted_code_dict = extract_and_save_code(full_code, default_folder="frontend")
     # Devolvemos todos los bloques de código y limpiamos el feedback
     return {
         "frontend_code": extracted_code_dict,
         "last_code_generated": "frontend",
-        "review_feedback": None # ¡CLAVE! Limpiar el bucle.
+        "review_feedback": None 
     }

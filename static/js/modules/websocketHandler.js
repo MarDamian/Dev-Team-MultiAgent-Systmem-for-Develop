@@ -27,6 +27,7 @@ function handleAgentMessage(nodeName, nodeOutput) {
             (plan.plan_type ? `<li><strong>Tipo:</strong> ${plan.plan_type}</li>` : '') +
             (plan.frontend_task ? `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>` : '') +
             (plan.backend_task ? `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>` : '') + 
+            (plan.db_task ? `<li><strong>Tarea base de Datos:</strong> ${plan.db_task}</li>` : '') + 
             "</ul>";
 
         addMessage(planHtml, 'bot');

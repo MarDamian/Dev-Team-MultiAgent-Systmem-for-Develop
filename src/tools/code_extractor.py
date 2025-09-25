@@ -3,26 +3,28 @@
 import re
 from .save_code_to_file import save_code_to_file
 
-# --- Definición de los tipos de archivos ---
-# Esto nos ayudará a decidir en qué carpeta guardar cada archivo.
-FRONTEND_LANGS = {'html', 'css', 'javascript', 'js'}
-BACKEND_LANGS = {'python', 'sql', 'requirements.txt', 'dockerfile'} # Añadimos algunos extra para el futuro
+def extract_and_save_code(full_code_string: str, default_folder: str) -> dict:
+    """
+    Extrae múltiples bloques de código de una cadena y los guarda en una subcarpeta
+    especificada (ej. 'frontend' o 'backend'), usando nombres de archivo descriptivos
+    extraídos de los delimitadores.
 
-def extract_and_save_code(full_code_string: str) -> dict:
+    Args:
+        full_code_string: La cadena completa de texto generada por el LLM.
+        default_folder: La carpeta de destino ('frontend', 'backend', 'misc', etc.).
+
+    Returns:
+        Un diccionario con el código extraído, usando el nombre de archivo como clave.
     """
-    Extrae múltiples bloques de código de una cadena, los clasifica como frontend o backend,
-    y los guarda en subcarpetas ('outputs/frontend' o 'outputs/backend') usando save_code_to_file.
-    Devuelve un diccionario con el código extraído.
-    """
-    print("---HERRAMIENTA: EXTRACTOR Y ORGANIZADOR DE CÓDIGO---")
+    print(f"---HERRAMIENTA: EXTRACTOR Y ORGANIZADOR DE CÓDIGO (Guardando en: {default_folder})---")
     
-    # El mismo patrón universal que desarrollamos antes. Funciona para ambos casos.
+    # Patrón universal que soporta varios tipos de comentarios: --, //, /*, <!--
     pattern = re.compile(
-        r"(?:<!---|\/\* ---|\/\/ ---)\s*"
-        r"([\w\.]+)_CODE_START"
+        r"(?:<!---|\/\* ---|\/\/ ---|-- ---)\s*"
+        r"([\w\.-]+)_CODE_START"  # Permite '.' y '-' en el nombre del archivo
         r"\s*(?:--- \*/|--->|---)"
         r"([\s\S]*?)"
-        r"(?:<!---|\/\* ---|\/\/ ---)\s*"
+        r"(?:<!---|\/\* ---|\/\/ ---|-- ---)\s*"
         r"\1_CODE_END"
         r"\s*(?:--- \*/|--->|---)",
         re.IGNORECASE
@@ -32,47 +34,22 @@ def extract_and_save_code(full_code_string: str) -> dict:
     
     extracted_code = {}
     for match in matches:
-        lang_or_filename = match.group(1).lower()
+        filename_key = match.group(1).lower()
         code = match.group(2).strip()
-        
-        # Guardar en el diccionario de resultados.
-        key = 'javascript' if lang_or_filename == 'js' else lang_or_filename
-        extracted_code[key] = code
+        extracted_code[filename_key] = code
 
     if not extracted_code:
         print("ADVERTENCIA: No se encontraron bloques de código con los delimitadores esperados.")
         return {}
 
     # --- Lógica de guardado y organización ---
-    for key, code in extracted_code.items():
-        # 1. Determinar la subcarpeta de destino
-        if key in FRONTEND_LANGS:
-            subdirectory = "frontend"
-        elif key in BACKEND_LANGS:
-            subdirectory = "backend"
-        else:
-            subdirectory = "misc" # Carpeta para tipos no reconocidos
-
-        # 2. Determinar el nombre del archivo
-        if key == 'html':
-            filename = "index.html"
-        elif key == 'css':
-            filename = "style.css"
-        elif key == 'javascript':
-            filename = "script.js"
-        elif key == 'python':
-            filename = "app.py"
-        elif key == 'requirements.txt':
-            filename = "requirements.txt"
-        else:
-            # Fallback para sql, dockerfile, etc.
-            ext = key.split('.')[-1] if '.' in key else key
-            filename = f"{key}.{ext}"
-
-        # 3. Construir la ruta final y guardar usando la herramienta
-        # La herramienta save_code_to_file necesita una ruta relativa a 'outputs', 
-        # así que le pasamos 'frontend/index.html', por ejemplo.
-        final_filename = f"{subdirectory}/{filename}"
-        save_code_to_file(final_filename, code)
+    for filename, code in extracted_code.items():
+        # La carpeta de destino es determinada por el agente que llama a la función.
+        subdirectory = default_folder
+        
+        # El nombre del archivo se toma directamente de la clave extraída del delimitador.
+        # No es necesario inferir la extensión.
+        final_path = f"{subdirectory}/{filename}"
+        save_code_to_file(final_path, code)
             
     return extracted_code

@@ -1,0 +1,47 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger Menu Functionality
+    const hamburgerMenu = document.querySelector('.hamburger-menu');
+    const mainNav = document.querySelector('.main-nav');
+
+    if (hamburgerMenu && mainNav) {
+        hamburgerMenu.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+            // Optional: Change hamburger icon to close icon
+            // hamburgerMenu.innerHTML = mainNav.classList.contains('active') ? '✕' : '☰';
+        });
+
+        // Close menu when a navigation link is clicked (for single-page navigation)
+        mainNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mainNav.classList.remove('active');
+                // hamburgerMenu.innerHTML = '☰';
+            });
+        });
+    }
+
+    // Tab Navigation Functionality for "First Impressions" section
+    const tabButtons = document.querySelectorAll('.tabs-navigation .tab-item');
+    const tabContents = document.querySelectorAll('.tab-content-block');
+
+    if (tabButtons.length > 0 && tabContents.length > 0) {
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove 'active' class from all buttons and content blocks
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add 'active' class to the clicked button
+                button.classList.add('active');
+
+                // Get the data-tab attribute to find the corresponding content
+                const targetTabId = button.dataset.tab;
+                const targetContent = document.getElementById(targetTabId);
+
+                // Add 'active' class to the corresponding content block
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+});

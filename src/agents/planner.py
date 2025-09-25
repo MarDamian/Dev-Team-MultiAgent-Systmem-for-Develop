@@ -5,16 +5,14 @@ from src.rag_retriever import retrieve_context
 def planner_node(state: dict) -> dict:
     print("---AGENTE: PLANIFICADOR DE PROYECTO---")
 
-    if state.get("ui_ux_spec"):
-        context_source = "Especificación Técnica de UI/UX"
-        context_content = state["ui_ux_spec"]
-    else:
-        context_source = "Solicitud Original del Usuario"
-        context_content = state["user_input"]
+
+    context_ui_ux = state.get("ui_ux_spec")
+    context_user = state.get("user_input")
+    context_media= state.get("analysis_result")
 
     # --- Recuperación de Contexto con RAG ---
-    # Llama a la función del otro archivo. No sabe ni le importa cómo funciona por dentro.
-    retrieved_info = retrieve_context(context_content)
+ 
+    retrieved_info = retrieve_context(context_user)
 
     prompt = f"""
         Eres un jefe de proyecto técnico. Tu tarea es analizar la siguiente información y generar un plan de desarrollo en formato JSON.
@@ -24,11 +22,13 @@ def planner_node(state: dict) -> dict:
         {retrieved_info}
         ---
 
-        **Solicitud del Usuario ({context_source}):**
+        **Solicitud del Usuario ({context_user}):**
         ---
-        {context_content}
+        **Contexto de Interfaz(Opcional) ({context_ui_ux}):**
         ---
+        **Contexto Multimedia (Opcional) ( {context_media}):**
 
+        
         **INSTRUCCIONES:**
         1.  **Analiza** la solicitud del usuario y la base de conocimientos.
         2.  **Formula un plan** para los desarrolladores frontend y/o backend.
@@ -39,11 +39,13 @@ def planner_node(state: dict) -> dict:
 
         **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
         {{
-            "plan_type": "frontend", "backend", "both" o "none",
+            "plan_type": "frontend", "backend","database", "both" o "none",
             "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend, incluyendo justificación si aplica.",
             "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
             "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend, incluyendo justificación si aplica.",
-            "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask')."
+            "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
+            "db_task:"(string | null) Descripción clara de la tarea para el arquitecto de base de datos, incluyendo justificación si aplica.(no des detalles muy especificos sobre la base de datos)",
+            "db_tech": "(string | null) Tecnología específica para de base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j').",
         }}
 
         **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. 

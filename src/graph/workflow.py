@@ -10,6 +10,7 @@ from src.agents.planner import planner_node
 from src.agents.backend_developer import backend_developer_node
 from src.agents.frontend_developer import frontend_developer_node
 from src.agents.quality_auditor import quality_auditor_node 
+from src.agents.database_architech_agent import database_architech_node
 
 
 def route_to_specialist(state: dict) -> str:
@@ -31,6 +32,7 @@ def build_graph(checkpointer):
     workflow.add_node("develop_backend", backend_developer_node)
     workflow.add_node("develop_frontend", frontend_developer_node)
     workflow.add_node("quality_auditor", quality_auditor_node)
+    workflow.add_node("database_architech",database_architech_node)
     workflow.set_entry_point("supervisor")
 
     workflow.add_conditional_edges(
@@ -44,6 +46,7 @@ def build_graph(checkpointer):
             "develop_backend": "develop_backend",
             "develop_frontend": "develop_frontend",
             "quality_auditor": "quality_auditor",
+            "database_architech":"database_architech",
             "__end__": "__end__"
         }
     )
@@ -56,6 +59,7 @@ def build_graph(checkpointer):
     workflow.add_edge("develop_backend", "supervisor")
     workflow.add_edge("develop_frontend", "supervisor")
     workflow.add_edge("quality_auditor", "supervisor")
+    workflow.add_edge("database_architech","supervisor")
 
     app = workflow.compile(
         checkpointer=checkpointer

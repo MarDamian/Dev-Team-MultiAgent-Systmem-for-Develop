@@ -73,6 +73,7 @@ def quality_auditor_node(state: dict) -> dict:
 
     **CÓDIGO GENERADO A AUDITAR (leído de los archivos):**
     {code_to_review}
+    
 
     **Tus Criterios de Auditoría:**
     1.  **Corrección Funcional/Visual:** ¿El código parece implementar lo solicitado por el usuario y el plan?
