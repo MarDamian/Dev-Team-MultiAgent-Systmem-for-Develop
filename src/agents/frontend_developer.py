@@ -45,13 +45,17 @@ def frontend_developer_node(state: dict) -> dict:
     Si se proporciona código existente y feedback, DEBES modificar el código existente para aplicar las correcciones.
 
     **Instrucciones CRÍTICAS:**
-    1.  Genera el código en tres bloques separados y claramente delimitados: uno para HTML, uno para CSS y uno para JavaScript.
-    2.  Usa los siguientes delimitadores EXACTOS para cada bloque:
-        - Para HTML: `<!--- HTML_CODE_START --->` y `<!--- HTML_CODE_END --->`
-        - Para CSS: `/* --- CSS_CODE_START --- */` y `/* --- CSS_CODE_END --- */`
-        - Para JavaScript: `// --- JS_CODE_START ---` y `// --- JS_CODE_END ---`
-    3.  Asegúrate de que el archivo HTML enlace correctamente a `style.css` y `script.js` .
-    4.  No añadas explicaciones fuera de los bloques de código.
+1.  Genera el código en tres bloques separados y claramente delimitados: uno para HTML, uno para CSS y uno para JavaScript.
+    2.  **Usa los nombres de archivo estándar y completos (incluyendo extensión) DENTRO de los delimitadores.**
+        - Para HTML, usa el nombre de archivo `index.html`.
+        - Para CSS, usa el nombre de archivo `style.css`.
+        - Para JavaScript, usa el nombre de archivo `script.js`.
+    3.  Usa el estilo de comentario apropiado para cada delimitador. Por ejemplo:
+        - Para HTML: `<!--- index.html_CODE_START --->` y `<!--- index.html_CODE_END --->`
+        - Para CSS: `/* --- style.css_CODE_START --- */` y `/* --- style.css_CODE_END --- */`
+        - Para JavaScript: `// --- script.js_CODE_START ---` y `// --- script.js_CODE_END ---`
+    4.  Asegúrate de que el archivo HTML (`index.html`) enlace correctamente a `./style.css` y `./script.js`.
+    5.  No añadas explicaciones fuera de los bloques de código.
 
     **Plan de Desarrollo y Tarea Asignada:**
     ---

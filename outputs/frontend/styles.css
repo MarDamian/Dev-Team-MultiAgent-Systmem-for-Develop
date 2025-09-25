@@ -1,0 +1,782 @@
+/* Variables de Color y Tipografía */
+:root {
+    /* Colores */
+    --color-background: #121212;
+    --color-surface: #1E1E1E;
+    --color-text-primary: #E0E0E0;
+    --color-text-secondary: #A0A0A0;
+    --color-accent: #4285F4;
+    --color-highlight-hover: #5B9CFF;
+    --color-border-separator: #333333;
+    --color-sidebar-active-bg: #2A3B5C;
+    --color-new-button-text: #FFFFFF;
+
+    /* Tipografía */
+    --font-family-roboto: 'Roboto', sans-serif;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700; /* Not explicitly used but good to have */
+
+    /* Tamaños de fuente */
+    --font-size-title: 24px;
+    --font-size-subtitle: 16px;
+    --font-size-nav: 14px;
+    --font-size-button: 14px;
+    --font-size-content: 13px; /* For file/folder names, metadata */
+    --font-size-storage: 12px;
+}
+
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-roboto);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    overflow-y: hidden; /* Prevent body scroll, app-container handles it */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-family: var(--font-family-roboto);
+}
+
+/* Estructura General y Layout */
+.app-container {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Sidebar width, Main content */
+    grid-template-rows: 64px 1fr; /* Header height */
+    height: 100vh;
+    overflow: hidden; /* Ensure content doesn't overflow grid areas */
+}
+
+.app-header {
+    grid-column: 1 / -1; /* Spans across all columns */
+    grid-row: 1;
+    background-color: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--color-border-separator);
+    z-index: 100;
+}
+
+.app-sidebar {
+    grid-column: 1;
+    grid-row: 2;
+    background-color: var(--color-surface);
+    padding: 20px 0;
+    border-right: 1px solid var(--color-border-separator);
+    overflow-y: auto; /* Allow sidebar content to scroll */
+}
+
+.app-content {
+    grid-column: 2;
+    grid-row: 2;
+    background-color: var(--color-background);
+    padding: 30px;
+    overflow-y: auto; /* Allow main content to scroll */
+}
+
+/* Header */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Placeholder for a circular logo */
+    object-fit: cover;
+}
+
+.app-title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.header-center {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-border-separator); /* Darker than surface */
+    border-radius: 8px;
+    padding: 8px 15px;
+    width: 100%;
+    max-width: 600px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-nav);
+    outline: none;
+    padding: 0 10px;
+}
+
+.search-bar input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+.search-bar:focus-within {
+    background-color: #444444; /* Slightly lighter on focus */
+    box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.search-icon, .filter-icon {
+    color: var(--color-text-secondary);
+    font-size: 20px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+    background-color: var(--color-border-separator); /* Subtle circular background */
+}
+
+.icon-button .material-icons {
+    color: var(--color-text-primary);
+    font-size: 24px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-separator);
+    object-fit: cover;
+}
+
+/* Sidebar */
+.new-button-container {
+    padding: 0 15px 20px 15px;
+    position: relative; /* For dropdown positioning */
+}
+
+.new-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--color-accent);
+    color: var(--color-new-button-text);
+    padding: 12px 20px;
+    border-radius: 16px;
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-medium);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.new-button .material-icons {
+    color: var(--color-new-button-text);
+    font-size: 20px;
+}
+
+.new-button:hover {
+    background-color: var(--color-highlight-hover);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.new-dropdown {
+    position: absolute;
+    top: calc(100% + 10px); /* Position below the button */
+    left: 15px;
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    min-width: 250px;
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+
+.new-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-nav);
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item .material-icons {
+    font-size: 20px;
+    color: var(--color-text-primary);
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-border-separator);
+}
+
+.new-dropdown hr {
+    border: none;
+    border-top: 1px solid var(--color-border-separator);
+    margin: 5px 0;
+}
+
+.sidebar-nav {
+    margin-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border-separator);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-nav);
+    font-weight: var(--font-weight-regular);
+    border-left: 4px solid transparent;
+    transition: background-color 0.2s ease, border-left-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-item .material-icons {
+    font-size: 20px;
+    color: var(--color-text-primary);
+}
+
+.nav-item:hover {
+    background-color: var(--color-border-separator);
+}
+
+.nav-item.active {
+    background-color: var(--color-sidebar-active-bg);
+    border-left-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.nav-item.active .material-icons {
+    color: var(--color-accent);
+}
+
+.storage-section {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.storage-section .material-icons {
+    color: var(--color-text-secondary);
+    font-size: 20px;
+}
+
+.storage-text {
+    font-size: var(--font-size-nav);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--color-border-separator);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--color-accent);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.storage-usage {
+    font-size: var(--font-size-storage);
+    color: var(--color-text-secondary);
+}
+
+.get-more-storage-button {
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-medium);
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.get-more-storage-button:hover {
+    background-color: var(--color-sidebar-active-bg);
+}
+
+/* Main Content Area */
+.welcome-title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-subtitle {
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+}
+
+.folders-grid {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px; /* Space for scrollbar */
+    overflow-x: auto; /* Horizontal scroll */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    margin-bottom: 30px;
+}
+
+/* Hide scrollbar for aesthetic, but keep functionality */
+.folders-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.folders-grid::-webkit-scrollbar-track {
+    background: var(--color-border-separator);
+    border-radius: 4px;
+}
+
+.folders-grid::-webkit-scrollbar-thumb {
+    background: var(--color-text-secondary);
+    border-radius: 4px;
+}
+
+.folders-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
+
+.folder-card {
+    flex-shrink: 0; /* Prevent cards from shrinking */
+    width: 220px; /* Fixed width for folder cards */
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.folder-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #2A2A2A; /* Slightly lighter */
+}
+
+.folder-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.folder-icon {
+    color: var(--color-accent);
+    font-size: 28px;
+}
+
+.kebab-menu {
+    color: var(--color-text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px; /* Increase clickable area */
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.kebab-menu:hover {
+    background-color: var(--color-border-separator);
+}
+
+.folder-name {
+    font-size: var(--font-size-content);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-metadata {
+    font-size: var(--font-size-content);
+    color: var(--color-text-secondary);
+}
+
+/* View Controls */
+.view-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.view-toggle-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.view-toggle-button .material-icons {
+    color: var(--color-text-secondary);
+    font-size: 22px;
+}
+
+.view-toggle-button:hover {
+    background-color: var(--color-border-separator);
+}
+
+.view-toggle-button.active {
+    background-color: var(--color-sidebar-active-bg);
+}
+
+.view-toggle-button.active .material-icons {
+    color: var(--color-accent);
+}
+
+/* Files Container */
+.files-container {
+    display: grid;
+    gap: 20px;
+}
+
+.files-container.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Responsive grid */
+}
+
+.files-container.list-view {
+    grid-template-columns: 1fr; /* Single column for list view */
+}
+
+.file-card {
+    background-color: var(--color-surface);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.file-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #2A2A2A; /* Slightly lighter */
+}
+
+.files-container.grid-view .file-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    height: 200px; /* Fixed height for grid cards */
+}
+
+.files-container.list-view .file-card {
+    flex-direction: row;
+    padding: 10px 15px;
+    gap: 15px;
+    align-items: center;
+}
+
+.file-preview {
+    width: 100%;
+    height: 100px; /* Fixed height for grid preview */
+    background-color: var(--color-border-separator);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.files-container.list-view .file-preview {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+}
+
+.file-thumbnail {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.file-icon {
+    font-size: 48px; /* Larger for grid view */
+    color: var(--color-accent);
+}
+
+.files-container.list-view .file-icon {
+    font-size: 24px; /* Smaller for list view */
+}
+
+.file-info {
+    flex-grow: 1;
+    overflow: hidden; /* For ellipsis */
+}
+
+.file-name {
+    font-size: var(--font-size-content);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+}
+
+.files-container.list-view .file-name {
+    margin-bottom: 0;
+}
+
+.file-metadata {
+    font-size: var(--font-size-content);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.files-container.grid-view .file-card .kebab-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(30, 30, 30, 0.7); /* Semi-transparent background for visibility */
+    border-radius: 50%;
+}
+
+.files-container.list-view .file-card .kebab-menu {
+    position: static; /* Reset position for list view */
+    margin-left: auto; /* Push to the right */
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 64px auto 1fr; /* Header, then sidebar, then content */
+    }
+
+    .app-sidebar {
+        grid-column: 1;
+        grid-row: 2; /* Move sidebar below header */
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border-separator);
+        padding: 10px 0;
+        overflow-x: auto; /* Allow horizontal scroll for nav items */
+        white-space: nowrap; /* Prevent nav items from wrapping */
+    }
+
+    .sidebar-nav {
+        display: flex;
+        margin-top: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .nav-item {
+        flex-shrink: 0; /* Prevent shrinking */
+        border-left: none; /* Remove left border for horizontal nav */
+        border-bottom: 4px solid transparent; /* Use bottom border for active state */
+        padding: 10px 15px;
+    }
+
+    .nav-item.active {
+        border-bottom-color: var(--color-accent);
+        background-color: transparent; /* Active background only for desktop */
+    }
+
+    .nav-item:hover {
+        background-color: var(--color-border-separator);
+    }
+
+    .new-button-container, .storage-section {
+        display: none; /* Hide these sections on small screens for simplicity */
+    }
+
+    .app-content {
+        grid-column: 1;
+        grid-row: 3; /* Move content below sidebar */
+        padding: 20px;
+    }
+
+    .header-left .app-title {
+        display: none; /* Hide app title on small screens */
+    }
+
+    .header-center {
+        order: 3; /* Move search bar to the right on small screens */
+        flex-grow: 0;
+        width: auto;
+    }
+
+    .search-bar {
+        max-width: 250px;
+        padding: 6px 10px;
+    }
+
+    .header-right {
+        order: 2; /* Keep icons on the right */
+    }
+
+    .folders-grid {
+        flex-wrap: wrap; /* Allow folders to wrap */
+        justify-content: center;
+        overflow-x: visible; /* No horizontal scroll */
+    }
+
+    .folder-card {
+        width: 180px; /* Smaller width for folder cards */
+    }
+
+    .files-container.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .files-container.grid-view .file-card {
+        height: 180px;
+    }
+
+    .file-preview {
+        height: 80px;
+    }
+
+    .file-icon {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header {
+        padding: 0 10px;
+    }
+
+    .header-left {
+        gap: 5px;
+    }
+
+    .app-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .search-bar {
+        max-width: 180px;
+    }
+
+    .icon-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .welcome-title {
+        font-size: 20px;
+    }
+
+    .section-subtitle {
+        font-size: 14px;
+    }
+
+    .folders-grid {
+        gap: 10px;
+    }
+
+    .folder-card {
+        width: 150px;
+        padding: 10px;
+    }
+
+    .folder-icon {
+        font-size: 24px;
+    }
+
+    .kebab-menu {
+        font-size: 18px;
+    }
+
+    .files-container.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .files-container.grid-view .file-card {
+        height: 160px;
+        padding: 10px;
+    }
+
+    .file-preview {
+        height: 70px;
+    }
+
+    .file-icon {
+        font-size: 36px;
+    }
+
+    .file-name, .file-metadata {
+        font-size: 12px;
+    }
+}
