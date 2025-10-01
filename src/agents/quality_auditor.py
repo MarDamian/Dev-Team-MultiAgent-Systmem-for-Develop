@@ -10,9 +10,19 @@ from src.tools.code_reader import (
 
 def quality_auditor_node(state: dict) -> dict:
     """
-    Nodo del grafo que audita la calidad del código generado.
-    Utiliza RAG para fundamentar sus decisiones y lee el código directamente
-    desde los archivos generados usando la herramienta 'code_reader'.
+    Agente Auditor de Calidad que impulsa el ciclo de RAG Iterativo.
+
+    Este nodo actúa como el "evaluador" en un bucle de mejora continua. Su función es:
+    1. Leer el código generado por otro agente directamente desde los archivos.
+    2. Utilizar RAG para recuperar los principios de calidad y buenas prácticas relevantes
+       de una base de conocimientos.
+    3. Evaluar el código en función de la solicitud original, el plan de desarrollo y
+       dichos principios de calidad.
+    4. Generar un "feedback" constructivo si el código no cumple los estándares.
+
+    Este feedback es la pieza clave del RAG Iterativo, ya que se utiliza para instruir
+    al agente generador de código en la siguiente iteración, permitiendo refinar y
+    mejorar el resultado hasta que se alcance la calidad deseada.
     """
     print("---AGENTE: AUDITOR DE CALIDAD (POTENCIADO CON RAG)---")
     
@@ -43,6 +53,7 @@ def quality_auditor_node(state: dict) -> dict:
     # --- 5. Enriquecer con RAG ---
     task_description_for_rag = plan.get("frontend_task") or plan.get("backend_task") or plan.get("db_task") or user_input
     print(f"Buscando principios de calidad relevantes para: '{task_description_for_rag[:80]}...'")
+    #Invocación al sistema de recuperación para obtener principios de calidad.
     quality_principles = retrieve_context(task_description_for_rag)
     print("Contexto de calidad recuperado.")
 
@@ -77,7 +88,7 @@ def quality_auditor_node(state: dict) -> dict:
     
     # --- 6. Invocar al LLM y Procesar la Respuesta ---
     response = analytical_llm.invoke(prompt_text)
-    review_count += 1
+    review_count += 1 # Incrementa el contador de revisiones (útil para limitar iteraciones)
     
     try:
         json_response = response.content.strip().replace("```json", "").replace("```", "").strip()
@@ -85,21 +96,19 @@ def quality_auditor_node(state: dict) -> dict:
         feedback = audit_result.get("feedback", "No se proporcionó feedback.")
         is_approved = audit_result.get("approved", False)
 
-        review_count += 1
+        review_count += 1 # este contador se incrementa dos veces, aquí y arriba.
 
         if is_approved:
             print(f"Auditoría de Calidad: APROBADO. Feedback: {feedback}")
-            # --- ¡ESTE ES EL BLOQUE QUE NECESITA CORRECCIÓN! ---
             # Debemos devolver el feedback Y la bandera de aprobación para que el frontend los vea.
             return {
-                "feedback": feedback,         # <-- CLAVE: Devolver el feedback de aprobación.
+                "feedback": feedback,         # Devolver el feedback de aprobación.
                 "review_feedback": None,      # Limpiar el feedback de rechazo.
                 "review_count": review_count,
                 "code_approved": True         # Señal para que el supervisor finalice.
             }
         else:
             print(f"Auditoría de Calidad: REQUIERE CAMBIOS. Feedback: {feedback}")
-            # Este bloque ya estaba bien, pero lo revisamos para consistencia.
             return {
                 "feedback": feedback,         # Devolver el feedback.
                 "review_feedback": feedback,  # Llenar el campo de feedback de rechazo.
