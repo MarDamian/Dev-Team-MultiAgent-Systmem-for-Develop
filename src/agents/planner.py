@@ -50,8 +50,11 @@ def planner_node(state: dict) -> dict:
         }}
 
         **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. 
-        Si el usuario pide "HTML, CSS y JS", el campo `frontend_tech` debe ser exactamente ese. 
-        Si el usuario te pide unicamente bases de datos, solo osupas `db_task` y `db_tech`.
+        Si el usuario pide "HTML, CSS y JS" o una implementacion de muckup o video:
+            Los campos `frontend_task`, `frontend_tech`   
+        Si el usuario te pide unicamente bases de datos,
+            entonces solo ocupas `db_task` y `db_tech`.
+
         No sugieras frameworks, librerías o herramientas de construcción a menos que se pidan explícitamente.  
     """
     
