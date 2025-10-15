@@ -86,7 +86,7 @@ def supervisor_node(state: dict) -> dict:
         **Proceso de Decisión Lógico (Paso a Paso):**
         1.  **Requisito de Análisis:** 
             - ¿Pide crear una interfaz/sitio web o diesño web a partir de un diseño visual (imagen/boceto/video)? -> `ui_ux_designer`
-             ¿La petición del usuario es para una base de datos, una API , o tares del backend ? -> `multimodal_analyzer`            
+            - ¿La petición del usuario es ajena a interzas o dieño web (ui/ux)? -> `multimodal_analyzer`            
         2.  **Si no se requiere análisis previo**, evalúa la intención principal de desarrollo:
             - ¿Pide explícitamente y SOLO un esquema de BD o código SQL? -> `database_architech`
             - ¿Pide una aplicación completa, API, backend, o una tarea de desarrollo compleja? -> `planner`

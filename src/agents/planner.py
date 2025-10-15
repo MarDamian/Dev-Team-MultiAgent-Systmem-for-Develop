@@ -39,7 +39,7 @@ def planner_node(state: dict) -> dict:
 
         **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
         {{
-            "plan_type": "frontend", "backend","database", "both" o "none",
+            "plan_type": "frontend", "backend","database".
             "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend, incluyendo justificación si aplica.",
             "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
             "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend, incluyendo justificación si aplica.",
@@ -50,8 +50,8 @@ def planner_node(state: dict) -> dict:
         }}
 
         **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las tecnologías solicitadas en la petición del usuario. 
-        Si el usuario pide "HTML, CSS y JS" o una implementacion de muckup o video:
-            Los campos `frontend_task`, `frontend_tech`   
+        Si el usuario pide "HTML, CSS y JS" o una implementacion de interfaz a partir de un muckup o video:
+            Los campos `frontend_task`, `frontend_tech` unicamente no añadas otros campos  
         Si el usuario te pide unicamente bases de datos,
             entonces solo ocupas `db_task` y `db_tech`.
 
@@ -67,5 +67,8 @@ def planner_node(state: dict) -> dict:
         return {"dev_plan": plan}
     except json.JSONDecodeError:
         print("Error: El planificador no devolvió un JSON válido.")
-        return {"dev_plan": {"plan_type": "none"}}
+        return {
+            "dev_plan": {"plan_type": "none"},
+            "supervisor_iterations": state.get("supervisor_iterations")+1
+            }
 

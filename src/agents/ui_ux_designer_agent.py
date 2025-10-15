@@ -21,6 +21,8 @@ def ui_ux_designer_node(state: dict) -> dict:
         y **NO OMITAS NINGUNA SECCIÓN**. Genera la especificación completa en formato Markdown,
         siguiendo estrictamente este orden y formato:
 
+        Adicionalmente presta atencion a si el usaurio pide algo narrado o escrito en el video y añadelo a la especificacion.
+
         ## 1. Estructura General y Layout
         - Describe la disposición principal de la interfaz, jerarquía visual y organización.
 
@@ -65,4 +67,7 @@ def ui_ux_designer_node(state: dict) -> dict:
     ui_ux_spec = response.content.strip()
 
     print(f"--- ESPECIFICACIÓN DE UI/UX GENERADA ---\n{ui_ux_spec[:500]}...\n---")
-    return {"ui_ux_spec": ui_ux_spec}
+    return {
+        "ui_ux_spec": ui_ux_spec,
+        "supervisor_iterations": state.get("supervisor_iterations")+1
+        }

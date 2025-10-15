@@ -32,4 +32,7 @@ def multimodal_analyzer_node(state: dict) -> dict:
     print(f"--- SALIDA DEL ANALISTA MULTIMODAL: {analysis_result[:100]}... ---")
 
 
-    return {"analysis_result": analysis_result} 
+    return {
+        "analysis_result": analysis_result,
+        "supervisor_iterations": state.get("supervisor_iterations")+1
+        } 

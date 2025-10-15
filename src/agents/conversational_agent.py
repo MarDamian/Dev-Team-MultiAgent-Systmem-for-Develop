@@ -1,7 +1,7 @@
 # Contenido para: src/agents/conversational_agent.py
 
 # Usaremos un único modelo para conversar y para decidir la lógica.
-from src.model import analytical_llm 
+from src.model import conversational_llm
 
 def conversational_node(state: dict) -> dict:
     """
@@ -61,7 +61,7 @@ def conversational_node(state: dict) -> dict:
     """
 
     # --- PASO ÚNICO: Invocar al LLM y analizar la respuesta estructurada ---
-    response = analytical_llm.invoke(prompt)
+    response = conversational_llm.invoke(prompt)
     raw_output = response.content.strip()
 
     print(f"--- Salida bruta del LLM: {raw_output[:100]}... ---")
@@ -97,5 +97,6 @@ def conversational_node(state: dict) -> dict:
     return {
         "final_response": final_bot_response,
         "task_complete": is_task_complete,
-        "chat_history": new_history
+        "chat_history": new_history,
+        "supervisor_iterations": state.get("supervisor_iterations")+1
     }

@@ -60,6 +60,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 # <-- CAMBIO CLAVE: Inyectamos el historial en el estado inicial de la nueva tarea
                 inputs = {
                     "user_input": user_input,
+                    "supervisor_iterations": 0,
                     "file_paths": file_paths,
                     "chat_history": chat_history 
                 }

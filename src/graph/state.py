@@ -7,6 +7,7 @@ class GraphState(TypedDict):
     final_response: Optional[str]
     task_complete: Optional[bool]
     routing_decision: str
+    supervisor_iterations: Optional[int] 
 
     # --- Campos de Desarrollo y Archivos ---
     file_paths: List[str]

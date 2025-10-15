@@ -124,5 +124,6 @@ def quality_auditor_node(state: dict) -> dict:
             "feedback": feedback_error,
             "review_feedback": feedback_error,
             "review_count": review_count,
-            "code_approved": False
+            "code_approved": False,
+            "supervisor_iterations": state.get("supervisor_iterations")+1
         }

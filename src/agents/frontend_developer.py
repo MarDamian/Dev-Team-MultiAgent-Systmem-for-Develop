@@ -83,5 +83,6 @@ def frontend_developer_node(state: dict) -> dict:
     return {
         "frontend_code": extracted_code_dict,
         "last_code_generated": "frontend",
-        "review_feedback": None 
+        "review_feedback": None,
+        "supervisor_iterations": state.get("supervisor_iterations")+1
     }

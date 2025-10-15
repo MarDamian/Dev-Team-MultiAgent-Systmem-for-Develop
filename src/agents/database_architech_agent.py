@@ -70,5 +70,6 @@ def database_architech_node(state: dict) -> dict:
     return {
         "db_schema": extracted_code_dict,
         "last_code_generated": "database",
-        "review_feedback": None 
+        "review_feedback": None ,
+        "supervisor_iterations": state.get("supervisor_iterations")+1
     }

@@ -1,0 +1,14 @@
+# Archivos de entorno
+.env
+*.env
+
+# Carpetas que no deben subirse
+outputs/
+uploads/
+
+# Archivos y carpetas de caché de Python
+__pycache__/
+# Entornos virtuales
+venv/
+.venv/
+
