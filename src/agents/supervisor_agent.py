@@ -1,122 +1,89 @@
-# Contenido para: src/agents/supervisor_agent.py
-
 from src.model import analytical_llm
-from src.tools.generate_hyperlink import generate_local_html_hyperlink, create_hyperlink_message
 from langchain_core.messages import HumanMessage
-import os
-import re
+import json
 
+# Lista de nodos disponibles para el enrutamiento.
 AVAILABLE_NODES = [
-    "conversational_agent", "multimodal_analyzer", "ui_ux_designer", "planner",
-    "develop_backend", "develop_frontend", "quality_auditor", "database_architech","__end__"
+    "planner",
+    "database_architech",
+    "develop_backend",
+    "develop_frontend",
+    "quality_auditor",
+    "ui_ux_designer",
+    "multimodal_analyzer",
+    "conversational_agent",
+    "__end__"
 ]
+
+# El nuevo prompt inteligente que centraliza toda la lógica de enrutamiento.
+SUPERVISOR_PROMPT = """
+Eres el supervisor experto de un equipo de agentes de IA para el desarrollo de software.
+Tu única función es analizar el estado completo de una tarea y decidir cuál es el siguiente agente que debe actuar.
+Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JSON. Ejemplo: {{"destination": "planner"}}
+
+**AGENTES DISPONIBLES (NODOS Y SU FUNCIÓN):**
+
+- `planner`: Descompone requisitos complejos en un plan de desarrollo paso a paso. **Es el punto de partida ideal para cualquier nueva solicitud de desarrollo.**
+- `database_architech`: Diseña y genera esquemas de bases de datos (código SQL) a partir de un plan.
+- `develop_backend`: Escribe el código del lado del servidor (APIs, lógica de negocio) a partir de un plan.
+- `develop_frontend`: Escribe el código del lado del cliente (HTML, CSS, JS) a partir de un plan o diseño.
+- `quality_auditor`: Revisa el código generado para corregir errores, aplicar feedback o verificar que cumple los requisitos. **Debe actuar siempre después de que se genere código o si hay feedback pendiente.**
+- `ui_ux_designer`: Analiza bocetos o imágenes de diseño para crear especificaciones de UI/UX. **Úsalo si la entrada es visual y el objetivo es crear una interfaz.**
+- `multimodal_analyzer`: Extrae información de archivos (PDF, TXT, etc.). Úsalo si el usuario pide analizar, resumir o entender un documento.
+- `conversational_agent`: Responde a preguntas generales, saludos o si la petición del usuario no está clara. Úsalo como último recurso.
+- `__end__`: Finaliza la tarea. Úsalo solo cuando el objetivo final se haya cumplido satisfactoriamente.
+
+**ESTADO ACTUAL DE LA TAREA (CONTEXTO):**
+{state_json}
+
+**INSTRUCCIÓN:**
+Basado en TODO el estado actual, analiza la situación y determina el siguiente paso lógico. ¿Qué agente debe actuar ahora?
+"""
 
 def supervisor_node(state: dict) -> dict:
     """
-    Supervisor orquestador puro. Enruta la tarea basándose en el estado actual de la sesión.
-    La gestión del estado entre tareas (incluido el historial) se maneja en main.py.
+    Supervisor inteligente que utiliza un LLM para enrutar tareas basándose en el estado completo.
     """
-    print("---AGENTE: SUPERVISOR ORQUESTADOR---")
+    print("---AGENTE: SUPERVISOR INTELIGENTE---")
 
-    # --- 1. LÓGICA DE FINALIZACIÓN (PRIORIDAD MÁXIMA) ---
-    if state.get("code_approved"):
-        print("Tarea finalizada (código aprobado).")
-        final_response_message = "Tarea completada."
-        return {"routing_decision": "__end__", "final_response": final_response_message}
-
+    # --- LÓGICA DE FINALIZACIÓN PRIORITARIA ---
+    # Si un agente especialista ha marcado la tarea como completa, forzamos el fin del flujo.
     if state.get("task_complete"):
-        print("Tarea de un solo paso completa. Finalizando flujo.")
+        print("Decisión del Supervisor: Tarea marcada como completa. Finalizando.")
         return {"routing_decision": "__end__"}
 
-    # --- 2. RECOPILACIÓN DE ESTADO Y ENRUTAMIENTO ---
-    plan = state.get("dev_plan", {})
-    has_plan = bool(plan)
-    has_files = bool(state.get("file_paths"))
-    has_analysis_result = bool(state.get("analysis_result")) 
-    has_spec = bool(state.get("ui_ux_spec"))
-    has_db_schema = bool(state.get("db_schema"))
-    has_code = bool(state.get("frontend_code") or state.get("backend_code"))
-    has_feedback = bool(state.get("review_feedback"))
-    rag_status = state.get("rag_status")
-    decision_route = ""
+    # Convertir el estado a una cadena JSON para una visualización clara en el prompt.
+    # Se excluyen claves que no son útiles para la decisión de enrutamiento.
+    excluded_keys = {"routing_decision", "final_response"}
+    state_for_prompt = {k: v for k, v in state.items() if k not in excluded_keys and v}
+    state_json = json.dumps(state_for_prompt, indent=2)
 
-    # --- 3. ENRUTAMIENTO BASADO EN ESTADO (TAREAS EN CURSO) ---
-    if has_analysis_result and not has_plan:
-        decision_route = "planner"
-    if rag_status == "continue":
-        decision_route = "planner"
-    elif has_feedback:
-        plan_type = plan.get("plan_type")
-        if plan_type in ["frontend", "both"]:
-            decision_route = "develop_frontend"
-        elif plan_type == "database":
-            decision_route = "database_architech"
-        else: 
-            decision_route = "develop_backend"   
-    elif has_code or has_db_schema:
-        decision_route = "quality_auditor"
-    elif has_plan:
-        plan_type = plan.get("plan_type")
-        if plan_type in ["database", "both"] and not has_db_schema:
-            decision_route = "database_architech"
-        elif plan_type in ["frontend", "both"]:
-            decision_route = "develop_frontend"
-        elif plan_type == "backend":
-            decision_route = "develop_backend"
-        else:
-            decision_route = "conversational_agent"
-    elif has_spec:
-        decision_route = "planner"
+    # Formatear el prompt con el estado actual.
+    prompt = SUPERVISOR_PROMPT.format(state_json=state_json)
+    
+    # Invocar al LLM para que tome la decisión.
+    message = HumanMessage(content=prompt)
+    response = analytical_llm.invoke([message])
+    
+    try:
+        # Parsear la respuesta JSON del LLM.
+        response_data = json.loads(response.content)
+        decision = response_data.get("destination", "conversational_agent")
+        print(f"Respuesta del LLM para enrutamiento: '{response.content}'")
 
-    # --- 4. ENRUTAMIENTO INICIAL BASADO EN INTENCIÓN (NUEVAS TAREAS) ---
-    if not decision_route:
-        #print("No se encontró una regla de enrutamiento explícita. Consultando al LLM.")
-        user_input = state.get("user_input", "")
-        chat_history = state.get("chat_history", [])
-        
-        
-        prompt_route = f"""
-        Eres un enrutador de tareas experto. Tu objetivo es analizar la petición del usuario y decidir el PRIMER paso correcto en un flujo de trabajo.
-        Responde ÚNICAMENTE con el nombre de uno de estos nodos: {AVAILABLE_NODES}.
+        # Validar que la decisión sea un nodo válido.
+        if decision not in AVAILABLE_NODES:
+            print(f"ADVERTENCIA: Decisión inválida ('{decision}'). Forzando a 'conversational_agent'.")
+            decision = "conversational_agent"
 
-        **Contexto:**
-        - Petición del Usuario: "{user_input}"
-        - ¿Hay archivos adjuntos?: {has_files}
-
-        **Proceso de Decisión Lógico (Paso a Paso):**
-        1.  **Requisito de Análisis:** 
-            - ¿Pide crear una interfaz/sitio web o diesño web a partir de un diseño visual (imagen/boceto/video)? -> `ui_ux_designer`
-            - ¿La petición del usuario es ajena a interzas o dieño web (ui/ux)? -> `multimodal_analyzer`            
-        2.  **Si no se requiere análisis previo**, evalúa la intención principal de desarrollo:
-            - ¿Pide explícitamente y SOLO un esquema de BD o código SQL? -> `database_architech`
-            - ¿Pide una aplicación completa, API, backend, o una tarea de desarrollo compleja? -> `planner`
-            - ¿Pide crear una interfaz a partir de un diseño visual (imagen/boceto)? -> `ui_ux_designer`
-        3.  **Otros Casos:**
-            - ¿Pide solo saber qué hay en un archivo (análisis puro, sin construcción)? -> `multimodal_analyzer`
-            - ¿Es una conversación normal (saludo, pregunta)? -> `conversational_agent`
-
-        Basado en este proceso, ¿cuál es el único nodo correcto para la petición actual?
-        Nodo de destino:
-        """
-
-        message = HumanMessage(content=prompt_route)
-        response = analytical_llm.invoke([message])
-        llm_response_content = response.content.strip()
-        print(f"Respuesta del LLM para enrutamiento: '{llm_response_content}'")
-        
-        # Lógica de parseo robusta para evitar errores
-        decision_route = "conversational_agent" # Fallback de seguridad
+    except (json.JSONDecodeError, AttributeError) as e:
+        print(f"Error al parsear la respuesta del LLM: {e}. Usando fallback.")
+        # Fallback robusto: buscar el nombre del nodo en el texto si el JSON falla.
+        decision = "conversational_agent"
         for node in AVAILABLE_NODES:
-            if node in llm_response_content:
-                decision_route = node
+            if f'"{node}"' in response.content or f"'{node}'" in response.content:
+                decision = node
                 break
 
-    # --- 5. VALIDACIÓN FINAL ---
-    if decision_route not in AVAILABLE_NODES:
-        print(f"ADVERTENCIA: Decisión inválida ('{decision_route}'). Forzando a '__end__'.")
-        decision_route = "__end__"
-    
-    print(f"Decisión del Supervisor: Enviar a '{decision_route}'")
-    
-    return {"routing_decision": decision_route}
-    
+    print(f"Decisión del Supervisor: Enviar a '{decision}'")
+    return {"routing_decision": decision}

@@ -53,7 +53,7 @@ def planner_node(state: dict) -> dict:
         Si el usuario pide "HTML, CSS y JS" o una implementacion de interfaz a partir de un muckup o video:
             Los campos `frontend_task`, `frontend_tech` unicamente no añadas otros campos  
         Si el usuario te pide unicamente bases de datos,
-            entonces solo ocupas `db_task` y `db_tech`.
+            entonces solo ocupas `db_task` y `db_tech` no ocupas mas campos ya que el usuario no lo especifica.
 
         No sugieras frameworks, librerías o herramientas de construcción a menos que se pidan explícitamente.  
     """

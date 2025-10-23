@@ -57,7 +57,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 file_paths = [os.path.join("uploads", f) for f in file_names]
                 
-                # <-- CAMBIO CLAVE: Inyectamos el historial en el estado inicial de la nueva tarea
                 inputs = {
                     "user_input": user_input,
                     "supervisor_iterations": 0,

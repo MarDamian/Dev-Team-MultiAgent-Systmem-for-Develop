@@ -20,31 +20,6 @@ def route_to_specialist(state: dict) -> str:
     return decision
 
 
-def should_continue_or_end(state: dict) -> str:
-    """
-    Decide si continuar al supervisor o finalizar el flujo.
-    
-    Esta función se ejecuta después de cada agente especialista para determinar
-    si la tarea está completa o si debe continuar el procesamiento.
-    """
-    # Condiciones de finalización
-    if state.get("code_approved"):
-        print("✓ Flujo finalizado: Código aprobado")
-        return END
-    
-    if state.get("task_complete"):
-        print("✓ Flujo finalizado: Tarea simple completada")
-        return END
-    
-    # Protección adicional: si hay demasiadas iteraciones
-    iterations = state.get("supervisor_iterations", 0)
-    if iterations > 10:
-        print(f"⚠️ Flujo finalizado: Límite de iteraciones ({iterations})")
-        return END
-    
-    # Continuar al supervisor para siguiente paso
-    print(f"→ Regresando al supervisor (iteración {iterations})")
-    return "supervisor"
 
 
 # --- Constructor del Grafo Principal ---
@@ -83,80 +58,16 @@ def build_graph(checkpointer):
         }
     )
 
-    # --- ENRUTAMIENTO DE REGRESO (CON CONDICIÓN DE SALIDA) ---
-    # CAMBIO CLAVE: Usar conditional_edges en lugar de add_edge directo
-    
-    workflow.add_conditional_edges(
-        "conversational_agent",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "multimodal_analyzer",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "ui_ux_designer",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "planner",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "develop_backend",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "develop_frontend",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "quality_auditor",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
-    
-    workflow.add_conditional_edges(
-        "database_architech",
-        should_continue_or_end,
-        {
-            "supervisor": "supervisor",
-            END: END
-        }
-    )
+    # --- ENRUTAMIENTO DE REGRESO ---
+    # Después de cada nodo especialista, el control siempre vuelve al supervisor.
+    workflow.add_edge("conversational_agent", "supervisor")
+    workflow.add_edge("multimodal_analyzer", "supervisor")
+    workflow.add_edge("ui_ux_designer", "supervisor")
+    workflow.add_edge("planner", "supervisor")
+    workflow.add_edge("develop_backend", "supervisor")
+    workflow.add_edge("develop_frontend", "supervisor")
+    workflow.add_edge("quality_auditor", "supervisor")
+    workflow.add_edge("database_architech", "supervisor")
 
     app = workflow.compile(checkpointer=checkpointer)
     

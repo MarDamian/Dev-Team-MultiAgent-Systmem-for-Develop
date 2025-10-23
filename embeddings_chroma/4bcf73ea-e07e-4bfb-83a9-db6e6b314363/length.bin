@@ -1,7 +1,1 @@
-PRINCIPIOS Y PATRONES DEL DESARROLLO DE SOFTWARE
-En Autentia proporcionamos soporte al desarrollo de software y 
-ayudamos a la transformación digital de grandes organizaciones siendo 
-referentes en eficacia y buenas prácticas. Te invito a que te informes 
-sobre los servicios profesionales de Autentia y el soporte que podemos 
-proporcionar para la transformación digital de tu empresa.
-¡Conoce m
+invalid type: string "PRINCIPIOS Y PATRONES DEL DESARROLLO DE SOFTWARE\u{a0}        66\u{a0}\u{a0}\nacoplarnos a implementaciones.\u{a0}\n● ConcreteIterable: implementa la interfaz e instancia el Iterator\u{a0} \u{a0} \u{a0} \u{a0} \u{a0} \u{a0} \u{a0} \u{a0}\nconcreto que iterará sobre una colección específica.\u{a0}\n● Iterator: declara los métodos necesarios para recorrer la colección.
