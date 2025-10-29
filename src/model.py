@@ -29,12 +29,11 @@ except Exception as e:
     analytical_llm = None
     conversational_llm = None
 
-# --- GEMINI (GRATIS - 250 req/día) ---
-# Para: Generación de código (Frontend, Backend, Database)
+
 try:
     creative_llm = ChatGoogleGenerativeAI(
         #model="gemini-2.5-flash-lite",
-        model="gemini-2.5-flash",
+        model="gemini-2.5-pro",
         google_api_key=GOOGLE_API_KEY,
         temperature=0.3,
         max_output_tokens=8192
@@ -54,11 +53,11 @@ def validate_configuration():
     
     print("\n Configuración de modelos lista:")
     if analytical_llm:
-        print("   ✓ Analytical LLM: Groq Llama 3.3 70B")
+        print("   ✓ Analytical LLM: Groq Llama 3.3 70B Versatile")
     if conversational_llm:
         print("   ✓ Conversational LLM: Groq llama-3.1-8b-instant")
     if creative_llm:
-        print("   ✓ Creative LLM: Gemini 2.0 Flash")
+        print("   ✓ Creative LLM: Gemini 2.5 Pro")
     print()
     return True
 
