@@ -51,7 +51,7 @@ Ademas de plantear los requisitos del sistema basado en la solicitud del usuario
 **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las siguientes reglas de decisión para determinar qué tareas incluir:
 
 1.  **Regla de Simplificación (Prioridad Frontend):**
-    * Si la solicitud del usuario describe una funcionalidad que puede resolverse **completamente en el cliente** (ej. manipulación de imágenes en el navegador, conversores de unidades, cálculos simples, generación y *descarga local* de archivos) Y **no solicita explícitamente** guardado en servidor, autenticación, funcionalidad multiusuario o una base de datos:
+    * Si la solicitud del usuario describe una funcionalidad que puede resolverse **completamente en el cliente** (ej. manipulación de imágenes en el navegador, conversores de unidades, cálculos simples, generación y *descarga local* de archivos , implementar una interfaz) Y **no solicita explícitamente** guardado en servidor, autenticación, funcionalidad multiusuario o una base de datos:
     * **DEBES** optar por una solución `frontend-only`.
     * Establece `plan_type` en 'frontend-only'.
     * Rellena **únicamente** `frontend_task` y `frontend_tech`.

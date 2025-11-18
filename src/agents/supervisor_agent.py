@@ -29,7 +29,7 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
 - `develop_frontend`: Escribe el código del lado del cliente (HTML, CSS, JS) a partir de un plan o diseño.
 - `quality_auditor`: Revisa el código generado para corregir errores, aplicar feedback o verificar que cumple los requisitos. **Debe actuar siempre después de que se genere código o si hay feedback pendiente.**
 - `ui_ux_designer`: Analiza bocetos o imágenes de diseño para crear especificaciones de UI/UX. **Úsalo si la entrada es visual y el objetivo es crear una interfaz.**
-- `multimodal_analyzer`: Extrae información de archivos (PDF, TXT, etc.). Úsalo si el usuario pide analizar, resumir o entender un documento.
+- `multimodal_analyzer`: Extrae información de archivos (PDF, TXT, png,etc .). Úsalo si el usuario pide analizar, resumir o entender un documento imagen audio etc.
 - `conversational_agent`: Responde a preguntas generales, saludos o si la petición del usuario no está clara. Úsalo como último recurso.
 - `__end__`: Finaliza la tarea. Úsalo solo cuando el objetivo final se haya cumplido satisfactoriamente.
 
