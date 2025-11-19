@@ -59,3 +59,25 @@ export function addMessage(content, type, options = {}) {
     selectors.chatBox.appendChild(messageDiv);
     selectors.chatBox.scrollTop = selectors.chatBox.scrollHeight;
 }
+
+export function showLoading() {
+    const sendButton = document.querySelector("#message-form button[type='submit']");
+    if (sendButton) {
+        sendButton.dataset.originalContent = sendButton.innerHTML;
+        sendButton.innerHTML = '<div class="button-loader"></div>';
+        sendButton.disabled = true;
+    }
+}
+
+export function hideLoading() {
+    const sendButton = document.querySelector("#message-form button[type='submit']");
+    if (sendButton && sendButton.dataset.originalContent) {
+        sendButton.innerHTML = sendButton.dataset.originalContent;
+        sendButton.disabled = false;
+    }
+    // Remove old loading indicator if it exists
+    const loadingDiv = document.getElementById("loading-indicator");
+    if (loadingDiv) {
+        loadingDiv.remove();
+    }
+}

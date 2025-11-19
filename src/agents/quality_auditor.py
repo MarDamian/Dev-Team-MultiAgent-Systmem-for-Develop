@@ -79,6 +79,7 @@ def quality_auditor_node(state: dict) -> dict:
     1.  **Corrección Funcional/Visual:** ¿El código parece implementar lo solicitado por el usuario y el plan?
     2.  **Adherencia a Principios:** ¿El código respeta los principios de calidad y buenas prácticas descritos arriba? (Ej: ¿Es legible, mantenible, sigue patrones de diseño recomendados?).
     3.  **Errores Obvios:** ¿Hay algún error de sintaxis evidente que impida su funcionamiento?
+    4.  **Coherencia de Integracion e Infraestructura:** ¿Existen sincronización entre cliente y servidor?(Verificar: coincidencia exacta de endpoints, manejo dinámico de puertos/URLs base y correspondencia en los tipos de datos enviados/recibidos).
 
     **Formato de Respuesta (OBLIGATORIO):**
     Tu respuesta DEBE ser un objeto JSON con la siguiente estructura y NADA MÁS:
@@ -89,7 +90,7 @@ def quality_auditor_node(state: dict) -> dict:
     # --- 6. Invocar al LLM y Procesar la Respuesta ---
     response = analytical_llm.invoke(prompt_text)
     review_count += 1 # Incrementa el contador de revisiones (útil para limitar iteraciones)
-    
+    print("Archivos auditados: ", files_to_read)
     try:
         json_response = response.content.strip().replace("```json", "").replace("```", "").strip()
         audit_result = json.loads(json_response)

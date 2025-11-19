@@ -22,6 +22,8 @@ Ademas de plantear los requisitos del sistema basado en la solicitud del usuario
 ---
 {retrieved_info}
 ---
+Genera un PRD, o Documento de Requisitos del Producto, es un documento que detalla las características, 
+funcionalidades y objetivos de un producto para que los equipos de desarrollo y pruebas sepan qué construir.
 
 **Solicitud del Usuario ({context_user}):**
 ---
