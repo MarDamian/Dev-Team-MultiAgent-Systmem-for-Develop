@@ -72,7 +72,7 @@ Antes de instalar, asegúrate de tener lo siguiente:
     ```env
     GOOGLE_API_KEY="tu_api_key_de_google"
     GROQ_API_KEY="tu_api_key_de_groq"
-    GEMINI_MODEL="gemini-2.5-pro" # O la versión configurada en src/config.py
+    GEMINI_MODEL="gemini-2.5-pro" # O la versión especifica configurada en src/model.py
     ```
 
 5.  **Base de Conocimiento (Opcional - RAG):**

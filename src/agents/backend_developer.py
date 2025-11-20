@@ -51,7 +51,7 @@ def backend_developer_node(state: dict) -> dict:
     Tu tarea es generar el código backend completo, funcional y bien documentado.
 
     **Instrucciones CRÍTICAS:**
-    1.  Genera el código en bloques separados. El código principal debe estar en un bloque con el nombre de la tecnología (ej: 'python', 'javascript') y las dependencias en un bloque de gestor de paquetes (ej: 'requirements.txt', 'package.json').
+    1.  Genera el código en bloques separados. El código principal debe estar en un bloque con el nombre de la tecnología (ej: 'main.py', 'script.js', functionality.py) y las dependencias en un bloque de gestor de paquetes (ej: 'requirements.txt', 'package.json').
     2.  Usa delimitadores como `<!--- python_code_start --->` o `<!--- package.json_code_start --->`.
     3.  No añadas explicaciones fuera de los bloques de código.
     4.  Tu código DEBE ser consistente con el modelo/esquema de la base de datos proporcionado.

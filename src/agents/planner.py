@@ -61,7 +61,7 @@ funcionalidades y objetivos de un producto para que los equipos de desarrollo y 
     * *(Ejemplo: La solicitud del "creador de stickers" que pide "guardar como archivo PNG" debe interpretarse como una descarga local, por lo tanto, es 'frontend-only').*
 
 2.  **Regla de Base de Datos Única:**
-    * Si el usuario pide **únicamente** un diseño, esquema o tarea de base de datos:
+    * Si el usuario pide **únicamente** un diseño, creacion, esquema o tarea de base de datos:
     * Establece `plan_type` en 'database-only'.
     * Rellena **únicamente** `db_task` y `db_tech`.
     * Todos los demás campos deben ser `null`.
@@ -72,6 +72,12 @@ funcionalidades y objetivos de un producto para que los equipos de desarrollo y 
     * Rellena todos los campos (`frontend`, `backend`, `db`) que sean necesarios para cumplir con la solicitud.
 
 4.  **Consistencia del `plan_type`:** El valor de `plan_type` siempre debe reflejar con precisión qué campos de tareas (frontend, backend, db) se han rellenado.
+
+5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):**
+    *   Si `plan_type` es 'fullstack':
+    *   **Backend Task:** DEBES definir explícitamente los endpoints clave (Ruta, Método, Input esperado, Output esperado) en la descripción de `backend_task`.
+    *   **Frontend Task:** DEBES instruir explícitamente al desarrollador frontend para que "Implemente la interfaz consumiendo los endpoints definidos en la tarea de backend" (menciona los endpoints clave si es posible).
+    *   **Objetivo:** Garantizar que el Frontend sepa exactamente qué esperar del Backend antes de escribir una sola línea de código.
     """
     
     response = analytical_llm.invoke(prompt)

@@ -40,7 +40,8 @@ def database_architech_node(state: dict) -> dict:
     Eres un experto desarrollador de la capa de datos. Tu tarea es generar el código o script necesario para la base de datos o sistema de almacenamiento de datos que se infiera de la solicitud. Puede ser SQL, un script para MongoDB (JavaScript), Cypher (Neo4j), un archivo JSON de configuración, etc.
 
     Te basarás en:
-     - Análisis Multimodal: {analysis_result}
+     - Análisis Multimodal(Opcional): {analysis_result}
+     - Análisis de Interfaz(Opcional): {ui_ux_spec}
      - Solicitud del Usuario: {user}
     
     Si se proporciona código existente y feedback, DEBES modificar el código existente para aplicar las correcciones.
