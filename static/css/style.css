@@ -594,16 +594,13 @@ input:checked+.slider .moon-icon {
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    margin-right: 10px;
+    margin:0px 10px 0px 0px;
     font-size: 1.2em;
-    padding: 0;
+    padding: 10px 20px;
     line-height: 40px;
     display: flex;
-    /* Usar flexbox */
     justify-content: center;
-    /* Centrar horizontalmente */
     align-items: center;
-    /* Centrar verticalmente */
 }
 
 /* Loading Spinner */
@@ -615,6 +612,127 @@ input:checked+.slider .moon-icon {
     border-left-color: #09f;
     animation: spin 1s ease-in-out infinite;
     margin: 10px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Button Loading State */
+.button-loader {
+    border: 3px solid rgba(128, 128, 128, 0.3);
+    /* Visible on white and teal */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border-left-color: currentColor;
+    animation: spin 1s ease-in-out infinite;
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+#message-form button:disabled {
+    opacity: 0.8;
+    /* Keep it visible */
+    cursor: not-allowed;
+}
+
+/* --- Agent Specific Colors --- */
+.agent-supervisor {
+    border-left: 4px solid #6c757d;
+    background-color: rgba(108, 117, 125, 0.1);
+}
+
+.agent-conversational {
+    border-left: 4px solid #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.agent-multimodal {
+    border-left: 4px solid #17a2b8;
+    background-color: rgba(23, 162, 184, 0.1);
+}
+
+.agent-planner {
+    border-left: 4px solid #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.agent-ui-ux {
+    border-left: 4px solid #dc2ee6;
+    background-color: rgba(232, 62, 140, 0.1);
+}
+
+.agent-frontend {
+    border-left: 4px solid #6610f2;
+    background-color: rgba(102, 16, 242, 0.1);
+}
+
+.agent-backend {
+    border-left: 4px solid #fd7e14;
+    background-color: rgba(253, 126, 20, 0.1);
+}
+
+.agent-database {
+    border-left: 4px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.agent-auditor {
+    border-left: 4px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+#mic-button.recording {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    animation: pulse 1.5s infinite;
+}
+
+#mic-button.recording img {
+    filter: brightness(0) invert(1);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+.agent-database {
+    border-left: 4px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.agent-auditor {
+    border-left: 4px solid #dc3545;
+    background-color: rgba(110, 2, 13, 0.1);
+}
+
+.agent-badge {
+    margin: 0 auto;         
+    text-align: center; 
+    font-size: 0.75em;
+    font-weight: 700;
+    height: 36px;
+    border-radius: 6px;
+    margin: 0 auto;      
+    text-align: center; 
 }
 
 @keyframes spin {
@@ -740,4 +858,53 @@ input:checked+.slider .moon-icon {
 
 .badge-auditor {
     background-color: #dc3545;
+}
+
+/* --- Microphone Button --- */
+#mic-button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--input-border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+    font-size: 1.2em;
+    padding: 0;
+    line-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#mic-button img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+#mic-button.recording {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    animation: pulse 1.5s infinite;
+}
+
+#mic-button.recording img {
+    filter: brightness(0) invert(1);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
 }
