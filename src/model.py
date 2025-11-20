@@ -10,20 +10,12 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 try:
-    analytical_llm1 = ChatGroq(
+    analytical_llm = ChatGroq(
         model="llama-3.3-70b-versatile",  
         groq_api_key=GROQ_API_KEY,
         temperature=0.3
     )
-    analytical_llm = ChatGoogleGenerativeAI(
-        #model="gemini-2.5-flash-lite",
-        #model="gemini-2.5-pro",
-        model="gemini-2.5-flash",
-        google_api_key=GOOGLE_API_KEY,
-        temperature=0.3,
-        max_output_tokens=8192
-    )
-
+    
     conversational_llm = ChatGroq(
         model="llama-3.1-8b-instant",  
         groq_api_key=GROQ_API_KEY,
