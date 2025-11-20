@@ -46,7 +46,8 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
 2.  **Si ya existe un `dev_plan`:** El siguiente paso debe ser un agente de desarrollo (`database_architech`, `develop_backend`, `develop_frontend`) para ejecutar el plan.
 
 3.  **Si hay código generado (`frontend_code` o `backend_code`):** El siguiente paso es siempre el `quality_auditor` para la revisión.
-4.  **Si el quality auditor da por aprovado el codigo Finaliza la tarea  `__end__`, si no es el caso enruta nuevamente al developer
+4.  **Si el quality auditor da por aprovado el codigo Finaliza la tarea  `__end__`, si no es el caso enruta nuevamente al developer 
+5.  **Si el frontend genero nuevo codigo el siguiente paso es el quality auditor para la revision y pasa al la regla  4
 
 **INSTRUCCIÓN:**
 Basado en TODO el estado actual, analiza la situación y determina el siguiente paso lógico. ¿Qué agente debe actuar ahora?

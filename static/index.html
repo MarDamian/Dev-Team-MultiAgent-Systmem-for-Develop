@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevTeam-Bot</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
     <div id="chat-container">
         <label class="theme-switch" for="theme-toggle">
@@ -20,15 +22,23 @@
                 <p>Hola Soy DevTeamAgent. ¿En qué puedo ayudarte hoy?</p>
             </div>
         </div>
-         <div id="file-list"></div>
+        <div id="file-list"></div>
         <form id="message-form">
             <input type="file" id="file-input" multiple hidden>
             <button type="button" id="upload-button"><img src="/static/img/attachment.png" alt="Adjuntar"></button>
-            <input type="text" id="message-input" placeholder="Escribe tu mensaje..." autocomplete="off" required>
+            <textarea id="message-input" placeholder="Escribe tu mensaje..." rows="1" required></textarea>
             <button type="submit"><img src="/static/img/send.png" alt="Enviar"></button>
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
     <script src="/static/js/main.js" type="module"></script>
 </body>
+
 </html>

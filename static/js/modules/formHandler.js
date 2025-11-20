@@ -21,6 +21,21 @@ async function uploadFiles(files) {
 
 export function initFormHandler(socket) {
     const messageForm = document.getElementById("message-form");
+    const messageInput = selectors.messageInput;
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Handle Enter to submit, Shift+Enter for new line
+    messageInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            messageForm.requestSubmit();
+        }
+    });
 
     messageForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -57,6 +72,7 @@ export function initFormHandler(socket) {
         clearSelectedFiles();
 
         selectors.messageInput.value = "";
+        selectors.messageInput.style.height = 'auto'; // Reset height
         selectors.messageInput.disabled = true;
         isThinking = true;
         showLoading();

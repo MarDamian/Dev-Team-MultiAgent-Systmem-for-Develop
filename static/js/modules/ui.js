@@ -61,12 +61,6 @@ export function addMessage(content, type, options = {}) {
         code.textContent = content;
         pre.appendChild(code);
         codeContainer.appendChild(pre);
-
-        const renderedHtml = marked.parse(pre.outerHTML);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = renderedHtml;
-
-        codeContainer.replaceChild(tempDiv.firstChild, pre);
         messageDiv.appendChild(codeContainer);
 
     } else {
@@ -76,6 +70,13 @@ export function addMessage(content, type, options = {}) {
     }
     selectors.chatBox.appendChild(messageDiv);
     selectors.chatBox.scrollTop = selectors.chatBox.scrollHeight;
+
+    // Apply Prism syntax highlighting
+    if (window.Prism) {
+        messageDiv.querySelectorAll('pre code').forEach((block) => {
+            window.Prism.highlightElement(block);
+        });
+    }
 }
 
 export function showLoading() {

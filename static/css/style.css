@@ -28,6 +28,7 @@
     /* Fondo de las etiquetas de archivo */
     --remove-file-color: #DC3545;
     /* Color del botón 'x' de eliminar archivo */
+    --code-bg-color: #272822;
 }
 
 body.dark-mode {
@@ -310,6 +311,7 @@ input:checked+.slider .moon-icon {
 #message-form {
     display: flex;
     padding: 15px;
+    align-items: flex-end;
 }
 
 #message-input {
@@ -319,6 +321,12 @@ input:checked+.slider .moon-icon {
     border-radius: 20px;
     padding: 10px 15px;
     font-size: 1em;
+    resize: none;
+    overflow-y: hidden;
+    min-height: 24px;
+    max-height: 200px;
+    line-height: 1.5;
+    font-family: inherit;
 }
 
 #message-form button {
@@ -661,7 +669,7 @@ input:checked+.slider .moon-icon {
 }
 
 .agent-ui-ux {
-    border-left: 4px solid #e83e8c;
+    border-left: 4px solid #dc2ee6;
     background-color: rgba(232, 62, 140, 0.1);
 }
 
