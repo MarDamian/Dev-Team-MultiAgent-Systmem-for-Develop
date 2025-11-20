@@ -8,8 +8,26 @@ export function addMessage(content, type, options = {}) {
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", `${type}-message`);
 
+    // Add agent-specific class if provided
+    if (options.agent) {
+        messageDiv.classList.add(`agent-${options.agent}`);
+
+        // Create and prepend badge
+        const badge = document.createElement("span");
+        badge.classList.add("agent-badge", `badge-${options.agent}`);
+        // Format agent name: "ui_ux" -> "UI UX"
+        badge.textContent = options.agent.replace(/_/g, ' ').toUpperCase();
+        messageDiv.appendChild(badge);
+    }
+
     if (type === 'agent-status') {
-        messageDiv.innerHTML = content;
+        // For status messages, we might want to keep them simple or use the badge
+        // If options.agent is passed, the badge is already added above.
+        // We can make the content a bit smaller or italic
+        const statusText = document.createElement("div");
+        statusText.innerHTML = content;
+        messageDiv.appendChild(statusText);
+
     } else if (options.isCode) {
         const codeContainer = document.createElement("div");
         codeContainer.className = "code-block-container";
@@ -52,7 +70,7 @@ export function addMessage(content, type, options = {}) {
         messageDiv.appendChild(codeContainer);
 
     } else {
-        const p = document.createElement("p");
+        const p = document.createElement("div");
         p.innerHTML = (type === 'bot') ? marked.parse(content) : content;
         messageDiv.appendChild(p);
     }
