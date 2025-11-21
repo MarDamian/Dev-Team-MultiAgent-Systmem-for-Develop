@@ -15,71 +15,73 @@ def planner_node(state: dict) -> dict:
     retrieved_info = retrieve_context(context_user)
 
     prompt = f"""
-       Eres un jefe de proyecto técnico. Tu tarea es analizar la siguiente información y generar un plan de desarrollo en formato JSON.
-Ademas de plantear los requisitos del sistema basado en la solicitud del usuario.
+    Eres un jefe de proyecto técnico. Tu tarea es analizar la siguiente información y generar un plan de desarrollo en formato JSON.
+    Además de plantear los requisitos del sistema basado en la solicitud del usuario.
 
-**Contexto Relevante de la Base de Conocimientos (Para guiar decisiones técnicas):**
----
-{retrieved_info}
----
-Genera un PRD, o Documento de Requisitos del Producto, es un documento que detalla las características, 
-funcionalidades y objetivos de un producto para que los equipos de desarrollo y pruebas sepan qué construir.
+    **Contexto Relevante de la Base de Conocimientos (Para guiar decisiones técnicas):**
+    ---
+    {retrieved_info}
+    ---
 
-**Solicitud del Usuario ({context_user}):**
----
-**Contexto de Interfaz(Opcional) ({context_ui_ux}):**
----
-**Contexto Multimedia (Opcional) ( {context_media}):**
+    Genera un PRD, o Documento de Requisitos del Producto, que detalla las características,
+    funcionalidades y objetivos de un producto para que los equipos de desarrollo y pruebas sepan qué construir.
 
-**INSTRUCCIONES:**
-1.  **Analiza** la solicitud del usuario y la base de conocimientos.
-2.  **Formula un plan** para los desarrolladores frontend, backend y/o de base de datos.
-3.  **Justifica tus decisiones técnicas** incorporando citas de la "Base de Conocimientos" directamente en la descripción de la tarea. La justificación debe ser breve y empezar con "(Justificación: ...)" para ser fácilmente identificable.
-4.  **Genera un único objeto JSON** con la respuesta, sin texto introductorio ni de cierre.
+    **Solicitud del Usuario ({context_user}):**
+    ---
+    **Contexto de Interfaz (Opcional) ({context_ui_ux}):**
+    ---
+    **Contexto Multimedia (Opcional) ({context_media}):**
 
-**Ejemplo de justificación en una tarea:** "Crear los endpoints API para la gestión de usuarios. (Justificación: La base de conocimientos indica que 'la autenticación debe manejarse en el backend')."
+    **INSTRUCCIONES:**
+    1.  **Analiza** la solicitud del usuario y la base de conocimientos.
+    2.  **Formula un plan** siguiendo las reglas de decisión.
+    3.  **Justifica tus decisiones técnicas** incorporando citas de la "Base de Conocimientos" directamente en la descripción de la tarea. 
+        La justificación puntual para la tarea y empezar con "(**Justificación:** ...)" para ser fácilmente identificable.
+    4.  **Genera un único objeto JSON** con la respuesta, sin texto introductorio ni de cierre.
 
-**IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
-{{
-    "plan_type": "(string) Uno de: 'frontend-only', 'backend-only', 'database-only', 'fullstack'.",
-    "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend, incluyendo justificación si aplica.",
-    "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
-    "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend, incluyendo justificación si aplica.",
-    "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
-    "db_task": "(string | null) Descripción clara de la tarea para el arquitecto de base de datos, incluyendo justificación si aplica. (no des detalles sobre la base de datos ya hay un agente especializado en su creacion)",
-    "db_tech": "(string | null) Tecnología específica para de base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j')."
-}}
+    **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
+    {{
+        "plan_type": "(string) Uno de: 'frontend-only', 'backend-only', 'database-only', 'fullstack'.",
+        "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend con requisitos técnicos, incluyendo justificación si aplica.",
+        "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
+        "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend con requisitos técnicos, incluyendo justificación si aplica.",
+        "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
+        "db_task": "(string | null) Descripción clara de la tarea para el arquitecto de base de datos con requisitos técnicos, incluyendo justificación si aplica. (no des detalles sobre la base de datos ya hay un agente especializado en su creación)",
+        "db_tech": "(string | null) Tecnología específica para base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j')."
+    }}
 
-**REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las siguientes reglas de decisión para determinar qué tareas incluir:
+    **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las siguientes reglas de decisión:
 
-1.  **Regla de Simplificación (Prioridad Frontend):**
-    * Si la solicitud del usuario describe una funcionalidad que puede resolverse **completamente en el cliente** (ej. manipulación de imágenes en el navegador, conversores de unidades, cálculos simples, generación y *descarga local* de archivos , implementar una interfaz) Y **no solicita explícitamente** guardado en servidor, autenticación, funcionalidad multiusuario o una base de datos:
-    * **DEBES** optar por una solución `frontend-only`.
-    * Establece `plan_type` en 'frontend-only'.
-    * Rellena **únicamente** `frontend_task` y `frontend_tech`.
-    * Todos los demás campos (`backend_task`, `backend_tech`, `db_task`, `db_tech`) **deben ser `null`**.
-    * *(Ejemplo: La solicitud del "creador de stickers" que pide "guardar como archivo PNG" debe interpretarse como una descarga local, por lo tanto, es 'frontend-only').*
+    1.  **Regla de Simplificación (Prioridad Frontend):**
+        * Si la solicitud del usuario puede resolverse completamente en el cliente (ej. landing page, interfaz web, programa basico web...)
+        **y NO solicita** (guardado en servidor, autenticación, multiusuario o base de datos...):
+        * Establece `plan_type` en 'frontend-only'.
+        * Rellena SOLO `frontend_task` y `frontend_tech` los demas en null.
 
-2.  **Regla de Base de Datos Única:**
-    * Si el usuario pide **únicamente** un diseño, creacion, esquema o tarea de base de datos:
-    * Establece `plan_type` en 'database-only'.
-    * Rellena **únicamente** `db_task` y `db_tech`.
-    * Todos los demás campos deben ser `null`.
+    2.  **Regla de Base de Datos Única:**
+        * Si el usuario pide únicamente diseño, creación, esquema o una tarea exclusiva de base de datos:
+        * Establece `plan_type` en 'database-only'.
+        * Rellena únicamente `db_task` y `db_tech` los demás campos deben ser `null`.
 
-3.  **Regla Fullstack o Backend Explícito:**
-    * Si el usuario pide explícitamente tecnologías de backend (ej. 'Python', 'Node.js', 'Java') O si la funcionalidad **requiere inequívocamente un servidor** (ej. "iniciar sesión de usuario", "guardar perfiles", "compartir datos entre usuarios", "procesamiento pesado"):
-    * Establece `plan_type` en 'fullstack' (o 'backend-only' si aplica).
-    * Rellena todos los campos (`frontend`, `backend`, `db`) que sean necesarios para cumplir con la solicitud.
+    3.  **Regla de Backend Explícito:** 
+        * Si el usuario pide explícitamente tecnologías de backend (ej. 'Python', 'Node.js', 'Java') o juego/programas sencillos.
+        o la funcionalidad requiere inequívocamente un servidor (ej. iniciar sesión, guardar perfiles, compartir datos, procesamiento pesado):
+        * Establece `plan_type` en 'backend-only'.
+        * Rellena solo `backend_task` y `backend_tech` (y `db` si aplica).
+        * **Consistencia del `plan_type`:** Debe reflejar exactamente los campos rellenados.
 
-4.  **Consistencia del `plan_type`:** El valor de `plan_type` siempre debe reflejar con precisión qué campos de tareas (frontend, backend, db) se han rellenado.
+    4.  **Regla Fullstack:** *(Solo úsala si es estrictamente necesario el fullstack)*
+        * Si la solicitud combina claramente frontend + backend, o si para cumplirla se necesitan ambos:
+        * Establece `plan_type` en 'fullstack'.
+        * Rellena `frontend`, `backend` y `db` según corresponda.
+        * **Consistencia del `plan_type`:** Debe coincidir con los campos completados.
 
-5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):**
-    *   Si `plan_type` es 'fullstack':
-    *   **Backend Task:** DEBES definir explícitamente los endpoints clave (Ruta, Método, Input esperado, Output esperado) en la descripción de `backend_task`.
-    *   **Frontend Task:** DEBES instruir explícitamente al desarrollador frontend para que "Implemente la interfaz consumiendo los endpoints definidos en la tarea de backend" (menciona los endpoints clave si es posible).
-    *   **Objetivo:** Garantizar que el Frontend sepa exactamente qué esperar del Backend antes de escribir una sola línea de código.
+    4.5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):** *(Solo si `plan_type` es 'fullstack')*
+        * **Backend Task:** Define explícitamente los endpoints clave (Ruta, Método, Input esperado, Output esperado).
+        * **Frontend Task:** Indica que la interfaz debe consumir los endpoints definidos en el backend, mencionando los relevantes.
+        * **Objetivo:** Garantizar que el frontend conozca exactamente lo que debe esperar del backend antes de iniciar la implementación.
     """
-    
+
     response = analytical_llm.invoke(prompt)
     
     try:

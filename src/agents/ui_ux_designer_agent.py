@@ -44,7 +44,7 @@ def ui_ux_designer_node(state: dict) -> dict:
         - **Animaciones:** Describe duración, dirección y estilo.
         - **Lógica de JavaScript:** Sugiere pseudocódigo o funciones para implementar.
 
-        La petición original del usuario es: "{user_input}".
+        La petición original del usuario es: "{user_input}" atiende su petición.
         No respondas fuera de este formato.
         """
 

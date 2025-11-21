@@ -1,6 +1,6 @@
 # Contenido para: src/agents/frontend_developer.py
 
-from src.model import creative_llm
+from src.model import advanced_llm
 from src.tools.code_extractor import extract_and_save_code
 
 def frontend_developer_node(state: dict) -> dict:
@@ -68,7 +68,7 @@ def frontend_developer_node(state: dict) -> dict:
     ---
     {prompt_additions}
     """
-    response = creative_llm.invoke(prompt)
+    response = advanced_llm.invoke(prompt)
     full_code = response.content
 
     # --- PASO DE DEPURACIÓN ---

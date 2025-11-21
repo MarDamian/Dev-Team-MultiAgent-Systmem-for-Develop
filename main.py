@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from src.graph.workflow import build_graph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+import time 
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -66,15 +67,24 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 print(f"Invocando el grafo con la entrada (con historial): {inputs}")
                 
+                start_time = time.time() # INICIO DE MEDICIÓN DE TIEMPO
+                
                 async for event in langgraph_app.astream(inputs, config=config):
                     if event:
                         await websocket.send_json(event)
                 
+                end_time = time.time() # FIN DE MEDICIÓN DE TIEMPO
+                execution_time = end_time - start_time
+                print("////////////////////////////////////////////")
+                print(f"Tiempo de ejecución total de la tarea: {execution_time:.2f} segundos") 
+                print("////////////////////////////////////////////")
+
                 for file_path in file_paths:
                     if os.path.exists(file_path):
                         os.remove(file_path)
                 print(f"Archivos de la tarea limpiados: {file_names}")
 
+                
                 await websocket.send_json({"type": "done"})
 
         except WebSocketDisconnect:
