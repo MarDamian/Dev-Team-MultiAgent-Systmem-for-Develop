@@ -1,6 +1,8 @@
 import json
 from src.model import analytical_llm
 from src.rag_retriever import retrieve_context
+from src.tools.project_manager import create_project, set_active_project
+from src.tools.contract_manager import define_api_contract, define_data_contract
 
 def planner_node(state: dict) -> dict:
     print("---AGENTE: PLANIFICADOR DE PROYECTO---")
@@ -41,13 +43,16 @@ def planner_node(state: dict) -> dict:
 
     **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
     {{
+        "project_name": "(string) Nombre descriptivo del proyecto",
         "plan_type": "(string) Uno de: 'frontend-only', 'backend-only', 'database-only', 'fullstack'.",
         "frontend_task": "(string | null) Descripción clara de la tarea para el desarrollador frontend con requisitos técnicos, incluyendo justificación si aplica.",
         "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
         "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend con requisitos técnicos, incluyendo justificación si aplica.",
         "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
         "db_task": "(string | null) Descripción clara de la tarea para el arquitecto de base de datos con requisitos técnicos, incluyendo justificación si aplica. (no des detalles sobre la base de datos ya hay un agente especializado en su creación)",
-        "db_tech": "(string | null) Tecnología específica para base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j')."
+        "db_tech": "(string | null) Tecnología específica para base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j').",
+        "api_contracts": "(array | null) Solo para fullstack: Array de contratos de API con estructura: [{{'endpoint': '/api/resource', 'method': 'GET/POST/PUT/DELETE', 'description': 'descripción', 'request_schema': {{'campo': 'tipo'}}, 'response_schema': {{'campo': 'tipo'}}, 'status_codes': [200, 400, 500]}}]",
+        "data_contracts": "(array | null) Solo para fullstack/backend/database: Array de modelos de datos con estructura: [{{'model_name': 'NombreModelo', 'description': 'descripción', 'fields': {{'campo': {{'type': 'tipo', 'required': true}}}}}}]"
     }}
 
     **REGLA CRÍTICA:** Adhiérete ESTRICTAMENTE a las siguientes reglas de decisión:
@@ -88,11 +93,73 @@ def planner_node(state: dict) -> dict:
         json_response = response.content.strip().replace("```json", "").replace("```", "").strip()
         plan = json.loads(json_response)
         print(f"Plan de desarrollo generado: {plan}")
-        return {"dev_plan": plan}
+        
+        # --- CREAR PROYECTO Y CONTRATOS ---
+        project_name = plan.get("project_name", "Proyecto Sin Nombre")
+        plan_type = plan.get("plan_type", "frontend-only")
+        
+        # Recopilar tecnologías
+        technologies = {}
+        if plan.get("frontend_tech"):
+            technologies["frontend"] = plan["frontend_tech"]
+        if plan.get("backend_tech"):
+            technologies["backend"] = plan["backend_tech"]
+        if plan.get("db_tech"):
+            technologies["database"] = plan["db_tech"]
+        
+        # Crear proyecto
+        project_id = create_project(
+            name=project_name,
+            plan_type=plan_type,
+            technologies=technologies,
+            description=context_user[:200]  # Primeros 200 caracteres de la solicitud
+        )
+        
+        # Establecer como proyecto activo
+        set_active_project(project_id)
+        
+        # Definir contratos si existen
+        api_contracts_list = []
+        data_contracts_list = []
+        
+        if plan.get("api_contracts"):
+            for contract in plan["api_contracts"]:
+                define_api_contract(
+                    project_id=project_id,
+                    endpoint=contract.get("endpoint", "/api/unknown"),
+                    method=contract.get("method", "GET"),
+                    request_schema=contract.get("request_schema", {}),
+                    response_schema=contract.get("response_schema", {}),
+                    status_codes=contract.get("status_codes", [200]),
+                    description=contract.get("description", "")
+                )
+                api_contracts_list.append(contract)
+        
+        if plan.get("data_contracts"):
+            for contract in plan["data_contracts"]:
+                define_data_contract(
+                    project_id=project_id,
+                    model_name=contract.get("model_name", "UnknownModel"),
+                    fields=contract.get("fields", {}),
+                    description=contract.get("description", "")
+                )
+                data_contracts_list.append(contract)
+        
+        print(f"✅ Proyecto creado: {project_id}")
+        print(f"   Contratos de API: {len(api_contracts_list)}")
+        print(f"   Contratos de datos: {len(data_contracts_list)}")
+        
+        return {
+            "dev_plan": plan,
+            "project_id": project_id,
+            "api_contracts": api_contracts_list,
+            "data_contracts": data_contracts_list
+        }
+        
     except json.JSONDecodeError:
         print("Error: El planificador no devolvió un JSON válido.")
         return {
             "dev_plan": {"plan_type": "none"},
             "supervisor_iterations": state.get("supervisor_iterations")+1
-            }
+        }
 

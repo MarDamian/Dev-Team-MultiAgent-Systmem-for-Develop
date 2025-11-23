@@ -1,0 +1,7 @@
+ya que los objetos dependen menos de la estructura interna de otros                       
+objetos, lo que reduce el acoplamiento. 
+● Se vuelve más sencillo reutilizar las clases. 
+● El código es más fácil de probar. 
+Para más detalle, ver el artículo ​Ley de Demeter​ en Adictos al Trabajo. 
+​Strive for loosely coupled design between           
+objects that in

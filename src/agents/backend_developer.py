@@ -1,12 +1,14 @@
 # Contenido para: src/agents/backend_developer.py
 
 from src.model import advanced_llm
-from src.tools.code_extractor import extract_and_save_code 
+from src.tools.code_extractor import extract_and_save_code
+from src.tools.contract_manager import get_contracts_for_prompt
+from src.tools.project_manager import get_active_project_id
 
 def backend_developer_node(state: dict) -> dict:
     """
     Agente que genera el código de la aplicación backend en la tecnología especificada.
-    Utiliza el plan, la tarea específica y el esquema de la base de datos como contexto.
+    Utiliza el plan, la tarea específica, el esquema de la base de datos y los contratos de interfaz.
     """
     print("---AGENTE: DESARROLLADOR BACKEND---")
     
@@ -21,6 +23,14 @@ def backend_developer_node(state: dict) -> dict:
     task = plan.get("backend_task")
     feedback = state.get("review_feedback")
     db_schema = state.get("db_schema", "No se proporcionó un esquema de base de datos específico. Asume un diseño apropiado.")
+    
+    # Obtener contratos del proyecto activo
+    project_id = get_active_project_id()
+    contracts_text = ""
+    if project_id:
+        contracts_text = get_contracts_for_prompt(project_id, "all")
+        if contracts_text:
+            print(f"✅ Contratos cargados para desarrollo backend")
     
     prompt_additions = ""
     # --- CORRECCIÓN CLAVE ---
@@ -61,10 +71,16 @@ def backend_developer_node(state: dict) -> dict:
         - Para requirements.txt: `<!--- requirements.txt_CODE_START --->` y `<!--- requirements.txt_CODE_END --->`
     3.  No añadas explicaciones fuera de los bloques de código.
     4.  Tu código DEBE ser consistente con el modelo/esquema de la base de datos proporcionado.
+    5.  **IMPORTANTE:** Si hay contratos de API definidos, DEBES implementar EXACTAMENTE esos endpoints con los schemas especificados.
 
     **Tarea Específica Asignada:**
     ---
     {task}
+    ---
+    
+    **CONTRATOS DE INTERFAZ (DEBES IMPLEMENTAR ESTOS ENDPOINTS EXACTAMENTE):**
+    ---
+    {contracts_text if contracts_text else "No hay contratos definidos. Implementa según la tarea."}
     ---
     
     **Esquema/Modelo de Base de Datos ({db_tech}) (DEBES SEGUIR ESTE DISEÑO):**

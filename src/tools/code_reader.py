@@ -1,19 +1,28 @@
 # En el archivo: src/tools/code_reader.py
 
 import os
-from typing import List, Dict # Asegúrate de que List y Dict estén importados
+from typing import List, Dict
+from .project_manager import get_active_project_path
 
-def list_code_files_in_directory(directory_path: str) -> List[str]:
+def list_code_files_in_directory(directory_path: str = None) -> List[str]:
     """
     Busca de forma recursiva todos los archivos dentro de un directorio y sus subdirectorios.
-
+    
     Args:
-        directory_path: La ruta a la carpeta raíz que se va a escanear (ej. 'outputs').
-
+        directory_path: La ruta a la carpeta raíz que se va a escanear.
+                       Si es None, usa el proyecto activo.
+    
     Returns:
         Una lista de rutas completas a cada archivo encontrado.
         Devuelve una lista vacía si el directorio no existe o no contiene archivos.
     """
+    # Si no se proporciona ruta, usar el proyecto activo
+    if directory_path is None:
+        directory_path = get_active_project_path()
+        if not directory_path:
+            print("⚠️ ADVERTENCIA: No hay proyecto activo y no se proporcionó ruta.")
+            return []
+    
     found_files = []
     
     if not os.path.isdir(directory_path):
@@ -22,7 +31,14 @@ def list_code_files_in_directory(directory_path: str) -> List[str]:
 
     # os.walk() recorre el directorio de arriba hacia abajo (recursivamente)
     for dirpath, _, filenames in os.walk(directory_path):
+        # Ignorar carpeta de contratos y metadata
+        if "contracts" in dirpath:
+            continue
+            
         for filename in filenames:
+            # Ignorar archivos de metadata
+            if filename == "metadata.json":
+                continue
             # Construimos la ruta completa y la añadimos a la lista
             full_path = os.path.join(dirpath, filename)
             found_files.append(full_path)
@@ -35,12 +51,10 @@ def list_code_files_in_directory(directory_path: str) -> List[str]:
     return found_files
 
 
-# Tu función existente debe permanecer en este archivo también
 def read_code_from_files(file_paths: List[str]) -> Dict[str, str]:
     """
     Lee el contenido de una lista de archivos de código y lo devuelve como un diccionario.
     Maneja de forma segura los casos en que un archivo no se encuentra.
-    ... (el resto de tu función no cambia)
     """
     code_contents = {}
     for file_path in file_paths:

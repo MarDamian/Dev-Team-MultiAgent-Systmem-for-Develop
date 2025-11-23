@@ -31,3 +31,10 @@ class GraphState(TypedDict):
 
     # --- CAMPO CLAVE PARA VISUALIZAR EL PROCESO RAG ITERATIVO ---
     rag_steps: Annotated[List[str], lambda x, y: x + y]
+    
+    # --- NUEVOS CAMPOS PARA GESTIÓN DE PROYECTOS Y CONTRATOS ---
+    project_id: Optional[str]
+    project_metadata: Optional[Dict]
+    api_contracts: Optional[List[Dict]]
+    data_contracts: Optional[List[Dict]]
+    contract_validation_results: Optional[Dict]

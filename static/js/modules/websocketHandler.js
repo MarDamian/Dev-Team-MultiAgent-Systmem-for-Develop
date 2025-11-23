@@ -19,70 +19,166 @@ function handleAgentMessage(nodeName, nodeOutput) {
 
     const agentKey = agentMap[nodeName] || 'supervisor';
 
-
-    if (nodeName !== 'conversational_agent' && nodeName !== 'supervisor') {
-        addMessage(`<i>Procesando...</i>`, 'agent-status', { agent: agentKey });
-    }
-
     if (!nodeOutput) return;
 
-    // Handle specific outputs
+    // ============================================
+    // CONVERSATIONAL AGENT - Respuesta final
+    // ============================================
     if (nodeName === 'conversational_agent' && nodeOutput.final_response) {
         const botResponse = marked.parse(nodeOutput.final_response);
         addMessage(botResponse, 'bot', { agent: agentKey });
         addToHistory("Bot", nodeOutput.final_response);
+        return;
     }
 
-    if (nodeOutput.ui_ux_spec) {
-        addMessage(marked.parse(nodeOutput.ui_ux_spec), 'bot', { agent: agentKey });
-        addToHistory("Bot", nodeOutput.ui_ux_spec);
-    }
-
-    if (nodeOutput.analysis_result) {
-        addMessage(marked.parse(nodeOutput.analysis_result), 'bot', { agent: agentKey });
-        addToHistory("Bot", nodeOutput.analysis_result);
-    }
-
-    if (nodeOutput.dev_plan) {
+    // ============================================
+    // PLANNER - Plan de desarrollo + Contratos
+    // ============================================
+    if (nodeName === 'planner' && nodeOutput.dev_plan) {
         const plan = nodeOutput.dev_plan;
-        let planHtml = "<h4>Plan de Desarrollo</h4><ul>" +
-            (plan.plan_type ? `<li><strong>Tipo:</strong> ${plan.plan_type}</li>` : '') +
-            (plan.frontend_task ? `<li><strong>Tarea Frontend:</strong> ${plan.frontend_task}</li>` : '') +
-            (plan.backend_task ? `<li><strong>Tarea Backend:</strong> ${plan.backend_task}</li>` : '') +
-            (plan.db_task ? `<li><strong>Tarea base de Datos:</strong> ${plan.db_task}</li>` : '') +
-            "</ul>";
 
-        addMessage(planHtml, 'bot', { agent: agentKey });
+        // Construir mensaje completo del planner en una sola vez
+        let plannerMessage = `<h4>📋 Proyecto Creado</h4>`;
 
-        const planTextParts = ["Plan de Desarrollo:"];
-        if (plan.plan_type) planTextParts.push(`Tipo=${plan.plan_type}`);
-        if (plan.frontend_task) planTextParts.push(`Tarea Frontend=${plan.frontend_task}`);
-        if (plan.backend_task) planTextParts.push(`Tarea Backend=${plan.backend_task}`);
-    }
-
-    if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
-        for (const [lang, code] of Object.entries(nodeOutput.frontend_code)) {
-            if (code) addMessage(code, 'bot', { isCode: true, lang, agent: agentKey });
+        // Información del proyecto
+        if (nodeOutput.project_id) {
+            plannerMessage += `<p><strong>ID:</strong> <code>${nodeOutput.project_id}</code></p>`;
         }
-    }
-
-    if (nodeName === 'database_architech' && nodeOutput.db_schema) {
-        for (const [lang, code] of Object.entries(nodeOutput.db_schema)) {
-            if (code) addMessage(code, 'bot', { isCode: true, lang, agent: agentKey });
+        if (plan.project_name) {
+            plannerMessage += `<p><strong>Nombre:</strong> ${plan.project_name}</p>`;
         }
+        if (plan.plan_type) {
+            plannerMessage += `<p><strong>Tipo:</strong> ${plan.plan_type}</p>`;
+        }
+
+        // Plan de desarrollo
+        plannerMessage += `<h4>📝 Plan de Desarrollo</h4>`;
+        if (plan.frontend_task) {
+            plannerMessage += `<div style="margin-bottom: 15px;">
+                <strong>🎨 Frontend:</strong> ${plan.frontend_task}
+                ${plan.frontend_tech ? `<br><em>Tecnología: ${plan.frontend_tech}</em>` : ''}
+            </div>`;
+        }
+        if (plan.backend_task) {
+            plannerMessage += `<div style="margin-bottom: 15px;">
+                <strong>⚙️ Backend:</strong> ${plan.backend_task}
+                ${plan.backend_tech ? `<br><em>Tecnología: ${plan.backend_tech}</em>` : ''}
+            </div>`;
+        }
+        if (plan.db_task) {
+            plannerMessage += `<div style="margin-bottom: 15px;">
+                <strong>🗄️ Base de Datos:</strong> ${plan.db_task}
+                ${plan.db_tech ? `<br><em>Tecnología: ${plan.db_tech}</em>` : ''}
+            </div>`;
+        }
+
+        // Contratos de API
+        if (nodeOutput.api_contracts && nodeOutput.api_contracts.length > 0) {
+            plannerMessage += `<h4>🔗 Contratos de API (${nodeOutput.api_contracts.length})</h4><ul>`;
+            nodeOutput.api_contracts.forEach(contract => {
+                plannerMessage += `<li><code>${contract.method} ${contract.endpoint}</code> - ${contract.description}</li>`;
+            });
+            plannerMessage += `</ul>`;
+        }
+
+        // Modelos de datos
+        if (nodeOutput.data_contracts && nodeOutput.data_contracts.length > 0) {
+            plannerMessage += `<h4>📊 Modelos de Datos (${nodeOutput.data_contracts.length})</h4><ul>`;
+            nodeOutput.data_contracts.forEach(model => {
+                plannerMessage += `<li><strong>${model.model_name}</strong> - ${model.description}</li>`;
+            });
+            plannerMessage += `</ul>`;
+        }
+
+        // Enviar todo en un solo mensaje
+        addMessage(plannerMessage, 'bot', { agent: agentKey });
+        return;
     }
 
+    // ============================================
+    // MULTIMODAL ANALYZER - Análisis
+    // ============================================
+    if (nodeName === 'multimodal_analyzer' && nodeOutput.analysis_result) {
+        addMessage(`<h4>🔍 Análisis Multimodal</h4>${marked.parse(nodeOutput.analysis_result)}`, 'bot', { agent: agentKey });
+        addToHistory("Bot", nodeOutput.analysis_result);
+        return;
+    }
+
+    // ============================================
+    // UI/UX DESIGNER - Especificación
+    // ============================================
+    if (nodeName === 'ui_ux_designer' && nodeOutput.ui_ux_spec) {
+        addMessage(`<h4>🎨 Diseño UI/UX</h4>${marked.parse(nodeOutput.ui_ux_spec)}`, 'bot', { agent: agentKey });
+        addToHistory("Bot", nodeOutput.ui_ux_spec);
+        return;
+    }
+
+    // ============================================
+    // BACKEND DEVELOPER - Código generado
+    // ============================================
     if (nodeName === 'develop_backend' && nodeOutput.backend_code) {
-        for (const [lang, code] of Object.entries(nodeOutput.backend_code)) {
-            if (code) addMessage(code, 'bot', { isCode: true, lang, agent: agentKey });
+        const fileCount = Object.keys(nodeOutput.backend_code).length;
+
+        // Construir mensaje completo en una sola vez
+        let backendMessage = `<h4>⚙️ Backend Generado (${fileCount} archivos)</h4><ul>`;
+        for (const filename of Object.keys(nodeOutput.backend_code)) {
+            backendMessage += `<li><code>${filename}</code></li>`;
         }
+        backendMessage += '</ul>';
+
+        // Enviar todo en un solo mensaje
+        addMessage(backendMessage, 'bot', { agent: agentKey });
+        return;
     }
 
+    // ============================================
+    // FRONTEND DEVELOPER - Código generado
+    // ============================================
+    if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
+        const fileCount = Object.keys(nodeOutput.frontend_code).length;
+
+        // Construir mensaje completo en una sola vez
+        let frontendMessage = `<h4>🎨 Frontend Generado (${fileCount} archivos)</h4><ul>`;
+        for (const filename of Object.keys(nodeOutput.frontend_code)) {
+            frontendMessage += `<li><code>${filename}</code></li>`;
+        }
+        frontendMessage += '</ul>';
+
+        // Enviar todo en un solo mensaje
+        addMessage(frontendMessage, 'bot', { agent: agentKey });
+        return;
+    }
+
+    // ============================================
+    // DATABASE ARCHITECT - Esquema generado
+    // ============================================
+    if (nodeName === 'database_architech' && nodeOutput.db_schema) {
+        const fileCount = Object.keys(nodeOutput.db_schema).length;
+
+        // Construir mensaje completo en una sola vez
+        let databaseMessage = `<h4>🗄️ Base de Datos Generada (${fileCount} archivos)</h4><ul>`;
+        for (const filename of Object.keys(nodeOutput.db_schema)) {
+            databaseMessage += `<li><code>${filename}</code></li>`;
+        }
+        databaseMessage += '</ul>';
+
+        // Enviar todo en un solo mensaje
+        addMessage(databaseMessage, 'bot', { agent: agentKey });
+        return;
+    }
+
+    // ============================================
+    // QUALITY AUDITOR - Feedback
+    // ============================================
     if (nodeName === 'quality_auditor' && nodeOutput.feedback) {
-        const prefix = nodeOutput.code_approved ? "Auditoría Aprobada" : "Feedback del Auditor";
-        const feedbackMessage = `**${prefix}:** ${nodeOutput.feedback}`;
-        addMessage(feedbackMessage, 'bot', { agent: agentKey });
-        addToHistory("Bot", feedbackMessage);
+        const isApproved = nodeOutput.code_approved;
+        const icon = isApproved ? '✅' : '⚠️';
+        const title = isApproved ? 'Código Aprobado' : 'Revisión Requerida';
+
+        const feedbackHtml = `<h4>${icon} ${title}</h4><p>${marked.parse(nodeOutput.feedback)}</p>`;
+        addMessage(feedbackHtml, 'bot', { agent: agentKey });
+        addToHistory("Bot", `${title}: ${nodeOutput.feedback}`);
+        return;
     }
 }
 
@@ -95,7 +191,7 @@ export function initWebSocket(callbacks) {
 
     socket.onerror = (error) => {
         console.error("WebSocket error:", error);
-        addMessage("Error de conexión. Por favor, refresca la página.", "bot");
+        addMessage("❌ Error de conexión. Por favor, refresca la página.", "bot");
     };
 
     socket.onmessage = (event) => {
@@ -103,11 +199,13 @@ export function initWebSocket(callbacks) {
         console.log("Mensaje recibido del servidor:", eventData);
 
         if (eventData.error) {
-            addMessage(`Error del servidor: ${eventData.error}`, 'agent-status');
+            addMessage(`❌ Error del servidor: ${eventData.error}`, 'bot');
             callbacks.onDone();
             return;
         }
         if (eventData.type === "done") {
+            // Mensaje final de completado
+            addMessage("✅ <strong>Tarea completada</strong>. Revisa los archivos generados en la carpeta <code>outputs/</code>.", 'bot');
             callbacks.onDone();
             return;
         }

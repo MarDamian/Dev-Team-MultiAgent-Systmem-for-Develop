@@ -11,7 +11,8 @@ def database_architech_node(state: dict) -> dict:
     """
     print("---AGENTE: DESARROLLADOR DE LA CAPA DE DATOS---")
 
-    analysis_result = state.get("analysis_result")
+    analysis_result = state.get("analysis_result", "No disponible")
+    ui_ux_spec = state.get("ui_ux_spec", "No disponible")
     feedback = state.get("review_feedback")
     user = state.get("user_input")
     

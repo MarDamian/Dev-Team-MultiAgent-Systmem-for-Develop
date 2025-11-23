@@ -6,22 +6,21 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.schema.vectorstore import VectorStoreRetriever
 
 
-model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+model_name = "sentence-transformers/all-MiniLM-L6-v2"  # Modelo más pequeño y rápido
 
 model_kwargs = {'device': 'cpu'}
-encode_kwargs = {'normalize_embeddings': True} # La normalización es una buena práctica
+encode_kwargs = {'normalize_embeddings': True}
 
-print(f"Inicializando embeddings con el modelo multilingüe: {model_name}")
+print(f"Inicializando embeddings con el modelo: {model_name}")
 embeddings = HuggingFaceEmbeddings(
     model_name=model_name,
     model_kwargs=model_kwargs,
     encode_kwargs=encode_kwargs
 )
 
-# --- CONFIGURACIÓN DE CHROMA Y RETRIEVER ---
+
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-# Cambiamos el nombre del directorio para no mezclar embeddings de modelos distintos
 persist_directory = "embeddings_chroma"
 
 vectorstore: Chroma | None = None
@@ -80,7 +79,6 @@ def initialize_rag():
     except Exception as e:
         print(f"Ocurrió un error durante la inicialización de RAG: {e}")
 
-# (Las funciones retrieve_context e initialize_rag() se mantienen igual)
 def retrieve_context(query: str) -> str:
     if not retriever:
         print("Error: El sistema RAG no ha sido inicializado. Llamando a initialize_rag() ahora.")
