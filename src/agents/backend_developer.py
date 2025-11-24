@@ -53,7 +53,7 @@ def backend_developer_node(state: dict) -> dict:
         ```
         {existing_code_prompt}
         ```
-        **Modifica unicamente los archivos que se te piden en la tarea. No modifiques archivos que no se te piden.**
+        **Modifica o Genera unicamente los archivos que se te piden en el Feedback. No modifiques archivos que no debes corregir.**
         """
 
     # --- Construcción del Prompt Final y Corregido ---
@@ -88,7 +88,7 @@ REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
    ✓ Nombres de variables, funciones y clases descriptivos y en inglés
    ✓ Constantes en MAYÚSCULAS, variables en snake_case/camelCase según lenguaje
    ✓ Código DRY (Don't Repeat Yourself) - reutiliza funciones comunes
-   ✓ Independiza el código de assets estáticos(recursos fuera del código) si es posible.
+   ✓ Si usas assets indica en comentarios la ubicación de los archivos necesarios.
 
 **2. DOCUMENTACIÓN Y COMENTARIOS:**
    ✓ Docstrings completos en todas las funciones (describe propósito, params, returns)

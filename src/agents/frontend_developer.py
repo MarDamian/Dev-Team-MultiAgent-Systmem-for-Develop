@@ -164,11 +164,6 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
    [código JavaScript completo]
    `// --- script.js_CODE_END ---`
 
-4. **DEPENDENCIAS** (package.json solo si es necesario para frameworks):
-   `/* --- package.json_CODE_START --- */`
-   [JSON de dependencias]
-   `/* --- package.json_CODE_END --- */`
-
 **REGLAS DE ORO:**
 - ❌ NO añadas explicaciones fuera de los bloques de código
 - ❌ NO uses markdown para código (solo los delimitadores especificados)
