@@ -64,17 +64,13 @@ def quality_auditor_node(state: dict) -> dict:
     project_id = get_active_project_id()
     contracts_text = ""
     syntax_report = ""
+    contract_report = ""
     
     if project_id:
         contracts_text = get_contracts_for_prompt(project_id, "all")
         if contracts_text:
             print(f"✅ Contratos de interfaz cargados para validación.")
         
-        # Validación de sintaxis
-        print("Ejecutando validación de sintaxis...")
-        syntax_validation = code_validator.validate_project_code(project_id)
-        syntax_report = code_validator.format_validation_report(syntax_validation)
-        print(syntax_report)
 
     # --- 6. Construir el Prompt para el LLM ---
     prompt_text = f"""
@@ -99,6 +95,11 @@ def quality_auditor_node(state: dict) -> dict:
     ---
     {syntax_report if syntax_report else "No se ejecutó validación de sintaxis."}
     ---
+    **REPORTE DE VALIDACIÓN DE CONTRATOS:**
+    ---
+    {contract_report if contract_report else "No se ejecutó validación de contratos."}
+    ---
+
 
     **CÓDIGO GENERADO A AUDITAR (leído de los archivos):**
     {code_to_review}
@@ -113,7 +114,7 @@ def quality_auditor_node(state: dict) -> dict:
 
     **Formato de Respuesta (OBLIGATORIO):**
     Tu respuesta DEBE ser un objeto JSON con la siguiente estructura y NADA MÁS:
-    - "approved": (boolean) `true` si el código pasa la auditoría, `false` si requiere cambios.
+    - "approved": (boolean) `true` si el código pasa la auditoria tanto backend como frontend y da, `false` si requiere cambios.
     - "feedback": (string) Si se rechaza, un feedback claro, conciso y constructivo que explique QUÉ cambiar y POR QUÉ, haciendo referencia a los principios de calidad y contratos si es necesario. Si se aprueba, un breve mensaje de confirmación (ej. "El código cumple con los estándares de calidad, contratos y la especificación.").
     """
     

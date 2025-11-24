@@ -224,23 +224,80 @@ class CodeValidator:
             for contract in api_contracts:
                 endpoint = contract["endpoint"]
                 method = contract["method"]
+                request_schema = contract.get("request_schema", {})
+                response_schema = contract.get("response_schema", {})
+                status_codes = contract.get("status_codes", [])
                 
-                # Buscar definición del endpoint en el código (búsqueda simple)
-                if endpoint.replace('/', '') not in code and endpoint not in code:
-                    result["warnings"].append(
-                        f"No se encontró implementación del endpoint {method} {endpoint}"
+                # Buscar definición del endpoint en el código
+                endpoint_found = endpoint.replace('/', '') in code or endpoint in code
+                
+                if not endpoint_found:
+                    result["errors"].append(
+                        f"❌ Endpoint {method} {endpoint} NO implementado"
                     )
+                    result["valid"] = False
+                    continue
+                
+                # Validar schema de request
+                if request_schema:
+                    for field in request_schema.keys():
+                        if field not in code:
+                            result["warnings"].append(
+                                f"⚠️ Campo '{field}' del request schema de {endpoint} no encontrado en código"
+                            )
+                
+                # Validar schema de response
+                if response_schema:
+                    # Si es un dict, validar campos
+                    if isinstance(response_schema, dict):
+                        for field in response_schema.keys():
+                            if field not in code:
+                                result["errors"].append(
+                                    f"❌ Campo '{field}' del response schema de {endpoint} NO encontrado en código"
+                                )
+                                result["valid"] = False
+                
+                # Validar códigos de estado
+                if status_codes:
+                    for status_code in status_codes:
+                        if str(status_code) not in code:
+                            result["warnings"].append(
+                                f"⚠️ Código de estado {status_code} para {endpoint} no encontrado explícitamente"
+                            )
         
         elif code_type == "frontend":
             # Verificar que se consuman los endpoints
             for contract in api_contracts:
                 endpoint = contract["endpoint"]
+                method = contract["method"]
+                request_schema = contract.get("request_schema", {})
+                response_schema = contract.get("response_schema", {})
                 
                 # Buscar uso del endpoint en el código
                 if endpoint not in code:
-                    result["warnings"].append(
-                        f"El endpoint {endpoint} no parece ser usado en el frontend"
+                    result["errors"].append(
+                        f"❌ Endpoint {endpoint} NO consumido en frontend"
                     )
+                    result["valid"] = False
+                    continue
+                
+                # Validar que se envíen los campos del request
+                if request_schema:
+                    for field in request_schema.keys():
+                        if field not in code:
+                            result["errors"].append(
+                                f"❌ Campo '{field}' del request NO enviado a {endpoint}"
+                            )
+                            result["valid"] = False
+                
+                # Validar que se procesen los campos del response
+                if response_schema:
+                    if isinstance(response_schema, dict):
+                        for field in response_schema.keys():
+                            if field not in code:
+                                result["warnings"].append(
+                                    f"⚠️ Campo '{field}' del response de {endpoint} no procesado en frontend"
+                                )
         
         return result
     
@@ -299,6 +356,143 @@ class CodeValidator:
                         results["summary"]["files_with_warnings"] += 1
         
         return results
+    
+    def validate_project_contracts(self, project_id: str) -> Dict[str, any]:
+        """
+        Valida que todo el código del proyecto cumpla con los contratos definidos.
+        
+        Args:
+            project_id: ID del proyecto
+            
+        Returns:
+            Dict con resultados de validación de contratos
+        """
+        results = {
+            "overall_valid": True,
+            "backend_validation": {},
+            "frontend_validation": {},
+            "summary": {
+                "total_violations": 0,
+                "critical_violations": 0,
+                "warnings": 0
+            }
+        }
+        
+        project_path = get_project_path(project_id)
+        
+        if not os.path.exists(project_path):
+            results["overall_valid"] = False
+            results["error"] = f"El proyecto {project_id} no existe"
+            return results
+        
+        # Validar backend
+        backend_path = os.path.join(project_path, "backend")
+        if os.path.exists(backend_path):
+            backend_code = ""
+            for root, dirs, files in os.walk(backend_path):
+                for file in files:
+                    if file.endswith('.py'):
+                        filepath = os.path.join(root, file)
+                        try:
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                backend_code += f.read() + "\n"
+                        except:
+                            pass
+            
+            if backend_code:
+                results["backend_validation"] = self.validate_api_contracts(
+                    project_id, backend_code, "backend"
+                )
+                
+                if not results["backend_validation"]["valid"]:
+                    results["overall_valid"] = False
+                
+                results["summary"]["critical_violations"] += len(results["backend_validation"].get("errors", []))
+                results["summary"]["warnings"] += len(results["backend_validation"].get("warnings", []))
+        
+        # Validar frontend
+        frontend_path = os.path.join(project_path, "frontend")
+        if os.path.exists(frontend_path):
+            frontend_code = ""
+            for root, dirs, files in os.walk(frontend_path):
+                for file in files:
+                    if file.endswith(('.js', '.html')):
+                        filepath = os.path.join(root, file)
+                        try:
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                frontend_code += f.read() + "\n"
+                        except:
+                            pass
+            
+            if frontend_code:
+                results["frontend_validation"] = self.validate_api_contracts(
+                    project_id, frontend_code, "frontend"
+                )
+                
+                if not results["frontend_validation"]["valid"]:
+                    results["overall_valid"] = False
+                
+                results["summary"]["critical_violations"] += len(results["frontend_validation"].get("errors", []))
+                results["summary"]["warnings"] += len(results["frontend_validation"].get("warnings", []))
+        
+        results["summary"]["total_violations"] = (
+            results["summary"]["critical_violations"] + 
+            results["summary"]["warnings"]
+        )
+        
+        return results
+    
+    def format_contract_validation_report(self, validation_results: Dict) -> str:
+        """
+        Formatea los resultados de validación de contratos en un reporte legible.
+        
+        Args:
+            validation_results: Resultados de validate_project_contracts()
+            
+        Returns:
+            String con reporte formateado
+        """
+        lines = []
+        lines.append("=" * 60)
+        lines.append("REPORTE DE VALIDACIÓN DE CONTRATOS")
+        lines.append("=" * 60)
+        
+        summary = validation_results.get("summary", {})
+        lines.append(f"\n📊 Resumen:")
+        lines.append(f"   Total de violaciones: {summary.get('total_violations', 0)}")
+        lines.append(f"   ❌ Violaciones críticas: {summary.get('critical_violations', 0)}")
+        lines.append(f"   ⚠️  Advertencias: {summary.get('warnings', 0)}")
+        
+        if validation_results.get("overall_valid"):
+            lines.append(f"\n✅ VALIDACIÓN DE CONTRATOS: APROBADA")
+        else:
+            lines.append(f"\n❌ VALIDACIÓN DE CONTRATOS: RECHAZADA")
+        
+        # Backend
+        backend = validation_results.get("backend_validation", {})
+        if backend:
+            lines.append(f"\n⚙️ Backend:")
+            if backend.get("errors"):
+                for error in backend["errors"]:
+                    lines.append(f"   {error}")
+            if backend.get("warnings"):
+                for warning in backend["warnings"]:
+                    lines.append(f"   {warning}")
+        
+        # Frontend
+        frontend = validation_results.get("frontend_validation", {})
+        if frontend:
+            lines.append(f"\n🎨 Frontend:")
+            if frontend.get("errors"):
+                for error in frontend["errors"]:
+                    lines.append(f"   {error}")
+            if frontend.get("warnings"):
+                for warning in frontend["warnings"]:
+                    lines.append(f"   {warning}")
+        
+        lines.append("\n" + "=" * 60)
+        
+        return "\n".join(lines)
     
     def format_validation_report(self, validation_results: Dict) -> str:
         """

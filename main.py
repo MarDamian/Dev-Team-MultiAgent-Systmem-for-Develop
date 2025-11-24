@@ -68,15 +68,23 @@ async def websocket_endpoint(websocket: WebSocket):
                 print(f"Invocando el grafo con la entrada (con historial): {inputs}")
                 
                 start_time = time.time() # INICIO DE MEDICIÓN DE TIEMPO
+                total_tokens = 0  # Contador de tokens
+                
                 
                 async for event in langgraph_app.astream(inputs, config=config):
                     if event:
                         await websocket.send_json(event)
+                        # Contar tokens si están disponibles en el evento
+                        for node_data in event.values():
+                            if isinstance(node_data, dict) and 'usage_metadata' in node_data:
+                                metadata = node_data['usage_metadata']
+                                total_tokens += metadata.get('input_tokens', 0) + metadata.get('output_tokens', 0)
                 
                 end_time = time.time() # FIN DE MEDICIÓN DE TIEMPO
                 execution_time = end_time - start_time
                 print("////////////////////////////////////////////")
-                print(f"Tiempo de ejecución total de la tarea: {execution_time:.2f} segundos") 
+                print(f"Tiempo de ejecución total: {execution_time:.2f} segundos")
+                print(f"Tokens consumidos: {total_tokens:,}")
                 print("////////////////////////////////////////////")
 
                 for file_path in file_paths:

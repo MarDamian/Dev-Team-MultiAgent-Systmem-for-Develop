@@ -184,6 +184,9 @@ function handleAgentMessage(nodeName, nodeOutput) {
 
 export function initWebSocket(callbacks) {
     const socket = new WebSocket(`ws://${window.location.host}/ws`);
+    
+    // Variable para rastrear si se generó código
+    let codeGenerated = false;
 
     socket.onopen = () => {
         console.log("WebSocket conectado.");
@@ -205,8 +208,13 @@ export function initWebSocket(callbacks) {
         }
         if (eventData.type === "done") {
             // Mensaje final de completado
-            addMessage("✅ <strong>Tarea completada</strong>. Revisa los archivos generados en la carpeta <code>outputs/</code>.", 'bot');
+            // Solo mostrar mensaje de completado si se generó código
+            if (codeGenerated) {
+                addMessage("✅ <strong>Tarea completada</strong>. Revisa los archivos generados en la carpeta <code>outputs/</code>.", 'bot');
+            }
             callbacks.onDone();
+            // Resetear el flag para la próxima tarea
+            codeGenerated = false;
             return;
         }
         if (eventData.type === "final_response") {
@@ -218,7 +226,19 @@ export function initWebSocket(callbacks) {
 
         const nodeName = Object.keys(eventData)[0];
         if (nodeName) {
-            handleAgentMessage(nodeName, eventData[nodeName]);
+            // Detectar si se generó código (backend, frontend, o database)
+            const nodeOutput = eventData[nodeName];
+            if (nodeName === 'develop_backend' && nodeOutput.backend_code) {
+                codeGenerated = true;
+            }
+            if (nodeName === 'develop_frontend' && nodeOutput.frontend_code) {
+                codeGenerated = true;
+            }
+            if (nodeName === 'database_architech' && nodeOutput.db_schema) {
+                codeGenerated = true;
+            }
+            
+            handleAgentMessage(nodeName, nodeOutput);
         }
     };
 

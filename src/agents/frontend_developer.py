@@ -20,6 +20,7 @@ def frontend_developer_node(state: dict) -> dict:
     # --- Recopilación de contexto ---
     frontend_tech = plan.get("frontend_tech", "HTML, CSS y JavaScript")
     task = plan.get("frontend_task")
+    backend_port = plan.get("backend_port", 5000)  # Puerto por defecto
     feedback = state.get("review_feedback")
     ui_ux_spec = state.get("ui_ux_spec", "No se proporcionó especificación de UI/UX. Crea una interfaz limpia y moderna.")
     
@@ -64,12 +65,17 @@ def frontend_developer_node(state: dict) -> dict:
     1.  Genera el código en bloques separados para cada archivo (HTML, CSS, JavaScript).
         Usa los nombres de archivo estándar y completos (incluyendo extensión) DENTRO de los delimitadores.
     2.  Usa el estilo de comentario apropiado para cada delimitador:
-        - Para HTML: `<!--- index.html_CODE_START --->` y `<!--- index.html_CODE_END --->`
+        - Para HTML: `<!--- index.html_CODE_START --->`  y `<!--- index.html_CODE_END --->`
         - Para CSS: `/* --- style.css_CODE_START --- */` y `/* --- style.css_CODE_END --- */`
         - Para JavaScript: `// --- script.js_CODE_START ---` y `// --- script.js_CODE_END ---`
     3.  No añadas explicaciones fuera de los bloques de código.
     4.  **IMPORTANTE:** Si hay contratos de API definidos, DEBES consumir EXACTAMENTE esos endpoints con los schemas especificados.
-    5.  El código debe ser responsive y seguir las mejores prácticas de UI/UX.
+    5.  **CONFIGURACIÓN DE BACKEND URL:**
+        - El backend corre en el puerto {backend_port}
+        - En JavaScript, define la URL base del backend como: `const BASE_URL = 'http://localhost:{backend_port}';`
+        - Usa esta constante para todas las llamadas fetch a los endpoints del backend
+        - Ejemplo: `fetch(\`${{BASE_URL}}/api/login\`, {{...}})`
+    6.  El código debe ser responsive y seguir las mejores prácticas de UI/UX.
 
     **Tarea Específica Asignada:**
     ---

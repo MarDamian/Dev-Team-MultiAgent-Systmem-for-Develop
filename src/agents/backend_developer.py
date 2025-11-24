@@ -72,6 +72,9 @@ def backend_developer_node(state: dict) -> dict:
     3.  No añadas explicaciones fuera de los bloques de código.
     4.  Tu código DEBE ser consistente con el modelo/esquema de la base de datos proporcionado.
     5.  **IMPORTANTE:** Si hay contratos de API definidos, DEBES implementar EXACTAMENTE esos endpoints con los schemas especificados.
+    6.  **CONFIGURACIÓN CORS (CRÍTICO en caso de fullstack):**
+        - Agrega `cors` a package.json
+        - Justificación: CORS es esencial para que el frontend pueda comunicarse con el backend en desarrollo local
 
     **Tarea Específica Asignada:**
     ---

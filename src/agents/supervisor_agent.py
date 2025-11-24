@@ -47,10 +47,15 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
     - **Estrategia Fullstack Secuencial:** Si `plan_type` es 'fullstack':
         - Si NO hay `backend_code` (o está vacío), el siguiente paso ES `develop_backend`. (Prioridad: Backend primero).
         - Si HAY `backend_code` pero NO hay `frontend_code`, el siguiente paso ES `develop_frontend`. (El frontend usará el contexto del backend).
+        - Si HAY `backend_code` Y `frontend_code`, pero NO se ha auditado (`code_approved` no está presente o es False), el siguiente paso ES `quality_auditor`.
     - **Otros tipos de plan:** Si es 'backend-only', ve a `develop_backend`. Si es 'frontend-only', ve a `develop_frontend`. Si es 'database-only', ve a `database_architech`.
 
-3.  **Si hay código generado (`frontend_code` o `backend_code`) y NO ha sido auditado recientemente:** El siguiente paso es el `quality_auditor`.
-4.  **Si el quality auditor da por aprobado el código:** Finaliza la tarea `__end__`. Si rechaza, devuelve al desarrollador correspondiente y repite el proceso.
+3.  **Si hay código generado (`frontend_code`, `backend_code`, o `db_schema`):**
+    - Si `code_approved` es True, finaliza con `__end__`.
+    - Si `code_approved` es False o no existe, y NO hay `review_feedback` reciente, el siguiente paso es `quality_auditor`.
+    - Si hay `review_feedback` (código rechazado), devuelve al desarrollador correspondiente según `last_code_generated`.
+
+4.  **Si el quality auditor aprobó el código:** Finaliza la tarea `__end__`.
 
 **INSTRUCCIÓN:**
 Basado en TODO el estado actual, analiza la situación y determina el siguiente paso lógico. ¿Qué agente debe actuar ahora?
@@ -62,11 +67,6 @@ def supervisor_node(state: dict) -> dict:
     """
     print("---AGENTE: SUPERVISOR INTELIGENTE---")
 
-    # --- LÓGICA DE FINALIZACIÓN PRIORITARIA ---
-    # Si un agente especialista ha marcado la tarea como completa, forzamos el fin del flujo.
-    if state.get("task_complete"):
-        print("Decisión del Supervisor: Tarea marcada como completa. Finalizando.")
-        return {"routing_decision": "__end__"}
 
     # Convertir el estado a una cadena JSON para una visualización clara en el prompt.
     # Se excluyen claves que no son útiles para la decisión de enrutamiento.

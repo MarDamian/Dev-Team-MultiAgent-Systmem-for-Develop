@@ -49,6 +49,7 @@ def planner_node(state: dict) -> dict:
         "frontend_tech": "(string | null) Tecnología específica para el frontend (ej. 'HTML, CSS y JavaScript').",
         "backend_task": "(string | null) Descripción clara de la tarea para el desarrollador backend con requisitos técnicos, incluyendo justificación si aplica.",
         "backend_tech": "(string | null) Tecnología específica para el backend (ej. 'Python con Flask').",
+        "backend_port": "(number | null) Puerto en el que correrá el backend (ej. 5000 para Flask, 3000 para Express). Solo para backend/fullstack.",
         "db_task": "(string | null) Descripción clara de la tarea para el arquitecto de base de datos con requisitos técnicos, incluyendo justificación si aplica. (no des detalles sobre la base de datos ya hay un agente especializado en su creación)",
         "db_tech": "(string | null) Tecnología específica para base de datos (ej. 'MongoDB' o 'PostgreSQL' o 'Neo4j').",
         "api_contracts": "(array | null) Solo para fullstack: Array de contratos de API con estructura: [{{'endpoint': '/api/resource', 'method': 'GET/POST/PUT/DELETE', 'description': 'descripción', 'request_schema': {{'campo': 'tipo'}}, 'response_schema': {{'campo': 'tipo'}}, 'status_codes': [200, 400, 500]}}]",
@@ -83,8 +84,9 @@ def planner_node(state: dict) -> dict:
 
     4.5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):** *(Solo si `plan_type` es 'fullstack')*
         * **Backend Task:** Define explícitamente los endpoints clave (Ruta, Método, Input esperado, Output esperado).
+        * **Backend Port:** Especifica el puerto estándar para la tecnología (Flask: 5000, Express: 3000, Django: 8000).
         * **Frontend Task:** Indica que la interfaz debe consumir los endpoints definidos en el backend, mencionando los relevantes.
-        * **Objetivo:** Garantizar que el frontend conozca exactamente lo que debe esperar del backend antes de iniciar la implementación.
+        * **Objetivo:** Garantizar que el frontend conozca exactamente lo que debe esperar del backend (endpoints y puerto) antes de iniciar la implementación.
     """
 
     response = analytical_llm.invoke(prompt)

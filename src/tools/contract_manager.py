@@ -25,7 +25,8 @@ class ContractManager:
         request_schema: Dict[str, str],
         response_schema: Dict[str, str],
         status_codes: List[int],
-        description: str = ""
+        description: str = "",
+        base_url: Optional[str] = None
     ) -> bool:
         """
         Define un contrato de API REST.
@@ -38,6 +39,7 @@ class ContractManager:
             response_schema: Schema de la respuesta (dict con nombre_campo: tipo)
             status_codes: Lista de códigos de estado posibles
             description: Descripción opcional del endpoint
+            base_url: URL base opcional (ej: 'http://localhost:5000')
             
         Returns:
             True si se guardó correctamente
@@ -51,6 +53,10 @@ class ContractManager:
             "response_schema": response_schema,
             "status_codes": status_codes
         }
+        
+        # Agregar base_url solo si se proporciona
+        if base_url:
+            contract["base_url"] = base_url
         
         return self._add_contract(project_id, "api_contracts", contract)
     
@@ -307,12 +313,13 @@ def define_api_contract(
     request_schema: Dict[str, str],
     response_schema: Dict[str, str],
     status_codes: List[int],
-    description: str = ""
+    description: str = "",
+    base_url: Optional[str] = None
 ) -> bool:
     """Define un contrato de API. Ver ContractManager.define_api_contract()"""
     return contract_manager.define_api_contract(
         project_id, endpoint, method, request_schema, 
-        response_schema, status_codes, description
+        response_schema, status_codes, description, base_url
     )
 
 
