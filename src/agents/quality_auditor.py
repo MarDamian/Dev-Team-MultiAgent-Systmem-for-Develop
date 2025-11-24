@@ -106,7 +106,7 @@ def quality_auditor_node(state: dict) -> dict:
     
 
     **Tus Criterios de Auditoría:**
-    1.  **Corrección Funcional/Visual:** ¿El código parece implementar lo solicitado por el usuario y el plan?
+    1.  **Corrección Funcional/Visual:** ¿El código implementa lo solicitado por el usuario y el plan?
     2.  **Adherencia a Principios:** ¿El código respeta los principios de calidad y buenas prácticas descritos arriba? (Ej: ¿Es legible, mantenible, sigue patrones de diseño recomendados?).
     3.  **Errores de Sintaxis:** ¿Hay errores de sintaxis según el reporte de validación?
     4.  **Cumplimiento de Contratos:** ¿El código cumple con los contratos de interfaz definidos? (Endpoints correctos, schemas de datos coincidentes, etc.)

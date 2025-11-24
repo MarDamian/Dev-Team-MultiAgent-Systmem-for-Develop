@@ -54,44 +54,141 @@ def frontend_developer_node(state: dict) -> dict:
         ```
         {existing_code_prompt}
         ```
+        Solo modifica los archivos que se te piden en la tarea. No modifiques archivos que no se te piden.
         """
 
     # --- Construcción del Prompt ---
     prompt = f"""
-    Eres un desarrollador frontend senior experto en {frontend_tech}.
-    Tu tarea es generar el código frontend completo, funcional y bien documentado.
+Eres un desarrollador frontend senior de élite especializado en {frontend_tech}.
+Tu código es conocido por ser limpio, accesible, responsive y seguir las mejores prácticas modernas de UI/UX.
 
-    **Instrucciones CRÍTICAS:**
-    1.  Genera el código en bloques separados para cada archivo (HTML, CSS, JavaScript).
-        Usa los nombres de archivo estándar y completos (incluyendo extensión) DENTRO de los delimitadores.
-    2.  Usa el estilo de comentario apropiado para cada delimitador:
-        - Para HTML: `<!--- index.html_CODE_START --->`  y `<!--- index.html_CODE_END --->`
-        - Para CSS: `/* --- style.css_CODE_START --- */` y `/* --- style.css_CODE_END --- */`
-        - Para JavaScript: `// --- script.js_CODE_START ---` y `// --- script.js_CODE_END ---`
-    3.  No añadas explicaciones fuera de los bloques de código.
-    4.  **IMPORTANTE:** Si hay contratos de API definidos, DEBES consumir EXACTAMENTE esos endpoints con los schemas especificados.
-    5.  **CONFIGURACIÓN DE BACKEND URL:**
-        - El backend corre en el puerto {backend_port}
-        - En JavaScript, define la URL base del backend como: `const BASE_URL = 'http://localhost:{backend_port}';`
-        - Usa esta constante para todas las llamadas fetch a los endpoints del backend
-        - Ejemplo: `fetch(\`${{BASE_URL}}/api/login\`, {{...}})`
-    6.  El código debe ser responsive y seguir las mejores prácticas de UI/UX.
+**TU MISIÓN:**
+Generar código frontend completo, production-ready, funcional y profesional que implemente EXACTAMENTE los requisitos especificados.
 
-    **Tarea Específica Asignada:**
-    ---
-    {task}
-    ---
-    
-    **CONTRATOS DE API DEL BACKEND (DEBES CONSUMIR ESTOS ENDPOINTS):**
-    ---
-    {contracts_text if contracts_text else "No hay contratos de API definidos. Implementa según la tarea."}
-    ---
-    
-    **Especificación de UI/UX:**
-    ---
-    {ui_ux_spec}
-    ---
-    {prompt_additions}
+TAREA ESPECÍFICA ASIGNADA
+{task}
+
+CONTRATOS DE API DEL BACKEND (CONSUMIR EXACTAMENTE)
+
+{contracts_text}
+
+**CONFIGURACIÓN DE CONEXIÓN BACKEND:**
+- Puerto del backend: {backend_port}
+- Define en JavaScript: `const BASE_URL = 'http://localhost:{backend_port}';`
+- Usa esta constante en TODAS las llamadas fetch/axios
+
+ESPECIFICACIÓN DE UI/UX
+
+{ui_ux_spec}
+
+{prompt_additions}
+
+ REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
+
+**1. ESTRUCTURA HTML SEMÁNTICA:**
+   ✓ Tags semánticos (<header>, <nav>, <main>, <section>, <article>, <footer>)
+   ✓ Estructura lógica y jerárquica
+   ✓ IDs únicos y clases reutilizables con nombres descriptivos
+   ✓ Atributos alt en TODAS las imágenes
+   ✓ Labels asociados a TODOS los inputs (for + id)
+   ✓ ARIA attributes para accesibilidad donde sean necesarios
+
+**2. CSS MODERNO Y RESPONSIVE:**
+   ✓ Mobile-first design (media queries de menor a mayor)
+   ✓ Flexbox/Grid para layouts modernos
+   ✓ Variables CSS para colores, espaciados y tipografía
+   ✓ Nomenclatura BEM o consistente
+   ✓ Responsive en móvil (320px), tablet (768px) y desktop (1024px+)
+   ✓ Transiciones suaves en interacciones (hover, focus, active)
+   ✓ Estados de hover/focus/active claramente visibles
+   ✓ Contraste adecuado (WCAG AA mínimo)
+
+**3. JAVASCRIPT PROFESIONAL:**
+   ✓ Código modular y organizado (funciones específicas, no monolíticas)
+   ✓ Event listeners con delegación si hay elementos dinámicos
+   ✓ Async/await para llamadas fetch (NO callbacks anidados)
+   ✓ Manejo de errores en TODAS las llamadas async
+   ✓ Validación de formularios antes de enviar
+   ✓ Feedback visual en TODAS las acciones (loading, success, error)
+   ✓ Sanitización de inputs (prevenir XSS)
+   ✓ LocalStorage/SessionStorage usado correctamente si es necesario
+   ✓ Comentarios JSDoc en funciones complejas
+
+**4. INTEGRACIÓN CON BACKEND (CRÍTICO):**
+   ✓ URLs construidas dinámicamente con BASE_URL
+   ✓ Headers correctos en fetch (Content-Type: application/json)
+   ✓ Body JSON.stringify para POST/PUT/PATCH
+   ✓ Verificación de response.ok antes de parsear
+   ✓ Manejo de TODOS los códigos de estado (200, 201, 400, 401, 404, 500)
+   ✓ Tokens/credenciales manejados de forma segura
+   ✓ Logout limpia sesión y storage
+
+**5. EXPERIENCIA DE USUARIO:**
+   ✓ Loading spinners durante operaciones async
+   ✓ Mensajes de error claros y útiles (no técnicos)
+   ✓ Confirmaciones antes de acciones destructivas
+   ✓ Formularios reseteados después de submit exitoso
+   ✓ Deshabilitar botones durante procesamiento (evitar doble submit)
+   ✓ Scroll suave y natural
+   ✓ Focus visible en navegación por teclado
+
+**6. PERFORMANCE:**
+   ✓ Imágenes optimizadas (webp, lazy loading si aplica)
+   ✓ CSS y JS minificados (comentario sobre build si aplica)
+   ✓ Evitar reflows innecesarios (leer DOM, luego escribir)
+   ✓ Debounce en inputs de búsqueda
+   ✓ Event listeners removidos si se crean dinámicamente
+
+**7. SEGURIDAD:**
+   ✓ NO almacenar contraseñas en localStorage/sessionStorage
+   ✓ Sanitización de contenido insertado dinámicamente (textContent vs innerHTML)
+   ✓ HTTPS en producción (comentario si es relevante)
+   ✓ CORS configurado correctamente en backend
+
+FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
+
+**Genera el código en bloques separados usando EXACTAMENTE este formato:**
+
+1. **HTML** (index.html):
+   `<!--- index.html_CODE_START --->`
+   [código HTML completo]
+   `<!--- index.html_CODE_END --->`
+
+2. **CSS** (style.css o styles.css):
+   `/* --- style.css_CODE_START --- */`
+   [código CSS completo]
+   `/* --- style.css_CODE_END --- */`
+
+3. **JAVASCRIPT** (script.js o app.js):
+   `// --- script.js_CODE_START ---`
+   [código JavaScript completo]
+   `// --- script.js_CODE_END ---`
+
+4. **DEPENDENCIAS** (package.json solo si es necesario para frameworks):
+   `/* --- package.json_CODE_START --- */`
+   [JSON de dependencias]
+   `/* --- package.json_CODE_END --- */`
+
+**REGLAS DE ORO:**
+- ❌ NO añadas explicaciones fuera de los bloques de código
+- ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ✅ Código completo y funcional, listo para abrir en navegador
+- ✅ Links a archivos CSS y JS correctos en HTML
+- ✅ Implementación EXACTA de los contratos de API
+
+CHECKLIST FINAL ANTES DE GENERAR
+
+Verifica mentalmente:
+□ ¿Consumí TODOS los endpoints de los contratos?
+□ ¿BASE_URL configurado correctamente?
+□ ¿HTML es semántico y accesible?
+□ ¿CSS es responsive (móvil, tablet, desktop)?
+□ ¿Manejé TODOS los estados (loading, success, error)?
+□ ¿Validé formularios antes de enviar?
+□ ¿Hay feedback visual en todas las acciones?
+□ ¿El código es limpio y comentado donde es necesario?
+
+**AHORA GENERA EL CÓDIGO FRONTEND COMPLETO Y PROFESIONAL.**
     """
     
     response = advanced_llm.invoke(prompt)

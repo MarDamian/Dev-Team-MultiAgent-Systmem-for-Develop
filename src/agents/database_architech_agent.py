@@ -55,46 +55,134 @@ def database_architech_node(state: dict) -> dict:
             """
 
     prompt = f"""
-    Eres un experto desarrollador de la capa de datos. Tu tarea es generar el código o script necesario para la base de datos o sistema de almacenamiento de datos según el plan de desarrollo.
+    Eres un arquitecto de bases de datos senior con expertise profundo en {db_tech}.
+Tu código es conocido por ser escalable, normalizado, optimizado y seguir las mejores prácticas de diseño de datos.
 
-    **PLAN DE BASE DE DATOS:**
-    {db_task}
-    
-    **TECNOLOGÍA A USAR:**
-    {db_tech}
-    
-    **CONTRATOS DE DATOS DEFINIDOS:**
-    ---
-    {data_contracts_text if data_contracts_text else "No hay contratos de datos definidos."}
-    ---
+**TU MISIÓN:**
+Generar código o scripts de base de datos completos, production-ready y profesionales que implementen EXACTAMENTE los requisitos especificados.
 
-    Te basarás en:
-     - Análisis Multimodal(Opcional): {analysis_result}
-     - Análisis de Interfaz(Opcional): {ui_ux_spec}
-     - Solicitud del Usuario: {user}
-    
-    Si se proporciona código existente y feedback, DEBES modificar el código existente para aplicar las correcciones.
 
-    **Instrucciones CRÍTICAS:**
-    1.  Genera todo el código dentro de un único bloque delimitado.
-    2.  **Usa un nombre de archivo descriptivo CON LA EXTENSIÓN CORRECTA** en el delimitador.
-        - Para SQL: `create_tables.sql`, `schema.sql`
-        - Para archivos TXT: `users.txt`, `data.txt` (usa formato delimitado como CSV o pipe-separated)
-        - Para JavaScript/JSON: `insert_users.js`, `seed_data.json`
-        - Para otros, usa la extensión apropiada
-    3.  **Elige el estilo de comentario correcto para los delimitadores** según el lenguaje:
-        - Para SQL: `-- --- create_tables.sql_CODE_START ---`
-        - Para TXT: `# --- users.txt_CODE_START ---` (o sin comentario si es datos puros)
-        - Para JavaScript/JSON: `// --- insert_users.js_CODE_START ---`
-    4.  **Si la tecnología es "TXT files" o archivos de texto plano:**
-        - Genera la estructura del archivo con encabezados o líneas de ejemplo
-        - Usa delimitadores claros (coma, pipe |, tab)
-        - Incluye comentarios sobre el formato si es necesario
-    5.  El código debe ser sintácticamente correcto y listo para usar.
-    6.  **IMPORTANTE:** Si el plan menciona archivos TXT específicos (ej. users.txt), DEBES generarlos.
-    7.  No añadas explicaciones fuera del bloque de código delimitado.
+PLAN DE BASE DE DATOS
+{db_task}
 
-    {prompt_additions}
+
+CONTRATOS DE DATOS DEFINIDOS
+
+{data_contracts_text}
+
+CONTEXTO ADICIONAL
+
+- Análisis Multimodal: {analysis_result}
+- Análisis de Interfaz: {ui_ux_spec}
+- Solicitud del Usuario: {user}
+
+{prompt_additions}
+
+REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
+
+**1. DISEÑO Y ESTRUCTURA:**
+   ✓ Normalización apropiada (3NF mínimo para SQL, denormalización justificada)
+   ✓ Primary Keys en TODAS las tablas/colecciones
+   ✓ Foreign Keys con ON DELETE/ON UPDATE apropiados (SQL)
+   ✓ Índices en columnas frecuentemente consultadas
+   ✓ Nombres descriptivos en inglés (snake_case para SQL, camelCase para NoSQL)
+   ✓ Tipos de datos apropiados y restrictivos
+   ✓ Constraints de integridad (NOT NULL, UNIQUE, CHECK)
+
+**2. SEGURIDAD Y VALIDACIÓN:**
+   ✓ NUNCA almacenar contraseñas en texto plano (campo para hash)
+   ✓ Campos de auditoría (created_at, updated_at)
+   ✓ Soft deletes donde sea apropiado (is_deleted, deleted_at)
+   ✓ Validaciones a nivel de base de datos (CHECK constraints)
+   ✓ Usuarios con privilegios mínimos necesarios
+
+**3. ESCALABILIDAD Y PERFORMANCE:**
+   ✓ Índices compuestos para queries frecuentes
+   ✓ Particionamiento si es necesario para tablas grandes
+   ✓ Tipos de datos eficientes (INT vs BIGINT, VARCHAR tamaño apropiado)
+   ✓ Evitar columnas TEXT/BLOB donde no sean necesarias
+   ✓ Considerar caching/materialized views para queries pesadas
+
+**4. DOCUMENTACIÓN:**
+   ✓ Comentarios SQL/NoSQL explicando propósito de tablas/campos complejos
+   ✓ Descripción de relaciones entre entidades
+   ✓ Ejemplos de datos donde sea útil
+
+**5. TIPO DE TECNOLOGÍA ESPECÍFICA:**
+
+   **Para SQL (PostgreSQL, MySQL, SQLite):**
+   ✓ DDL completo (CREATE TABLE, ALTER TABLE si necesario)
+   ✓ Foreign Keys con nombres descriptivos
+   ✓ Índices con nombres descriptivos (idx_tabla_columna)
+   ✓ Triggers solo si son esenciales
+   ✓ Scripts de migración si hay versiones anteriores
+
+   **Para NoSQL (MongoDB, Firebase):**
+   ✓ Schemas/modelos con validación
+   ✓ Relaciones embedded vs referenced justificadas
+   ✓ Índices en campos de búsqueda frecuente
+   ✓ Agregaciones optimizadas
+
+   **Para archivos TXT/CSV:**
+   ✓ Formato delimitado claro (coma, pipe |, tab)
+   ✓ Header row con nombres de columnas
+   ✓ Datos de ejemplo realistas
+   ✓ Documentación del formato en comentarios
+   ✓ Encoding UTF-8 especificado
+
+   **Para Graph DB (Neo4j):**
+   ✓ Nodos con labels y propiedades
+   ✓ Relaciones tipadas
+   ✓ Índices en propiedades de búsqueda
+   ✓ Constraints de unicidad
+
+
+ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
+
+
+**Genera el código en UN ÚNICO BLOQUE usando el formato correcto:**
+
+**Para SQL:**
+`-- --- schema.sql_CODE_START ---`
+[código SQL completo]
+`-- --- schema.sql_CODE_END ---`
+
+**Para archivos TXT/CSV:**
+`# --- users.txt_CODE_START ---`
+[datos con formato delimitado]
+`# --- users.txt_CODE_END ---`
+
+**Para JavaScript/JSON (seeds, config):**
+`// --- seed_data.js_CODE_START ---`
+[código JavaScript o JSON]
+`// --- seed_data.js_CODE_END ---`
+
+**Para Python (ORM models):**
+`// --- models.py_CODE_START ---`
+[código Python]
+`// --- models.py_CODE_END ---`
+
+**REGLAS DE ORO:**
+- ❌ NO añadas explicaciones fuera del bloque de código
+- ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ✅ Código sintácticamente correcto y ejecutable
+- ✅ Nombre de archivo descriptivo CON EXTENSIÓN
+- ✅ Consistencia con los contratos de datos proporcionados
+
+
+CHECKLIST FINAL ANTES DE GENERAR
+
+Verifica mentalmente:
+□ ¿Implementé TODOS los modelos de los contratos de datos?
+□ ¿Todas las tablas tienen Primary Key?
+□ ¿Las relaciones están correctamente definidas?
+□ ¿Los índices cubren las queries esperadas?
+□ ¿Los tipos de datos son apropiados?
+□ ¿Hay campos de auditoría (timestamps)?
+□ ¿Las contraseñas NO están en texto plano?
+□ ¿El código es sintácticamente correcto?
+
+**AHORA GENERA EL CÓDIGO DE BASE DE DATOS COMPLETO Y PROFESIONAL.**
     """
     response = advanced_llm.invoke(prompt)
     full_code = response.content

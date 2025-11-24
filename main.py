@@ -74,11 +74,23 @@ async def websocket_endpoint(websocket: WebSocket):
                 async for event in langgraph_app.astream(inputs, config=config):
                     if event:
                         await websocket.send_json(event)
-                        # Contar tokens si están disponibles en el evento
-                        for node_data in event.values():
-                            if isinstance(node_data, dict) and 'usage_metadata' in node_data:
-                                metadata = node_data['usage_metadata']
-                                total_tokens += metadata.get('input_tokens', 0) + metadata.get('output_tokens', 0)
+                        # Contar tokens de las respuestas del LLM
+                        for node_name, node_data in event.items():
+                            if isinstance(node_data, dict):
+                                # Gemini: usage_metadata con prompt_token_count y candidates_token_count
+                                if 'usage_metadata' in node_data:
+                                    meta = node_data['usage_metadata']
+                                    prompt_tokens = meta.get('prompt_token_count', 0)
+                                    output_tokens = meta.get('candidates_token_count', 0)
+                                    total = meta.get('total_token_count', prompt_tokens + output_tokens)
+                                    if total > 0:
+                                        total_tokens += total
+                                # Groq/OpenAI: token_usage con prompt_tokens y completion_tokens
+                                elif 'token_usage' in node_data:
+                                    usage = node_data['token_usage']
+                                    total = usage.get('prompt_tokens', 0) + usage.get('completion_tokens', 0)
+                                    if total > 0:
+                                        total_tokens += total
                 
                 end_time = time.time() # FIN DE MEDICIÓN DE TIEMPO
                 execution_time = end_time - start_time

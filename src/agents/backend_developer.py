@@ -53,44 +53,139 @@ def backend_developer_node(state: dict) -> dict:
         ```
         {existing_code_prompt}
         ```
+        **Modifica unicamente los archivos que se te piden en la tarea. No modifiques archivos que no se te piden.**
         """
 
     # --- Construcción del Prompt Final y Corregido ---
     prompt = f"""
-    Eres un desarrollador de software senior experto en {backend_tech}.
-    Tu tarea es generar el código backend completo, funcional y bien documentado.
+   Eres un desarrollador backend senior de élite con más de 10 años de experiencia en {backend_tech}.
+Tu código es conocido por ser robusto, escalable, seguro y seguir las mejores prácticas de la industria.
 
-    **Instrucciones CRÍTICAS:**
-    1.  Genera el código en bloques separados. El código principal debe estar en un bloque con el nombre de la tecnología (ej: 'main.py', 'script.js', functionality.py) 
-        y las dependencias en un bloque de gestor de paquetes (ej: 'requirements.txt'(pip install library_required), 'package.json').
-        Usa los nombres de archivo estándar y completos (incluyendo extensión) DENTRO de los delimitadores
-    2.  Usa el estilo de comentario apropiado para cada delimitador.Por ejemplo:
-        - Para Python: `// --- app.py_CODE_START ---` y `// --- app.py_CODE_END ---`
-        - Para Node/JS: `/* --- server.js_CODE_START --- */` y `/* --- server.js_CODE_END --- */`
-        - Para YAML/JSON: `<!--- config.yaml_CODE_START --->` y `<!--- config.yaml_CODE_END --->`
-        - Para requirements.txt: `<!--- requirements.txt_CODE_START --->` y `<!--- requirements.txt_CODE_END --->`
-    3.  No añadas explicaciones fuera de los bloques de código.
-    4.  Tu código DEBE ser consistente con el modelo/esquema de la base de datos proporcionado.
-    5.  **IMPORTANTE:** Si hay contratos de API definidos, DEBES implementar EXACTAMENTE esos endpoints con los schemas especificados.
-    6.  **CONFIGURACIÓN CORS (CRÍTICO en caso de fullstack):**
-        - Agrega `cors` a package.json
-        - Justificación: CORS es esencial para que el frontend pueda comunicarse con el backend en desarrollo local
+**TU MISIÓN:**
+Generar código backend completo, production-ready, funcional y profesional que implemente EXACTAMENTE los requisitos especificados.
 
-    **Tarea Específica Asignada:**
-    ---
-    {task}
-    ---
-    
-    **CONTRATOS DE INTERFAZ (DEBES IMPLEMENTAR ESTOS ENDPOINTS EXACTAMENTE):**
-    ---
-    {contracts_text if contracts_text else "No hay contratos definidos. Implementa según la tarea."}
-    ---
-    
-    **Esquema/Modelo de Base de Datos ({db_tech}) (DEBES SEGUIR ESTE DISEÑO):**
-    ---
-    {db_schema}
-    ---
-    {prompt_additions}
+TAREA ESPECÍFICA ASIGNADA
+{task}
+
+
+CONTRATOS DE INTERFAZ (IMPLEMENTAR EXACTAMENTE)
+
+{contracts_text}
+
+
+ESQUEMA/MODELO DE BASE DE DATOS ({db_tech})
+
+{db_schema}
+
+{prompt_additions}
+
+
+REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
+
+**1. ESTRUCTURA Y ORGANIZACIÓN DEL CÓDIGO:**
+   ✓ Arquitectura limpia y modular siguiendo principios SOLID
+   ✓ Separación clara de responsabilidades (rutas, controladores, servicios, modelos)
+   ✓ Nombres de variables, funciones y clases descriptivos y en inglés
+   ✓ Constantes en MAYÚSCULAS, variables en snake_case/camelCase según lenguaje
+   ✓ Código DRY (Don't Repeat Yourself) - reutiliza funciones comunes
+   ✓ Independiza el código de assets estáticos(recursos fuera del código) si es posible.
+
+**2. DOCUMENTACIÓN Y COMENTARIOS:**
+   ✓ Docstrings completos en todas las funciones (describe propósito, params, returns)
+   ✓ Comentarios inline solo donde la lógica sea compleja o no obvia
+   ✓ README implícito: el código debe ser auto-explicativo
+
+**3. MANEJO DE ERRORES Y VALIDACIÓN:**
+   ✓ Try-catch/try-except en TODAS las operaciones que puedan fallar
+   ✓ Validación de inputs en TODOS los endpoints (tipo, formato, requeridos)
+   ✓ Mensajes de error descriptivos y útiles (no genéricos)
+   ✓ Códigos de estado HTTP correctos (200, 201, 400, 401, 404, 500)
+   ✓ Logs informativos para debugging (no prints en producción)
+
+**4. SEGURIDAD (CRÍTICO):**
+   ✓ Hashing de contraseñas con bcrypt/argon2 (NUNCA texto plano)
+   ✓ Validación y sanitización de TODOS los inputs del usuario
+   ✓ Protección contra SQL Injection (usar ORM o prepared statements)
+   ✓ Variables de entorno para credenciales (NO hardcodear)
+   ✓ CORS configurado correctamente (solo orígenes permitidos)
+   ✓ Rate limiting en endpoints críticos si es posible
+
+**5. BASE DE DATOS:**
+   ✓ Conexiones eficientes (pooling si aplica)
+   ✓ Queries optimizadas (evitar N+1, usar índices adecuados)
+   ✓ Manejo correcto de transacciones
+   ✓ Cierre de conexiones en finally/context managers
+   ✓ Migraciones si son necesarias
+
+**6. PERFORMANCE Y ESCALABILIDAD:**
+   ✓ Operaciones asíncronas donde tenga sentido
+   ✓ Paginación en endpoints que retornen listas largas
+   ✓ Evitar consultas pesadas en bucles
+   ✓ Caching donde sea apropiado
+
+**7. TESTING IMPLÍCITO:**
+   ✓ Código testeable (funciones pequeñas, inyección de dependencias)
+   ✓ Edge cases considerados
+   ✓ Datos de prueba opcionales en comentarios
+
+DEPENDENCIAS Y CONFIGURACIÓN
+
+**OBLIGATORIO - Incluye TODAS las dependencias necesarias:**
+
+Para Python (requirements.txt):
+- Framework web (flask/fastapi/django)
+- bcrypt (para hashing de passwords)
+- python-dotenv (para variables de entorno)
+- CORS (flask-cors/fastapi-cors)
+- Driver de BD (psycopg2/pymongo/mysql-connector)
+- Validación (pydantic si usas FastAPI)
+
+Para Node.js (package.json):
+- Framework (express/fastify/koa)
+- bcrypt (hashing)
+- dotenv (variables entorno)
+- cors (CORS)
+- Driver BD (pg/mongodb/mysql2)
+- Validación (joi/express-validator)
+- nodemon (desarrollo)
+
+FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
+
+**Genera el código en bloques separados usando EXACTAMENTE este formato:**
+
+1. **ARCHIVO PRINCIPAL** (app.py, server.js, main.py, etc.):
+   - Para Python: `// --- app.py_CODE_START ---` y `// --- app.py_CODE_END ---`
+   - Para Node/JS: `/* --- server.js_CODE_START --- */` y `/* --- server.js_CODE_END --- */`
+   - Para Java: `// --- Main.java_CODE_START ---` y `// --- Main.java_CODE_END ---`
+
+2. **DEPENDENCIAS** (requirements.txt, package.json):
+   - Para requirements.txt: `<!--- requirements.txt_CODE_START --->` y `<!--- requirements.txt_CODE_END --->`
+   - Para package.json: `/* --- package.json_CODE_START --- */` y `/* --- package.json_CODE_END --- */`
+
+3. **CONFIGURACIÓN** (.env.example, config.py si necesario):
+   - `<!--- .env.example_CODE_START --->` y `<!--- .env.example_CODE_END --->`
+
+**REGLAS DE ORO:**
+- ❌ NO añadas explicaciones fuera de los bloques de código
+- ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ✅ Código completo y funcional, no pseudocódigo
+- ✅ Consistencia con el esquema de BD proporcionado
+- ✅ Implementación EXACTA de los contratos de API
+
+
+CHECKLIST FINAL ANTES DE GENERAR
+
+Verifica mentalmente:
+□ ¿Implementé TODOS los endpoints de los contratos?
+□ ¿Validé TODOS los inputs?
+□ ¿Manejé TODOS los errores posibles?
+□ ¿Las contraseñas están hasheadas?
+□ ¿CORS está configurado?
+□ ¿Las dependencias están completas?
+□ ¿El código es consistente con el esquema de BD?
+□ ¿Los nombres son claros y descriptivos?
+
+**AHORA GENERA EL CÓDIGO BACKEND COMPLETO Y PROFESIONAL.**
     """
     response = advanced_llm.invoke(prompt)
     full_code = response.content

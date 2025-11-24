@@ -5,6 +5,7 @@
 # Carpetas que no deben subirse
 outputs/
 uploads/
+embeddings_chroma/
 
 # Archivos y carpetas de caché de Python
 __pycache__/
