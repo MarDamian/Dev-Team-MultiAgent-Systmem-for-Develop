@@ -54,7 +54,7 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
     - Si `code_approved` es True, finaliza con `__end__`.
     - Si `code_approved` es False o no existe, y NO hay `review_feedback` reciente, el siguiente paso es `quality_auditor`.
     - Si hay `review_feedback` (código rechazado), devuelve al desarrollador correspondiente según `last_code_generated`.
-        Ten en ceunta que solo pasa una vez por cada agente. es un ciclo etre los desarrolladores y el quality auditor.
+        Ten en cuenta que solo pasa una vez por cada agente. es un ciclo etre los desarrolladores y el quality auditor.
         NO deber repetir el mismo agente dos veces seguidas.
 4.  **Si el quality auditor aprobó el código:** Finaliza la tarea `__end__`.
 

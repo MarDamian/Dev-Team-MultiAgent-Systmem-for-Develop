@@ -51,24 +51,24 @@ function handleAgentMessage(nodeName, nodeOutput) {
             plannerMessage += `<p><strong>Tipo:</strong> ${plan.plan_type}</p>`;
         }
 
-        // Plan de desarrollo
+        // Plan de desarrollo - AHORA CON MARKDOWN PARSING
         plannerMessage += `<h4>📝 Plan de Desarrollo</h4>`;
         if (plan.frontend_task) {
             plannerMessage += `<div style="margin-bottom: 15px;">
-                <strong>🎨 Frontend:</strong> ${plan.frontend_task}
-                ${plan.frontend_tech ? `<br><em>Tecnología: ${plan.frontend_tech}</em>` : ''}
+                <strong>🎨 Frontend:</strong><br>${marked.parse(plan.frontend_task)}
+                ${plan.frontend_tech ? `<em>Tecnología: ${plan.frontend_tech}</em>` : ''}
             </div>`;
         }
         if (plan.backend_task) {
             plannerMessage += `<div style="margin-bottom: 15px;">
-                <strong>⚙️ Backend:</strong> ${plan.backend_task}
-                ${plan.backend_tech ? `<br><em>Tecnología: ${plan.backend_tech}</em>` : ''}
+                <strong>⚙️ Backend:</strong><br>${marked.parse(plan.backend_task)}
+                ${plan.backend_tech ? `<em>Tecnología: ${plan.backend_tech}</em>` : ''}
             </div>`;
         }
         if (plan.db_task) {
             plannerMessage += `<div style="margin-bottom: 15px;">
-                <strong>🗄️ Base de Datos:</strong> ${plan.db_task}
-                ${plan.db_tech ? `<br><em>Tecnología: ${plan.db_tech}</em>` : ''}
+                <strong>🗄️ Base de Datos:</strong><br>${marked.parse(plan.db_task)}
+                ${plan.db_tech ? `<em>Tecnología: ${plan.db_tech}</em>` : ''}
             </div>`;
         }
 
@@ -184,7 +184,7 @@ function handleAgentMessage(nodeName, nodeOutput) {
 
 export function initWebSocket(callbacks) {
     const socket = new WebSocket(`ws://${window.location.host}/ws`);
-    
+
     // Variable para rastrear si se generó código
     let codeGenerated = false;
 
@@ -237,7 +237,7 @@ export function initWebSocket(callbacks) {
             if (nodeName === 'database_architech' && nodeOutput.db_schema) {
                 codeGenerated = true;
             }
-            
+
             handleAgentMessage(nodeName, nodeOutput);
         }
     };
