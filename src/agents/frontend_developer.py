@@ -54,7 +54,9 @@ def frontend_developer_node(state: dict) -> dict:
         ```
         {existing_code_prompt}
         ```
-        Solo modifica los archivos que se te piden en la tarea. No modifiques archivos que no se te piden.
+         **Modifica o Genera unicamente los archivos que se te piden en el Feedback. 
+         No modifiques todo el codigo solo las funcionalidades que se te piden en el feedback.
+         Lo demas mantenerlo igual.**
         """
 
     # --- Construcción del Prompt ---

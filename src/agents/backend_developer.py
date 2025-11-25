@@ -53,7 +53,9 @@ def backend_developer_node(state: dict) -> dict:
         ```
         {existing_code_prompt}
         ```
-        **Modifica o Genera unicamente los archivos que se te piden en el Feedback. No modifiques archivos que no debes corregir.**
+        **Modifica o Genera unicamente los archivos que se te piden en el Feedback. 
+         No modifiques todo el codigo solo las funcionalidades que se te piden en el feedback.
+         El resto de codigo mantenerlo igual.**
         """
 
     # --- Construcción del Prompt Final y Corregido ---
@@ -72,6 +74,7 @@ CONTRATOS DE INTERFAZ (IMPLEMENTAR EXACTAMENTE)
 
 {contracts_text}
 
+El directorio del frontend es: '/frontend'
 
 ESQUEMA/MODELO DE BASE DE DATOS ({db_tech})
 
@@ -102,7 +105,7 @@ REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
    ✓ Códigos de estado HTTP correctos (200, 201, 400, 401, 404, 500)
    ✓ Logs informativos para debugging (no prints en producción)
 
-**4. SEGURIDAD (CRÍTICO):**
+**4. SEGURIDAD:**
    ✓ Hashing de contraseñas con bcrypt/argon2 (NUNCA texto plano)
    ✓ Validación y sanitización de TODOS los inputs del usuario
    ✓ Protección contra SQL Injection (usar ORM o prepared statements)
@@ -154,13 +157,13 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
 **Genera el código en bloques separados usando EXACTAMENTE este formato:**
 
 1. **ARCHIVO PRINCIPAL** (app.py, server.js, main.py, etc.):
-   - Para Python: `// --- app.py_CODE_START ---` y `// --- app.py_CODE_END ---`
-   - Para Node/JS: `/* --- server.js_CODE_START --- */` y `/* --- server.js_CODE_END --- */`
-   - Para Java: `// --- Main.java_CODE_START ---` y `// --- Main.java_CODE_END ---`
+   - Para Python: `<!--- app.py_CODE_START --->` y `<!--- app.py_CODE_END --->`
+   - Para Node/JS: `<!--- server.js_CODE_START --->` y `<!--- server.js_CODE_END --->`
+   - Para Java: `<!--- Main.java_CODE_START --->` y `<!--- Main.java_CODE_END --->`
 
 2. **DEPENDENCIAS** (requirements.txt, package.json):
    - Para requirements.txt: `<!--- requirements.txt_CODE_START --->` y `<!--- requirements.txt_CODE_END --->`
-   - Para package.json: `/* --- package.json_CODE_START --- */` y `/* --- package.json_CODE_END --- */`
+   - Para package.json: `<!--- package.json_CODE_START --->` y `<!--- package.json_CODE_END --->`
 
 3. **CONFIGURACIÓN** (.env.example, config.py si necesario):
    - `<!--- .env.example_CODE_START --->` y `<!--- .env.example_CODE_END --->`

@@ -28,6 +28,7 @@ class GraphState(TypedDict):
     rag_context: Optional[str]
     rag_queries_made: Optional[List[str]]
     analysis_result: Optional[str]
+    nodes_visited: Optional[List[str]]
 
     # --- CAMPO CLAVE PARA VISUALIZAR EL PROCESO RAG ITERATIVO ---
     rag_steps: Annotated[List[str], lambda x, y: x + y]

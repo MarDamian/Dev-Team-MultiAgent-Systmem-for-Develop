@@ -36,8 +36,15 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
 **ESTADO ACTUAL DE LA TAREA (CONTEXTO):**
 {state_json}
 
+**HISTORIAL DE AGENTES VISITADOS:**
+{nodes_visited}
 
 **REGLAS DE DECISIÓN CLAVE (Evaluar en este orden):**
+
+**REGLA CRÍTICA DE NO REPETICIÓN:**
+- **NUNCA** repitas el mismo agente dos veces seguidas. Revisa `nodes_visited` para ver el último agente ejecutado.
+- Si el último nodo visitado fue un desarrollador (develop_backend, develop_frontend, database_architech), el siguiente DEBE ser `quality_auditor` (a menos que el código ya esté aprobado).
+- Si el último nodo visitado fue `quality_auditor` y hay `review_feedback`, el siguiente DEBE ser el desarrollador correspondiente según `last_code_generated`.
 
 1.  **Después de un Análisis (si `analysis_result` o `ui_ux_spec` está presente):**
     - **Revisa la `user_input` original.** Si la petición era únicamente para analizar, describir, transcribir o entender algo (ej: "¿qué dice este archivo?", "resume este documento"), la tarea está completa. **Elige `__end__`.**
@@ -50,16 +57,33 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
         - Si HAY `backend_code` Y `frontend_code`, pero NO se ha auditado (`code_approved` no está presente o es False), el siguiente paso ES `quality_auditor`.
     - **Otros tipos de plan:** Si es 'backend-only', ve a `develop_backend`. Si es 'frontend-only', ve a `develop_frontend`. Si es 'database-only', ve a `database_architech`.
 
-3.  **Si hay código generado (`frontend_code`, `backend_code`, o `db_schema`):**
-    - Si `code_approved` es True, finaliza con `__end__`.
-    - Si `code_approved` es False o no existe, y NO hay `review_feedback` reciente, el siguiente paso es `quality_auditor`.
-    - Si hay `review_feedback` (código rechazado), devuelve al desarrollador correspondiente según `last_code_generated`.
-        Ten en cunta que solo pasa una vez por cada agente. es un ciclo etre los desarrolladores y el quality auditor.
-        (CRITICO: NO deber repetir el mismo agente dos veces seguidas.
-4.  **Si el quality auditor aprobó el código:** Finaliza la tarea `__end__`.
+3.  **CICLO DE REVISIÓN DE CÓDIGO (Crítico - Sigue este flujo exactamente):**
+    - **Si hay código generado (`frontend_code`, `backend_code`, o `db_schema`):**
+        a) **Código Aprobado:** Si `code_approved` es True, finaliza con `__end__`.
+        
+        b) **Código Generado, Sin Revisar:** Si `code_approved` es False o no existe, Y NO hay `review_feedback`:
+           - Verifica `nodes_visited`: Si el último nodo NO fue `quality_auditor`, el siguiente paso es `quality_auditor`.
+           - Si el último nodo fue `quality_auditor`, hay un error de estado. Usa `conversational_agent` como fallback.
+        
+        c) **Código Rechazado (Hay review_feedback):** 
+           - Identifica el desarrollador correcto según `last_code_generated`:
+             * Si `last_code_generated` es "backend" → `develop_backend`
+             * Si `last_code_generated` es "frontend" → `develop_frontend`
+             * Si `last_code_generated` es "database" → `database_architech`
+           - **IMPORTANTE:** Verifica `nodes_visited`. Si el último nodo ya fue el desarrollador correspondiente, NO lo repitas. En su lugar, ve a `quality_auditor`.
+           - Después de que el desarrollador corrija el código, el siguiente paso SIEMPRE es `quality_auditor` para re-revisar.
+                Solo haz un maximo de 2 iteraciones por cada desarrollador y quality auditor. 
+                (Obvia esto si el quality auditor aprobó el código aprueba elcodigo de desarrollador)
+                Ej:planner → develop_backend → quality_auditor(rechazo)→ develop_backend → quality_auditor(rechazo) 
+                    → develop_frontent → quality_auditor(rechazo) → develop_frontend → quality_auditor(rechazo) → __end__     
+                el proyecto debe avanzar(no quedarse en ciclo).
+
+4.  **Si el quality auditor aprobó el código de todos los desarrolladores (`code_approved` es True):** Finaliza la tarea con `__end__`.
 
 **INSTRUCCIÓN:**
-Basado en TODO el estado actual, analiza la situación y determina el siguiente paso lógico. ¿Qué agente debe actuar ahora?
+Basado en TODO el estado actual y el historial de nodos visitados, analiza la situación y determina el siguiente paso lógico. 
+**RECUERDA:** NO repitas el mismo agente dos veces seguidas. El ciclo debe ser: Desarrollador → Quality Auditor → (si hay feedback) → Desarrollador → Quality Auditor → ... hasta aprobación.
+¿Qué agente debe actuar ahora?
 """
 
 def supervisor_node(state: dict) -> dict:
@@ -68,15 +92,26 @@ def supervisor_node(state: dict) -> dict:
     """
     print("---AGENTE: SUPERVISOR INTELIGENTE---")
 
+    # Obtener y formatear el historial de nodos visitados
+    nodes_visited = state.get("nodes_visited", [])
+    nodes_visited_str = " → ".join(nodes_visited) if nodes_visited else "Ninguno (inicio de la tarea)"
+    last_node = nodes_visited[-1] if nodes_visited else None
+    
+    print(f"Nodos Visitados: {nodes_visited_str}")
+    if last_node:
+        print(f"Último Nodo Ejecutado: {last_node}")
 
     # Convertir el estado a una cadena JSON para una visualización clara en el prompt.
     # Se excluyen claves que no son útiles para la decisión de enrutamiento.
-    excluded_keys = {"routing_decision", "final_response"}
+    excluded_keys = {"routing_decision", "final_response", "nodes_visited"}
     state_for_prompt = {k: v for k, v in state.items() if k not in excluded_keys and v}
     state_json = json.dumps(state_for_prompt, indent=2)
 
-    # Formatear el prompt con el estado actual.
-    prompt = SUPERVISOR_PROMPT.format(state_json=state_json)
+    # Formatear el prompt con el estado actual y el historial de nodos.
+    prompt = SUPERVISOR_PROMPT.format(
+        state_json=state_json,
+        nodes_visited=nodes_visited_str
+    )
     
     # Invocar al LLM para que tome la decisión.
     message = HumanMessage(content=prompt)
@@ -92,6 +127,31 @@ def supervisor_node(state: dict) -> dict:
         if decision not in AVAILABLE_NODES:
             print(f"ADVERTENCIA: Decisión inválida ('{decision}'). Forzando a 'conversational_agent'.")
             decision = "conversational_agent"
+        
+        # VALIDACIÓN CRÍTICA: Prevenir repetición del mismo agente
+        if last_node and decision == last_node and decision not in ["__end__", "conversational_agent"]:
+            print(f"⚠️ ADVERTENCIA: El supervisor intentó repetir el agente '{decision}'. Aplicando lógica de corrección...")
+            
+            # Si el último fue un desarrollador, forzar a quality_auditor
+            if last_node in ["develop_backend", "develop_frontend", "database_architech"]:
+                decision = "quality_auditor"
+                print(f"✅ Corrección aplicada: {last_node} → quality_auditor")
+            
+            # Si el último fue quality_auditor y hay feedback, ir al desarrollador correspondiente
+            elif last_node == "quality_auditor" and state.get("review_feedback"):
+                last_code = state.get("last_code_generated", "backend")
+                if last_code == "backend":
+                    decision = "develop_backend"
+                elif last_code == "frontend":
+                    decision = "develop_frontend"
+                elif last_code == "database":
+                    decision = "database_architech"
+                print(f"✅ Corrección aplicada: quality_auditor → {decision} (basado en last_code_generated: {last_code})")
+            
+            # Fallback: usar conversational_agent si no se puede determinar
+            else:
+                decision = "conversational_agent"
+                print(f"⚠️ No se pudo determinar el siguiente agente. Usando conversational_agent como fallback.")
 
     except (json.JSONDecodeError, AttributeError) as e:
         print(f"Error al parsear la respuesta del LLM: {e}. Usando fallback.")
@@ -101,6 +161,16 @@ def supervisor_node(state: dict) -> dict:
             if f'"{node}"' in response.content or f"'{node}'" in response.content:
                 decision = node
                 break
-
-    print(f"Decisión del Supervisor: Enviar a '{decision}'")
-    return {"routing_decision": decision}
+    
+    # Actualizar el historial de nodos visitados (solo si no es __end__)
+    updated_nodes_visited = nodes_visited.copy()
+    if decision != "__end__":
+        updated_nodes_visited.append(decision)
+    
+    print(f"Decisión Final del Supervisor: '{decision}'")
+    print(f"Historial Actualizado: {' → '.join(updated_nodes_visited)}")
+    
+    return {
+        "routing_decision": decision,
+        "nodes_visited": updated_nodes_visited
+    }
