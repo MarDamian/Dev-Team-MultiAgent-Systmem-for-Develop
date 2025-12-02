@@ -14,6 +14,10 @@ AVAILABLE_NODES = [
     "conversational_agent",
     "__end__"
 ]
+MAX_ITERATIONS_PER_DEVELOPER = 2
+backend_iterations = state.get("backend_iterations", 0)
+frontend_iterations = state.get("frontend_iterations", 0)
+database_iterations = state.get("database_iterations", 0)
 
 # El nuevo prompt inteligente que centraliza toda la lógica de enrutamiento.
 SUPERVISOR_PROMPT = """
@@ -71,12 +75,18 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
              * Si `last_code_generated` es "frontend" → `develop_frontend`
              * Si `last_code_generated` es "database" → `database_architech`
            - **IMPORTANTE:** Verifica `nodes_visited`. Si el último nodo ya fue el desarrollador correspondiente, NO lo repitas. En su lugar, ve a `quality_auditor`.
-           - Después de que el desarrollador corrija el código, el siguiente paso SIEMPRE es `quality_auditor` para re-revisar.
-                Solo haz un maximo de 2 iteraciones por cada desarrollador y quality auditor. 
-                (Obvia esto si el quality auditor aprobó el código aprueba elcodigo de desarrollador)
-                Ej:planner → develop_backend → quality_auditor(rechazo)→ develop_backend → quality_auditor(rechazo) 
-                    → develop_frontent → quality_auditor(rechazo) → develop_frontend → quality_auditor(rechazo) → __end__     
-                el proyecto debe avanzar(no quedarse en ciclo).
+        d) Después de que el desarrollador corrija el código, el siguiente paso SIEMPRE es `quality_auditor` para re-revisar.
+                Solo haz un maximo de 3 iteraciones por cada desarrollador y quality auditor. 
+                **CONTADORES DE ITERACIÓN:**
+                - Backend: {backend_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
+                - Frontend: {frontend_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
+                - Database: {database_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
+                **BANDERAS DE APROBACIÓN:**
+                - backend_approved: {backend_approved}
+                - frontend_approved: {frontend_approved}
+                - database_approved: {database_approved}
+                Si algún componente alcanzó {MAX_ITERATIONS_PER_DEVELOPER} iteraciones sin aprobarse, considera finalizar o avanzar.
+Si un componente está aprobado (bandera = True), no lo revises de nuevo.
 
 4.  **Si el quality auditor aprobó el código de todos los desarrolladores (`code_approved` es True):** Finaliza la tarea con `__end__`.
 

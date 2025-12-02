@@ -29,6 +29,9 @@ class GraphState(TypedDict):
     rag_queries_made: Optional[List[str]]
     analysis_result: Optional[str]
     nodes_visited: Optional[List[str]]
+    backend_iterations: Optional[int]
+    frontend_iterations: Optional[int]
+    database_iterations: Optional[int]
 
     # --- CAMPO CLAVE PARA VISUALIZAR EL PROCESO RAG ITERATIVO ---
     rag_steps: Annotated[List[str], lambda x, y: x + y]

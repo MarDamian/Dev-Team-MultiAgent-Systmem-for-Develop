@@ -34,6 +34,7 @@ def quality_auditor_node(state: dict) -> dict:
     user_input = state.get("user_input", "")
     plan = state.get("dev_plan", {})
     review_count = state.get("review_count", 0)
+    last_code_generated = state.get("last_code_generated", "")
     
     # --- 2. Determinar qué archivos auditar (usa proyecto activo) ---
     files_to_read = list_code_files_in_directory()
@@ -86,7 +87,7 @@ CONTEXTO DE LA SOLICITUD ORIGINAL
 **SOLICITUD DEL USUARIO:** 
 "{user_input}"
 
-**PLAN DE DESARROLLO ASIGNADO:**
+**PLAN DE DESARROLLO ASIGNADO:(Si crees que puede ser mejorado, propónlo)**
 {plan}
 
 PRINCIPIOS DE CALIDAD Y BUENAS PRÁCTICAS (BASE DE CONOCIMIENTOS)
@@ -108,6 +109,10 @@ REPORTES DE VALIDACIÓN TÉCNICA
 CÓDIGO A AUDITAR
 
 {code_to_review}
+
+CODIGO GENERADO ANTERIORMENTE
+
+{last_code_generated}
 
 CRITERIOS DE AUDITORÍA (EVALUAR TODOS)
 
@@ -232,10 +237,24 @@ PROCESO DE EVALUACIÓN
         if is_approved:
             print(f"Auditoría de Calidad: APROBADO. Feedback: {feedback}")
             # Debemos devolver el feedback Y la bandera de aprobación para que el frontend los vea.
+            last_generated = state.get("last_code_generated")
+            approval_flags = {}
+            
+            if last_generated == "backend":
+                approval_flags["backend_approved"] = True
+                print("✅ Backend aprobado")
+            elif last_generated == "frontend":
+                approval_flags["frontend_approved"] = True
+                print("✅ Frontend aprobado")
+            elif last_generated == "database":
+                approval_flags["database_approved"] = True
+                print("✅ Database aprobado")
+            
             return {
                 "feedback": feedback,         # Devolver el feedback de aprobación.
                 "review_feedback": None,      # Limpiar el feedback de rechazo.
                 "review_count": review_count,
+                "approval_flags": approval_flags,
                 "code_approved": True         # Señal para que el supervisor finalice.
             }
         else:

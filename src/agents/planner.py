@@ -83,7 +83,8 @@ def planner_node(state: dict) -> dict:
         * **Consistencia del `plan_type`:** Debe coincidir con los campos completados.
 
     4.5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):** *(Solo si `plan_type` es 'fullstack')*
-        * **Backend Task:** Define explícitamente los endpoints clave (Ruta, Método, Input esperado, Output esperado).
+        * **Backend Task:** Define explícitamente todos los endpoints clave (Ruta, Método, Input esperado, Output esperado).
+            No omitas nigun endpoint, que forme parte de una funcionalidad.
         * **Backend Port:** Especifica el puerto estándar para la tecnología (Flask: 5000, Express: 3000, Django: 8000).
         * **Frontend Task:** Indica que la interfaz debe consumir los endpoints definidos en el backend, mencionando los relevantes.
         * **Objetivo:** Garantizar que el frontend conozca exactamente lo que debe esperar del backend (endpoints y puerto) antes de iniciar la implementación.
