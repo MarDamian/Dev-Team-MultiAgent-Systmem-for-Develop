@@ -110,7 +110,7 @@ CÓDIGO A AUDITAR
 
 {code_to_review}
 
-CODIGO GENERADO ANTERIORMENTE
+CODIGO GENERADO ANTERIORMENTE SOlO APLICA FEEDBACK A ESTE CODIGO
 
 {last_code_generated}
 
@@ -123,17 +123,15 @@ CRITERIOS DE AUDITORÍA (EVALUAR TODOS)
    □ ¿Los casos de uso están cubiertos?
    □ ¿No hay funcionalidad faltante o incompleta?
 
-**2. CUMPLIMIENTO DE CONTRATOS (CRÍTICO):**
+**2. CUMPLIMIENTO DE CONTRATOS (FLEXIBLE):**
    □ ¿Todos los endpoints definidos están implementados?
    □ ¿Los métodos HTTP son correctos (GET, POST, PUT, DELETE)?
-   □ ¿Los request_schema coinciden exactamente?
-   □ ¿Los response_schema coinciden exactamente?
    □ ¿Los códigos de estado son los especificados?
    □ ¿Los modelos de datos tienen todos los campos requeridos?
    □ ¿Los tipos de datos son consistentes?
 
 **3. INTEGRACIÓN CLIENTE-SERVIDOR (FULLSTACK):**
-   □ ¿El frontend usa el puerto correcto del backend?
+   □ ¿El frontend usa el puerto correcto del backend y viceversa?
    □ ¿La BASE_URL está configurada correctamente?
    □ ¿Los endpoints del frontend coinciden EXACTAMENTE con los del backend?
    □ ¿Los payloads enviados coinciden con los esperados?
@@ -171,11 +169,6 @@ CRITERIOS DE AUDITORÍA (EVALUAR TODOS)
    □ ¿Hay archivo de configuración (.env.example)?
    □ ¿Las dependencias son las mínimas necesarias?
 
-**9. ADHERENCIA A PRINCIPIOS:**
-   □ ¿El código respeta los principios de la base de conocimientos?
-   □ ¿Sigue las mejores prácticas del lenguaje/framework?
-   □ ¿Es mantenible y escalable?
-
 FORMATO DE RESPUESTA (ESTRICTAMENTE OBLIGATORIO)
 
 Debes responder ÚNICAMENTE con un objeto JSON con esta estructura exacta:
@@ -209,7 +202,8 @@ Debes responder ÚNICAMENTE con un objeto JSON con esta estructura exacta:
 **REGLAS CRÍTICAS:**
 - ❌ NO apruebes código que no cumple los contratos
 - ❌ NO apruebes código con funcionalidad faltante
-- ❌ NO excesivamente estricto
+- ❌ NO seas excesivamente estricto 
+- ✅ Sé sugerente y constructivo
 - ✅ Sé objetivo y basado en hechos
 - ✅ Prioriza problemas críticos sobre estéticos
 - ✅ Da feedback que el desarrollador pueda actuar inmediatamente
@@ -254,7 +248,7 @@ PROCESO DE EVALUACIÓN
                 "feedback": feedback,         # Devolver el feedback de aprobación.
                 "review_feedback": None,      # Limpiar el feedback de rechazo.
                 "review_count": review_count,
-                "approval_flags": approval_flags,
+                **approval_flags,
                 "code_approved": True         # Señal para que el supervisor finalice.
             }
         else:
@@ -275,5 +269,5 @@ PROCESO DE EVALUACIÓN
             "review_feedback": feedback_error,
             "review_count": review_count,
             "code_approved": False,
-            "supervisor_iterations": state.get("supervisor_iterations")+1
+            "supervisor_iterations": state.get("supervisor_iterations", 0) + 1
         }

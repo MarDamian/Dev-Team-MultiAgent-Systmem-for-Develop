@@ -145,5 +145,5 @@ CONSIDERACIONES ESPECIALES
 
     return {
         "analysis_result": analysis_result,
-        "supervisor_iterations": state.get("supervisor_iterations")+1
+        "supervisor_iterations": state.get("supervisor_iterations", 0) + 1
         } 

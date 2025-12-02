@@ -69,5 +69,5 @@ def ui_ux_designer_node(state: dict) -> dict:
     print(f"--- ESPECIFICACIÓN DE UI/UX GENERADA ---\n{ui_ux_spec[:500]}...\n---")
     return {
         "ui_ux_spec": ui_ux_spec,
-        "supervisor_iterations": state.get("supervisor_iterations")+1
+        "supervisor_iterations": state.get("supervisor_iterations", 0) + 1
         }

@@ -165,13 +165,24 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
    - Para requirements.txt: `<!--- requirements.txt_CODE_START --->` y `<!--- requirements.txt_CODE_END --->`
    - Para package.json: `<!--- package.json_CODE_START --->` y `<!--- package.json_CODE_END --->`
 
-3. **CONFIGURACIÓN** (.env.example, config.py si necesario):
+3. **MÓDULOS Y ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS):
+   - Para organizar en carpetas: `<!--- models/user.py_CODE_START --->` y `<!--- models/user.py_CODE_END --->`
+   - Ejemplos válidos:
+     * `<!--- controllers/auth.py_CODE_START --->` (carpeta controllers)
+     * `<!--- routes/api.py_CODE_START --->` (carpeta routes)
+     * `<!--- utils/helpers.py_CODE_START --->` (carpeta utils)
+     * `<!--- view/main_window.py_CODE_START --->` (carpeta view)
+   - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..)
+
+4. **CONFIGURACIÓN** (.env.example, config.py si necesario):
    - `<!--- .env.example_CODE_START --->` y `<!--- .env.example_CODE_END --->`
 
 **REGLAS DE ORO:**
 - ❌ NO añadas explicaciones fuera de los bloques de código
 - ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ❌ NO uses rutas absolutas (/path) ni relativas con .. (../path)
 - ✅ Código completo y funcional, no pseudocódigo
+- ✅ Usa subdirectorios para organizar el código (models/, controllers/, etc.)
 - ✅ Consistencia con el esquema de BD proporcionado
 - ✅ Implementación EXACTA de los contratos de API
 

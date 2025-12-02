@@ -14,10 +14,8 @@ AVAILABLE_NODES = [
     "conversational_agent",
     "__end__"
 ]
-MAX_ITERATIONS_PER_DEVELOPER = 2
-backend_iterations = state.get("backend_iterations", 0)
-frontend_iterations = state.get("frontend_iterations", 0)
-database_iterations = state.get("database_iterations", 0)
+
+
 
 # El nuevo prompt inteligente que centraliza toda la lógica de enrutamiento.
 SUPERVISOR_PROMPT = """
@@ -78,14 +76,14 @@ Responde ÚNICAMENTE con el nombre de uno de los nodos disponibles en formato JS
         d) Después de que el desarrollador corrija el código, el siguiente paso SIEMPRE es `quality_auditor` para re-revisar.
                 Solo haz un maximo de 3 iteraciones por cada desarrollador y quality auditor. 
                 **CONTADORES DE ITERACIÓN:**
-                - Backend: {backend_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
-                - Frontend: {frontend_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
-                - Database: {database_iterations}/{MAX_ITERATIONS_PER_DEVELOPER}
+                - Backend: {backend_iterations}/2
+                - Frontend: {frontend_iterations}/2
+                - Database: {database_iterations}/2
                 **BANDERAS DE APROBACIÓN:**
                 - backend_approved: {backend_approved}
                 - frontend_approved: {frontend_approved}
                 - database_approved: {database_approved}
-                Si algún componente alcanzó {MAX_ITERATIONS_PER_DEVELOPER} iteraciones sin aprobarse, considera finalizar o avanzar.
+                Si algún componente alcanzó 2 iteraciones sin aprobarse, considera finalizar o avanzar.
 Si un componente está aprobado (bandera = True), no lo revises de nuevo.
 
 4.  **Si el quality auditor aprobó el código de todos los desarrolladores (`code_approved` es True):** Finaliza la tarea con `__end__`.
@@ -102,6 +100,9 @@ def supervisor_node(state: dict) -> dict:
     """
     print("---AGENTE: SUPERVISOR INTELIGENTE---")
 
+    backend_iterations = state.get("backend_iterations", 0)
+    frontend_iterations = state.get("frontend_iterations", 0)
+    database_iterations = state.get("database_iterations", 0)
     # Obtener y formatear el historial de nodos visitados
     nodes_visited = state.get("nodes_visited", [])
     nodes_visited_str = " → ".join(nodes_visited) if nodes_visited else "Ninguno (inicio de la tarea)"
@@ -120,7 +121,13 @@ def supervisor_node(state: dict) -> dict:
     # Formatear el prompt con el estado actual y el historial de nodos.
     prompt = SUPERVISOR_PROMPT.format(
         state_json=state_json,
-        nodes_visited=nodes_visited_str
+        nodes_visited=nodes_visited_str,
+        backend_iterations=backend_iterations,
+        frontend_iterations=frontend_iterations,
+        database_iterations=database_iterations,
+        backend_approved=state.get("backend_approved", False),
+        frontend_approved=state.get("frontend_approved", False),
+        database_approved=state.get("database_approved", False),
     )
     
     # Invocar al LLM para que tome la decisión.
@@ -142,27 +149,6 @@ def supervisor_node(state: dict) -> dict:
         if last_node and decision == last_node and decision not in ["__end__", "conversational_agent"]:
             print(f"⚠️ ADVERTENCIA: El supervisor intentó repetir el agente '{decision}'. Aplicando lógica de corrección...")
             
-            # Si el último fue un desarrollador, forzar a quality_auditor
-            if last_node in ["develop_backend", "develop_frontend", "database_architech"]:
-                decision = "quality_auditor"
-                print(f"✅ Corrección aplicada: {last_node} → quality_auditor")
-            
-            # Si el último fue quality_auditor y hay feedback, ir al desarrollador correspondiente
-            elif last_node == "quality_auditor" and state.get("review_feedback"):
-                last_code = state.get("last_code_generated", "backend")
-                if last_code == "backend":
-                    decision = "develop_backend"
-                elif last_code == "frontend":
-                    decision = "develop_frontend"
-                elif last_code == "database":
-                    decision = "database_architech"
-                print(f"✅ Corrección aplicada: quality_auditor → {decision} (basado en last_code_generated: {last_code})")
-            
-            # Fallback: usar conversational_agent si no se puede determinar
-            else:
-                decision = "conversational_agent"
-                print(f"⚠️ No se pudo determinar el siguiente agente. Usando conversational_agent como fallback.")
-
     except (json.JSONDecodeError, AttributeError) as e:
         print(f"Error al parsear la respuesta del LLM: {e}. Usando fallback.")
         # Fallback robusto: buscar el nombre del nodo en el texto si el JSON falla.

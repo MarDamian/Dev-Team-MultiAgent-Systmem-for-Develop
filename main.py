@@ -96,7 +96,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 execution_time = end_time - start_time
                 print("////////////////////////////////////////////")
                 print(f"Tiempo de ejecución total: {execution_time:.2f} segundos")
-                print(f"Tokens consumidos: {total_tokens:,}")
+                #print(f"Tokens consumidos: {total_tokens:,}")
                 print("////////////////////////////////////////////")
 
                 for file_path in file_paths:

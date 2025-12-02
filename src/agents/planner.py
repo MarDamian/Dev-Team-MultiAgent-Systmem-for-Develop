@@ -36,9 +36,9 @@ def planner_node(state: dict) -> dict:
 
     **INSTRUCCIONES:**
     1.  **Analiza** la solicitud del usuario y la base de conocimientos.
-    2.  **Formula un plan** siguiendo las reglas de decisión.
+    2.  **Formula un plan Flexible** siguiendo las reglas de decisión.
     3.  **Justifica tus decisiones técnicas** incorporando citas de la "Base de Conocimientos" directamente en la descripción de la tarea. 
-        La justificación puntual para la tarea y empezar con "(**Justificación:** ...)" para ser fácilmente identificable.
+        La justificación puntual para la tarea y empezar con Justificación:" " para ser fácilmente identificable.
     4.  **Genera un único objeto JSON** con la respuesta, sin texto introductorio ni de cierre.
 
     **IMPORTANTE:** Tu salida debe ser un objeto JSON VÁLIDO con la siguiente estructura y NADA MÁS:
@@ -83,7 +83,7 @@ def planner_node(state: dict) -> dict:
         * **Consistencia del `plan_type`:** Debe coincidir con los campos completados.
 
     4.5.  **Regla de Coordinación Fullstack (Estrategia de Contrato):** *(Solo si `plan_type` es 'fullstack')*
-        * **Backend Task:** Define explícitamente todos los endpoints clave (Ruta, Método, Input esperado, Output esperado).
+        * **Backend Task:** Define explícitamente todos los endpoints clave (Ruta, Método, Input esperado, Output esperado,aclara que puenden ser flexibles).
             No omitas nigun endpoint, que forme parte de una funcionalidad.
         * **Backend Port:** Especifica el puerto estándar para la tecnología (Flask: 5000, Express: 3000, Django: 8000).
         * **Frontend Task:** Indica que la interfaz debe consumir los endpoints definidos en el backend, mencionando los relevantes.
@@ -164,6 +164,6 @@ def planner_node(state: dict) -> dict:
         print("Error: El planificador no devolvió un JSON válido.")
         return {
             "dev_plan": {"plan_type": "none"},
-            "supervisor_iterations": state.get("supervisor_iterations")+1
+            "supervisor_iterations": state.get("supervisor_iterations", 0) + 1
         }
 

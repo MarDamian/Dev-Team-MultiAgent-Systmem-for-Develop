@@ -162,11 +162,22 @@ REQUISITOS TÉCNICOS CRÍTICOS (OBLIGATORIOS)
 [código Python]
 `// --- models.py_CODE_END ---`
 
+**ORGANIZACIÓN CON SUBDIRECTORIOS (OPCIONAL):**
+   - Para organizar en carpetas: `-- --- migrations/001_initial.sql_CODE_START ---`
+   - Ejemplos válidos:
+     * `-- --- schemas/users.sql_CODE_START ---` (carpeta schemas)
+     * `// --- seeds/initial_data.js_CODE_START ---` (carpeta seeds)
+     * `# --- data/users.txt_CODE_START ---` (carpeta data)
+     * `// --- models/user.py_CODE_START ---` (carpeta models)
+   - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..)
+
 **REGLAS DE ORO:**
 - ❌ NO añadas explicaciones fuera del bloque de código
 - ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ❌ NO uses rutas absolutas (/path) ni relativas con .. (../path)
 - ✅ Código sintácticamente correcto y ejecutable
 - ✅ Nombre de archivo descriptivo CON EXTENSIÓN
+- ✅ Usa subdirectorios para organizar scripts (migrations/, seeds/, etc.)
 - ✅ Consistencia con los contratos de datos proporcionados
 
 

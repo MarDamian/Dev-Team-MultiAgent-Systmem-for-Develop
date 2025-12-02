@@ -19,9 +19,10 @@ def extract_and_save_code(full_code_string: str, default_folder: str) -> dict:
     print(f"---HERRAMIENTA: EXTRACTOR Y ORGANIZADOR DE CÓDIGO (Guardando en: {default_folder})---")
     
     # Patrón universal que soporta varios tipos de comentarios: --, //, /*, <!--
+    # Ahora acepta rutas con subdirectorios (ej: "models/user.py", "view/main_window.py")
     pattern = re.compile(
         r"(?:<!---|\/\* ---|\/\/ ---|-- ---)\s*"
-        r"([\w\.-]+)_CODE_START"  # Permite '.' y '-' en el nombre del archivo
+        r"([\w\.\-/]+)_CODE_START"  # Permite '.' '-' y '/' para subdirectorios
         r"\s*(?:--- \*/|--->|---)"
         r"([\s\S]*?)"
         r"(?:<!---|\/\* ---|\/\/ ---|-- ---)\s*"
@@ -35,6 +36,12 @@ def extract_and_save_code(full_code_string: str, default_folder: str) -> dict:
     extracted_code = {}
     for match in matches:
         filename_key = match.group(1).lower()
+        
+        # Validación de seguridad: prevenir path traversal attacks
+        if '..' in filename_key or filename_key.startswith('/') or filename_key.startswith('\\'):
+            print(f"⚠️ ADVERTENCIA: Ruta peligrosa detectada y omitida: {filename_key}")
+            continue
+        
         code = match.group(2).strip()
         extracted_code[filename_key] = code
 

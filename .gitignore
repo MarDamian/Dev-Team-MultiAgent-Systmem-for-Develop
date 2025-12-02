@@ -7,8 +7,13 @@ outputs/
 uploads/
 embeddings_chroma/
 
+
 # Archivos y carpetas de caché de Python
 __pycache__/
+src/agents/__pycache__
+*.pyc
+src/agents/*.pyc
+
 # Entornos virtuales
 venv/
 .venv/

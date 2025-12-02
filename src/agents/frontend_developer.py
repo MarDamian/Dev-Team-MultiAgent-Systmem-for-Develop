@@ -157,20 +157,31 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
    `<!--- index.html_CODE_END --->`
 
 2. **CSS** (style.css o styles.css):
-   `/* --- style.css_CODE_START --- */`
+   `<!--- style.css_CODE_START --->`
    [código CSS completo]
-   `/* --- style.css_CODE_END --- */`
+   `<!--- style.css_CODE_END --->`
 
 3. **JAVASCRIPT** (script.js o app.js):
-   `// --- script.js_CODE_START ---`
+   `<!--- script.js_CODE_START --->`
    [código JavaScript completo]
-   `// --- script.js_CODE_END ---`
+   `<!--- script.js_CODE_END --->`
+
+4. **ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS):
+   - Para organizar en carpetas: `// --- js/utils.js_CODE_START ---` y `// --- js/utils.js_CODE_END ---`
+   - Ejemplos válidos:
+     * `// --- components/navbar.js_CODE_START ---` (carpeta components)
+     * `/* --- css/variables.css_CODE_START --- */` (carpeta css)
+     * `<!--- pages/login.html_CODE_START --->` (carpeta pages)
+     * `// --- services/api.js_CODE_START ---` (carpeta services)
+   - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..)
 
 **REGLAS DE ORO:**
 - ❌ NO añadas explicaciones fuera de los bloques de código
 - ❌ NO uses markdown para código (solo los delimitadores especificados)
+- ❌ NO uses rutas absolutas (/path) ni relativas con .. (../path)
 - ✅ Código completo y funcional, listo para abrir en navegador
-- ✅ Links a archivos CSS y JS correctos en HTML
+- ✅ Usa subdirectorios para organizar el código (js/, css/, components/, etc.)
+- ✅ Links a archivos CSS y JS correctos en HTML (respeta las rutas de subdirectorios)
 - ✅ Implementación EXACTA de los contratos de API
 
 CHECKLIST FINAL ANTES DE GENERAR

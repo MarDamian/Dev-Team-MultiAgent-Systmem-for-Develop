@@ -98,5 +98,5 @@ def conversational_node(state: dict) -> dict:
         "final_response": final_bot_response,
         "task_complete": is_task_complete,
         "chat_history": new_history,
-        "supervisor_iterations": state.get("supervisor_iterations")+1
+        "supervisor_iterations": state.get("supervisor_iterations", 0) + 1
     }
