@@ -166,14 +166,14 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
    [código JavaScript completo]
    `<!--- script.js_CODE_END --->`
 
-4. **ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS OPCIONAL):
+4. **ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS (OPCIONAL) SOLO SI ES NECESARIO):
    - Para organizar en carpetas: `// --- js/utils.js_CODE_START ---` y `// --- js/utils.js_CODE_END ---`
    - Ejemplos válidos:
      * `<!--- components/navbar.js_CODE_START --->` (carpeta components)
-     * `<!--- css/variables.css_CODE_START --->` (carpeta css)
+     * `<!--- css/style.css_CODE_START --->` (carpeta css)
      * `<!--- pages/login.html_CODE_START --->` (carpeta pages)
      * `<!--- services/api.js_CODE_START --->` (carpeta services)
-   - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..)
+   - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..) y recuerda que es opcinal apegate a tu estructura
 
 **REGLAS DE ORO:**
 - ❌ NO añadas explicaciones fuera de los bloques de código

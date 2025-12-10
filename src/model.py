@@ -10,7 +10,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 try:
-    analytical_llm1 = ChatGroq(
+    analytical_llm2 = ChatGroq(
         model="llama-3.3-70b-versatile",  
         groq_api_key=GROQ_API_KEY,
         temperature=0.3

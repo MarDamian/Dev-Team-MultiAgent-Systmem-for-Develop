@@ -20,6 +20,17 @@ def route_to_specialist(state: dict) -> str:
     return decision
 
 
+def route_from_conversational(state: dict) -> str:
+    """Enruta desde el agente conversacional: finaliza si task_complete es True, sino vuelve al supervisor."""
+    task_complete = state.get("task_complete", False)
+    if task_complete:
+        print("---CONVERSATIONAL AGENT: Tarea marcada como completa. Finalizando.---")
+        return "__end__"
+    else:
+        print("---CONVERSATIONAL AGENT: Tarea no completa. Volviendo al supervisor.---")
+        return "supervisor"
+
+
 
 
 # --- Constructor del Grafo Principal ---
@@ -60,7 +71,16 @@ def build_graph(checkpointer):
 
     # --- ENRUTAMIENTO DE REGRESO ---
     # Después de cada nodo especialista, el control siempre vuelve al supervisor.
-    workflow.add_edge("conversational_agent", "supervisor")
+    # EXCEPCIÓN: conversational_agent usa enrutamiento condicional basado en task_complete
+    workflow.add_conditional_edges(
+        "conversational_agent",
+        route_from_conversational,
+        {
+            "__end__": END,
+            "supervisor": "supervisor"
+        }
+    )
+    
     workflow.add_edge("multimodal_analyzer", "supervisor")
     workflow.add_edge("ui_ux_designer", "supervisor")
     workflow.add_edge("planner", "supervisor")
@@ -73,3 +93,4 @@ def build_graph(checkpointer):
     
     print("✅ Grafo compilado exitosamente con salidas condicionales")
     return app
+

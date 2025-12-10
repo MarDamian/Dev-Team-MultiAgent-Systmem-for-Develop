@@ -100,6 +100,19 @@ def supervisor_node(state: dict) -> dict:
     """
     print("---AGENTE: SUPERVISOR INTELIGENTE---")
 
+    # --- SAFETY CHECK: Prevenir bucles infinitos ---
+    supervisor_iterations = state.get("supervisor_iterations", 0)
+    MAX_ITERATIONS = 10  # Límite de seguridad
+    
+    if supervisor_iterations >= MAX_ITERATIONS:
+        print(f"⚠️ ADVERTENCIA: Se alcanzó el límite de {MAX_ITERATIONS} iteraciones del supervisor.")
+        print("Finalizando la tarea para prevenir bucle infinito.")
+        return {
+            "routing_decision": "__end__",
+            "final_response": "Lo siento, he detectado un problema en el flujo de trabajo. Por favor, intenta reformular tu solicitud o contacta al administrador.",
+            "task_complete": True
+        }
+
     backend_iterations = state.get("backend_iterations", 0)
     frontend_iterations = state.get("frontend_iterations", 0)
     database_iterations = state.get("database_iterations", 0)
@@ -168,5 +181,7 @@ def supervisor_node(state: dict) -> dict:
     
     return {
         "routing_decision": decision,
-        "nodes_visited": updated_nodes_visited
+        "nodes_visited": updated_nodes_visited,
+        "supervisor_iterations": supervisor_iterations + 1
     }
+
