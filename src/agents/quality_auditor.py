@@ -223,8 +223,70 @@ PROCESO DE EVALUACIÓN
     print("Archivos auditados: ", files_to_read)
     
     try:
-        json_response = response.content.strip().replace("```json", "").replace("```", "").strip()
-        audit_result = json.loads(json_response)
+        # Limpiar la respuesta del LLM
+        json_response = response.content.strip()
+        
+        # Remover bloques de código markdown si existen
+        if "```json" in json_response:
+            json_response = json_response.split("```json")[1].split("```")[0].strip()
+        elif "```" in json_response:
+            json_response = json_response.split("```")[1].split("```")[0].strip()
+        
+        # Intentar encontrar el JSON si está embebido en texto
+        if not json_response.startswith("{"):
+            # Buscar el primer { y el último }
+            start_idx = json_response.find("{")
+            end_idx = json_response.rfind("}")
+            if start_idx != -1 and end_idx != -1:
+                json_response = json_response[start_idx:end_idx+1]
+        
+        print(f"JSON original (primeros 500 chars): {repr(json_response[:500])}")
+        
+        # Estrategia 1: Intentar parsear directamente
+        try:
+            audit_result = json.loads(json_response)
+            print("✅ JSON parseado exitosamente (intento directo)")
+        except json.JSONDecodeError as e1:
+            print(f"⚠️ Intento directo falló: {e1}")
+            
+            # Estrategia 2: Sanitizar y volver a intentar
+            import re
+            # Primero, remover caracteres de control no imprimibles
+            sanitized = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', '', json_response)
+            
+            # Luego, asegurar que los saltos de línea dentro de strings estén escapados
+            # Esto es complicado, así que usaremos una estrategia diferente:
+            # Reemplazar saltos de línea literales dentro de valores de string
+            try:
+                audit_result = json.loads(sanitized)
+                print("✅ JSON parseado exitosamente (después de sanitización)")
+            except json.JSONDecodeError as e2:
+                print(f"⚠️ Sanitización falló: {e2}")
+                
+                # Estrategia 3: Extraer manualmente approved y feedback usando regex
+                print("🔧 Intentando extracción manual con regex...")
+                approved_match = re.search(r'"approved"\s*:\s*(true|false)', json_response, re.IGNORECASE)
+                feedback_match = re.search(r'"feedback"\s*:\s*"((?:[^"\\]|\\.)*)"', json_response, re.DOTALL)
+                
+                if approved_match and feedback_match:
+                    approved_str = approved_match.group(1).lower()
+                    feedback_str = feedback_match.group(1)
+                    
+                    # Decodificar secuencias de escape
+                    feedback_str = feedback_str.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
+                    
+                    audit_result = {
+                        "approved": approved_str == "true",
+                        "feedback": feedback_str
+                    }
+                    print("✅ JSON extraído manualmente con regex")
+                else:
+                    # Estrategia 4: Fallback total - asumir rechazo
+                    print("❌ Todas las estrategias fallaron. Usando fallback.")
+                    raise json.JSONDecodeError("No se pudo parsear el JSON", json_response, 0)
+        
+        print(f"JSON parseado exitosamente. Approved: {audit_result.get('approved')}")
+        
         feedback = audit_result.get("feedback", "No se proporcionó feedback.")
         is_approved = audit_result.get("approved", False)
 

@@ -31,7 +31,9 @@ def save_code_to_file(filename: str, code: str | None) -> str | None:
         directory = os.path.dirname(filepath)
         
         # Asegurarse de que toda la estructura de directorios exista
-        os.makedirs(directory, exist_ok=True)
+        if directory:  # Solo si hay un directorio (no es la raíz)
+            os.makedirs(directory, exist_ok=True)
+            print(f"✓ Directorio asegurado: '{directory}'")
         
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(code)
@@ -40,5 +42,7 @@ def save_code_to_file(filename: str, code: str | None) -> str | None:
         return filepath
     except Exception as e:
         # Usamos f-string para formatear la variable en el mensaje de error
-        print(f"Error al guardar el archivo {filename}: {e}")
+        print(f"❌ Error al guardar el archivo {filename}: {e}")
+        print(f"   Ruta intentada: {filepath if 'filepath' in locals() else 'N/A'}")
+        print(f"   Directorio: {directory if 'directory' in locals() else 'N/A'}")
         return None

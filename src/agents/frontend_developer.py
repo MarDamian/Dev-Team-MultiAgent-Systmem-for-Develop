@@ -3,7 +3,7 @@
 from src.model import advanced_llm
 from src.tools.code_extractor import extract_and_save_code
 from src.tools.contract_manager import get_contracts_for_prompt
-from src.tools.project_manager import get_active_project_id
+from src.tools.project_manager import get_active_project_id, ensure_project_folders
 
 def frontend_developer_node(state: dict) -> dict:
     """
@@ -28,6 +28,9 @@ def frontend_developer_node(state: dict) -> dict:
     project_id = get_active_project_id()
     contracts_text = ""
     if project_id:
+        # Asegurar que la carpeta frontend existe
+        ensure_project_folders(project_id, ["frontend"])
+        
         # Solo obtener contratos de API para el frontend
         contracts_text = get_contracts_for_prompt(project_id, "api")
         if contracts_text:
@@ -166,11 +169,10 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
    [código JavaScript completo]
    `<!--- script.js_CODE_END --->`
 
-4. **ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS (OPCIONAL) SOLO SI ES NECESARIO):
+4. **ARCHIVOS ADICIONALES** (PUEDES USAR SUBDIRECTORIOS (OPCIONAL) SOLO SI ES NECESARIO de lo contratio no lo uses):
    - Para organizar en carpetas: `// --- js/utils.js_CODE_START ---` y `// --- js/utils.js_CODE_END ---`
    - Ejemplos válidos:
      * `<!--- components/navbar.js_CODE_START --->` (carpeta components)
-     * `<!--- css/style.css_CODE_START --->` (carpeta css)
      * `<!--- pages/login.html_CODE_START --->` (carpeta pages)
      * `<!--- services/api.js_CODE_START --->` (carpeta services)
    - ⚠️ NO uses rutas absolutas (/) ni navegación hacia atrás (..) y recuerda que es opcinal apegate a tu estructura
@@ -180,7 +182,6 @@ FORMATO DE SALIDA (ESTRICTAMENTE OBLIGATORIO)
 - ❌ NO uses markdown para código (solo los delimitadores especificados)
 - ❌ NO uses rutas absolutas (/path) ni relativas con .. (../path)
 - ✅ Código completo y funcional, listo para abrir en navegador
-- ✅ Usa subdirectorios para organizar el código (js/, css/, components/, etc.)
 - ✅ Links a archivos CSS y JS correctos en HTML (respeta las rutas de subdirectorios)
 - ✅ Implementación EXACTA de los contratos de API
 

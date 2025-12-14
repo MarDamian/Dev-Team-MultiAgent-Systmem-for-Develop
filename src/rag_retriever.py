@@ -3,7 +3,7 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.schema.vectorstore import VectorStoreRetriever
+from langchain_core.vectorstores import VectorStoreRetriever
 
 
 model_name = "sentence-transformers/all-MiniLM-L6-v2"  # Modelo más pequeño y rápido

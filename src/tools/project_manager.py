@@ -283,3 +283,34 @@ def list_projects() -> List[Dict]:
 def get_project_metadata(project_id: str) -> Optional[Dict]:
     """Obtiene metadata de un proyecto. Ver ProjectManager.get_project_metadata()"""
     return project_manager.get_project_metadata(project_id)
+
+
+def ensure_project_folders(project_id: str, folders: List[str]) -> bool:
+    """
+    Asegura que las carpetas especificadas existan en el proyecto.
+    Útil para crear carpetas dinámicamente si no fueron creadas inicialmente.
+    
+    Args:
+        project_id: ID del proyecto
+        folders: Lista de carpetas a crear (ej: ['frontend', 'backend', 'database'])
+        
+    Returns:
+        True si todas las carpetas se crearon/verificaron correctamente
+    """
+    try:
+        project_path = project_manager.get_project_path(project_id)
+        
+        if not project_path or not os.path.exists(project_path):
+            print(f"❌ El proyecto {project_id} no existe")
+            return False
+        
+        for folder in folders:
+            folder_path = os.path.join(project_path, folder)
+            os.makedirs(folder_path, exist_ok=True)
+            print(f"✓ Carpeta asegurada: {folder_path}")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error al crear carpetas del proyecto: {e}")
+        return False
+

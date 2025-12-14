@@ -3,7 +3,7 @@
 from src.model import advanced_llm
 from src.tools.code_extractor import extract_and_save_code
 from src.tools.contract_manager import get_contracts_for_prompt
-from src.tools.project_manager import get_active_project_id
+from src.tools.project_manager import get_active_project_id, ensure_project_folders
 
 def backend_developer_node(state: dict) -> dict:
     """
@@ -28,6 +28,9 @@ def backend_developer_node(state: dict) -> dict:
     project_id = get_active_project_id()
     contracts_text = ""
     if project_id:
+        # Asegurar que la carpeta backend existe
+        ensure_project_folders(project_id, ["backend"])
+        
         contracts_text = get_contracts_for_prompt(project_id, "all")
         if contracts_text:
             print(f"✅ Contratos cargados para desarrollo backend")

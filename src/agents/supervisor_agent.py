@@ -102,7 +102,7 @@ def supervisor_node(state: dict) -> dict:
 
     # --- SAFETY CHECK: Prevenir bucles infinitos ---
     supervisor_iterations = state.get("supervisor_iterations", 0)
-    MAX_ITERATIONS = 10  # Límite de seguridad
+    MAX_ITERATIONS = 20  # Límite de seguridad
     
     if supervisor_iterations >= MAX_ITERATIONS:
         print(f"⚠️ ADVERTENCIA: Se alcanzó el límite de {MAX_ITERATIONS} iteraciones del supervisor.")

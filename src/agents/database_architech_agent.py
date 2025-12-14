@@ -3,7 +3,7 @@
 from src.model import advanced_llm
 from src.tools.code_extractor import extract_and_save_code
 from src.tools.contract_manager import get_contracts_for_prompt
-from src.tools.project_manager import get_active_project_id, get_project_path
+from src.tools.project_manager import get_active_project_id, get_project_path, ensure_project_folders
 import os
 
 def database_architech_node(state: dict) -> dict:
@@ -29,6 +29,9 @@ def database_architech_node(state: dict) -> dict:
     data_contracts_text = ""
     
     if project_id:
+        # Asegurar que la carpeta database existe
+        ensure_project_folders(project_id, ["database"])
+        
         data_contracts_text = get_contracts_for_prompt(project_id, "data")
         if data_contracts_text:
             print(f"✅ Contratos de datos cargados para el diseño de base de datos.")
