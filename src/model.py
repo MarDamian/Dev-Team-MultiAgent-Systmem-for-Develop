@@ -14,19 +14,19 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 
 try:
-    analytical_llm2 = ChatGroq(
+    analytical_llm3 = ChatGroq(
         model="llama-3.3-70b-versatile",  
         groq_api_key=GROQ_API_KEY,
         temperature=0.3
     )
 
-    analytical_llm = ChatCohere(
+    analytical_llm2 = ChatCohere(
         model="command-r-plus-08-2024",  
         api_key=COHERE_API_KEY,
         temperature=0.3
     )
 
-    analytical_llm2 = ChatGoogleGenerativeAI(
+    analytical_llm = ChatGoogleGenerativeAI(
         #model="gemini-2.5-flash",
         model="gemini-2.5-flash",
         google_api_key=GOOGLE_API_KEY,
@@ -66,8 +66,8 @@ try:
         temperature=0.3
     )
     advanced_llm = ChatGoogleGenerativeAI(
-        #model="gemini-2.5-flash",
-        model="gemini-2.5-pro",
+        model="gemini-2.5-flash",
+        #model="gemini-2.5-pro",
         google_api_key=GOOGLE_API_KEY,
         temperature=0.3
     )

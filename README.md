@@ -24,6 +24,54 @@ Este trabajo representa una implementación práctica de los conceptos de **Inge
 
 El sistema sigue un patrón de **Orquestación Basada en Grafos** (Graph-Based Agent Orchestration), donde un Agente Supervisor evalúa el estado global y enruta la tarea al especialista adecuado.
 
+### Arquitectura General del Sistema Agéntico
+
+![Arquitectura del Sistema](Images/Arquitectura%20Sistema%20Agentico.png)
+
+El diagrama muestra la arquitectura completa del sistema multiagente, donde:
+- **Solicitud del Usuario:** Puede incluir texto, imágenes, audio, documentos o videos
+- **Supervisor:** Agente central que coordina el flujo de trabajo y toma decisiones de enrutamiento
+- **Estado Compartido:** Memoria común accesible por todos los agentes para mantener contexto
+- **Agentes Especializados:** Cada uno con herramientas específicas (Conversacional, Multimodal, UI/UX Designer, Planner, Frontend/Backend/Database Developers)
+- **Quality Auditor:** Valida el código generado usando RAG (Retrieval-Augmented Generation)
+- **Guardado Local:** Almacenamiento persistente del código aprobado
+
+### Diagrama del Grafo MultiAgente
+
+![Diagrama del Grafo](Images/Diagrama%20del%20Grafo%20MultiAgente.png)
+
+Este diagrama ilustra el flujo completo del sistema en tres fases principales:
+
+#### **Fase 1: Análisis y Planificación**
+![Fase 1](Images/Fase%201.png)
+
+1. El **Supervisor** recibe la solicitud del usuario
+2. **Decisión:** Si hay archivos adjuntos (imágenes, documentos), se enruta al **Multimodal Analyzer** o **UI/UX Designer**
+3. Si no hay archivos adjuntos, se procede con el **Planner** y **Conversational Agent**
+4. Los agentes actualizan el estado compartido y retornan al Supervisor
+5. El Supervisor decide la siguiente fase
+
+#### **Fase 2: Desarrollo**
+![Fase 2](Images/Fase%202.png)
+
+1. El **Supervisor** enruta a los agentes de desarrollo según el plan:
+   - **Frontend Developer:** Genera HTML, CSS, JavaScript
+   - **Backend Developer:** Implementa APIs y lógica de servidor
+   - **Database Architect:** Diseña esquemas de base de datos
+2. Cada desarrollador guarda su código localmente
+3. El código generado regresa al Supervisor para validación
+
+#### **Fase 3: Validación y Refinamiento**
+![Fase 3](Images/Fase%203.png)
+
+1. El **Quality Auditor** lee el código guardado
+2. Utiliza **RAG** para verificar la calidad del código contra estándares
+3. **Decisión:**
+   - ✅ **Código Aprobado:** El Supervisor finaliza el proceso
+   - ❌ **Código No Aprobado:** Retroalimenta a los Developer Agents (Fase 2)
+4. Los desarrolladores corrigen el código según el feedback
+5. El ciclo continúa hasta que el código sea aprobado
+
 ### Agentes Implementados
 
 1.  **Supervisor (`supervisor_agent.py`):** Cerebro del sistema, decide el siguiente paso en el grafo basándose en el estado actual.
@@ -72,9 +120,10 @@ Antes de instalar, asegúrate de tener lo siguiente:
     ```env
     GOOGLE_API_KEY="tu_api_key_de_google"
     GROQ_API_KEY="tu_api_key_de_groq"
-    GEMINI_MODEL="gemini-2.5-pro" # O la versión especifica configurada en src/model.py
+    CEREBRAS_API_KEY="your_cerebras_api_key"
+    COHERE_API_KEY="your_cohere_api_key"
     ```
-
+    Configura tus modelos de IA en src/model.py
 5.  **Base de Conocimiento (Opcional - RAG):**
     Para que el agente QA funcione correctamente, coloca tus documentos de estándares (PDFs) en la carpeta `knowledge_base/` (créala si no existe). El sistema indexará estos documentos automáticamente al iniciar.
 
