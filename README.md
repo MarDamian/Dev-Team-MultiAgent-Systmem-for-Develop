@@ -43,9 +43,7 @@ El diagrama muestra la arquitectura completa del sistema multiagente, donde:
 Este diagrama ilustra el flujo completo del sistema en tres fases principales:
 
 #### **Fase 1: Análisis y Planificación**
-<p align="center">
-  <img src="Images/Fase 1.png" alt="Fase 1" style="background-color: white; padding: 20px; border-radius: 10px;" />
-</p>
+![Fase 1](Images/Fase%201.png)
 
 1. El **Supervisor** recibe la solicitud del usuario
 2. **Decisión:** Si hay archivos adjuntos (imágenes, documentos), se enruta al **Multimodal Analyzer** o **UI/UX Designer**
@@ -54,9 +52,7 @@ Este diagrama ilustra el flujo completo del sistema en tres fases principales:
 5. El Supervisor decide la siguiente fase
 
 #### **Fase 2: Desarrollo**
-<p align="center">
-  <img src="Images/Fase 2.png" alt="Fase 2" style="background-color: white; padding: 20px; border-radius: 10px;" />
-</p>
+![Fase 2](Images/Fase%202.png)
 
 1. El **Supervisor** enruta a los agentes de desarrollo según el plan:
    - **Frontend Developer:** Genera HTML, CSS, JavaScript
@@ -66,9 +62,7 @@ Este diagrama ilustra el flujo completo del sistema en tres fases principales:
 3. El código generado regresa al Supervisor para validación
 
 #### **Fase 3: Validación y Refinamiento**
-<p align="center">
-  <img src="Images/Fase 3.png" alt="Fase 3" style="background-color: white; padding: 20px; border-radius: 10px;" />
-</p>
+![Fase 3](Images/Fase%203.png)
 
 1. El **Quality Auditor** lee el código guardado
 2. Utiliza **RAG** para verificar la calidad del código contra estándares
